@@ -33,20 +33,43 @@ COMMON_WORDS_URL = (
 POOL_SIZE = 15       # スコア上位からこの件数をプール
 PICK_N = 1           # 今回の動画用に実際に選ぶ件数
 MIN_LETTERS = 4      # これより短い単語は除外
+RECENT_PATTERN_WINDOW = 5  # 直近何件の投稿と綴りパターンの重複を避けるか
 
 
-def load_used_words() -> set:
-    """既に使用済み(=アップロード成功済み)の単語を読み込む。
+def load_used_words() -> list:
+    """既に使用済み(=アップロード成功済み)の単語履歴を、古い→新しい順で読み込む。
 
-    ここでの「使用済み」の記録は upload_videos.py が
+    各要素は {"word": str, "patterns": list[str]} の形式。
+    (patterns は score_words.matched_patterns が返す綴りパターン名で、
+     直近と系統が被った単語を避けるために使う)
+
+    used_words.json 内の「使用済み」の記録は upload_videos.py が
     YouTubeへのアップロードに成功した時点で初めて行う。
     (TTS/動画生成/アップロードのいずれかで失敗した単語を
      ここで使用済み扱いにしてしまうと、二度と候補に上がらず
-     動画が1本失われたままになるため)"""
-    if os.path.exists(USED_WORDS_PATH):
-        with open(USED_WORDS_PATH, encoding="utf-8") as f:
-            return set(json.load(f))
-    return set()
+     動画が1本失われたままになるため)
+
+    旧形式(単語の文字列だけのリスト)のファイルも読み込めるよう、
+    文字列の要素は patterns 不明(空リスト)として扱う。"""
+    if not os.path.exists(USED_WORDS_PATH):
+        return []
+    with open(USED_WORDS_PATH, encoding="utf-8") as f:
+        raw = json.load(f)
+    history = []
+    for entry in raw:
+        if isinstance(entry, str):
+            history.append({"word": entry, "patterns": []})
+        else:
+            history.append({"word": entry["word"], "patterns": entry.get("patterns", [])})
+    return history
+
+
+def recent_patterns(history: list, window: int = RECENT_PATTERN_WINDOW) -> set:
+    """直近 window 件の投稿で使われた綴りパターン名の集合を返す。"""
+    patterns = set()
+    for entry in history[-window:]:
+        patterns.update(entry["patterns"])
+    return patterns
 
 
 def load_common_words() -> set:
@@ -68,11 +91,12 @@ def main():
     entries = {w.upper(): " ".join(prons[0]) for w, prons in raw_entries.items()}
 
     common_words = load_common_words()
-    used = load_used_words()
+    history = load_used_words()
+    used_words_set = {h["word"] for h in history}
 
     scored = []
     for word, arpabet in entries.items():
-        if word in used:
+        if word in used_words_set:
             continue
         if not word.isalpha() or len(word) < MIN_LETTERS:
             continue
@@ -91,13 +115,26 @@ def main():
         return
 
     pool = scored[:POOL_SIZE]
-    picked = random.sample(pool, min(PICK_N, len(pool)))
+
+    # 直近の投稿と綴りパターン(黙字系, -ough系など)が被らない候補を優先する。
+    # 内容のマンネリ化(似た系統の単語が連続する)を避けるため。
+    avoid = recent_patterns(history)
+    diverse_pool = [p for p in pool if not (set(p.patterns) & avoid)] if avoid else pool
+    if avoid and not diverse_pool:
+        print(f"直近{RECENT_PATTERN_WINDOW}件のパターン{sorted(avoid)}と被らない候補が"
+              f"プール内になかったため、プール全体から選びます。")
+        selection_pool = pool
+    else:
+        selection_pool = diverse_pool
+
+    picked = random.sample(selection_pool, min(PICK_N, len(selection_pool)))
 
     candidates = [
         {
             "word": p.word.title(),
             "arpabet": entries[p.word],
             "score": p.score,
+            "patterns": p.patterns,
         }
         for p in picked
     ]

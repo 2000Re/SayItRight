@@ -153,14 +153,23 @@ def main():
 
         print(f"生成中: {word}  (IPA: {ipa})")
 
-        for label, rate in SPEAKING_RATES.items():
-            audio = synthesize_with_retry(client, ssml, rate, label)
-            padded_audio = add_silence_padding(audio)
-            duration = get_mp3_duration_seconds(padded_audio)
-            out_path = os.path.join(OUTPUT_DIR, f"{word.lower()}_{label}.mp3")
-            with open(out_path, "wb") as out_f:
-                out_f.write(padded_audio)
-            print(f"  -> {out_path} ({duration:.2f}秒、前後{PAD_MS/1000:.0f}秒無音付き)")
+        # 1単語の処理で例外(API側の一時的な障害や認証エラーなど)が起きても、
+        # ここで止めずに他の単語の処理とワークフロー後続ステップ
+        # (create_videos.py / upload_videos.py / コミット)を継続させる。
+        # 音声ファイルが欠けた単語は create_videos.py 側で自動的にスキップされ、
+        # used_words.json にも登録されないため、次回また候補に上がる。
+        try:
+            for label, rate in SPEAKING_RATES.items():
+                audio = synthesize_with_retry(client, ssml, rate, label)
+                padded_audio = add_silence_padding(audio)
+                duration = get_mp3_duration_seconds(padded_audio)
+                out_path = os.path.join(OUTPUT_DIR, f"{word.lower()}_{label}.mp3")
+                with open(out_path, "wb") as out_f:
+                    out_f.write(padded_audio)
+                print(f"  -> {out_path} ({duration:.2f}秒、前後{PAD_MS/1000:.0f}秒無音付き)")
+        except Exception as e:
+            print(f"[Error] {word} の音声生成に失敗しました: {e}")
+            continue
 
     print(f"全{len(candidates)}語の音声生成が完了しました。")
 

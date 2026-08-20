@@ -15,23 +15,25 @@
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
-# 黙字などが出やすい"綴りが特殊"なパターン(正規表現)
+# 黙字などが出やすい"綴りが特殊"なパターン(名前, 正規表現)
+# 名前は候補選定時の「直近と系統がかぶっていないか」判定にも使う。
 TRICKY_PATTERNS = [
-    r"^kn",       # knight, knife
-    r"^wr",       # wrist, write
-    r"^gn",       # gnome
-    r"^ps",       # psychology
-    r"^pt",       # ptarmigan
-    r"mb$",       # comb, thumb
-    r"bt",        # debt, subtle
-    r"ough",      # though, through, tough, cough, bough, thorough
-    r"augh",      # daughter, laugh
-    r"eigh",      # eight, weigh
-    r"que$",      # queue, unique
-    r"sc[iey]",   # scissors, science
-    r"dg",        # judge (soft g pattern)
+    ("kn-", r"^kn"),       # knight, knife
+    ("wr-", r"^wr"),       # wrist, write
+    ("gn-", r"^gn"),       # gnome
+    ("ps-", r"^ps"),       # psychology
+    ("pt-", r"^pt"),       # ptarmigan
+    ("-mb", r"mb$"),       # comb, thumb
+    ("bt", r"bt"),         # debt, subtle
+    ("ough", r"ough"),     # though, through, tough, cough, bough, thorough
+    ("augh", r"augh"),     # daughter, laugh
+    ("eigh", r"eigh"),     # eight, weigh
+    ("-que", r"que$"),     # queue, unique
+    ("sc[iey]", r"sc[iey]"),  # scissors, science
+    ("dg", r"dg"),         # judge (soft g pattern)
 ]
 
 VOWELS = set("AEIOU")
@@ -45,26 +47,29 @@ class WordScore:
     gap: int
     pattern_hits: int
     score: float
+    patterns: List[str] = field(default_factory=list)
 
 
 def count_phonemes(arpabet: str) -> int:
     return len(arpabet.split())
 
 
-def pattern_score(word: str) -> int:
+def matched_patterns(word: str) -> List[str]:
+    """単語にマッチした綴りパターンの名前一覧を返す(選定の多様性判定用)。"""
     w = word.lower()
-    return sum(1 for p in TRICKY_PATTERNS if re.search(p, w))
+    return [name for name, pattern in TRICKY_PATTERNS if re.search(pattern, w)]
 
 
 def score_word(word: str, arpabet: str) -> WordScore:
     letters = len(word)
     phonemes = count_phonemes(arpabet)
     gap = letters - phonemes
-    hits = pattern_score(word)
+    patterns = matched_patterns(word)
+    hits = len(patterns)
     # スコア = 文字数と音素数のギャップ + パターン一致数*2 (パターンは強いシグナルなので重み付け)
     score = gap + hits * 2
     return WordScore(word=word, letters=letters, phonemes=phonemes,
-                      gap=gap, pattern_hits=hits, score=score)
+                      gap=gap, pattern_hits=hits, score=score, patterns=patterns)
 
 
 def load_dict(path: str) -> dict:
