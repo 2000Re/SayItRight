@@ -36,15 +36,17 @@ MIN_LETTERS = 4      # これより短い単語は除外
 
 
 def load_used_words() -> set:
+    """既に使用済み(=アップロード成功済み)の単語を読み込む。
+
+    ここでの「使用済み」の記録は upload_videos.py が
+    YouTubeへのアップロードに成功した時点で初めて行う。
+    (TTS/動画生成/アップロードのいずれかで失敗した単語を
+     ここで使用済み扱いにしてしまうと、二度と候補に上がらず
+     動画が1本失われたままになるため)"""
     if os.path.exists(USED_WORDS_PATH):
         with open(USED_WORDS_PATH, encoding="utf-8") as f:
             return set(json.load(f))
     return set()
-
-
-def save_used_words(used: set) -> None:
-    with open(USED_WORDS_PATH, "w", encoding="utf-8") as f:
-        json.dump(sorted(used), f, ensure_ascii=False, indent=2)
 
 
 def load_common_words() -> set:
@@ -103,10 +105,8 @@ def main():
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(candidates, f, ensure_ascii=False, indent=2)
 
-    used.update(p.word for p in picked)
-    save_used_words(used)
-
-    print(f"{len(candidates)}件の候補を {OUTPUT_PATH} に出力しました。")
+    print(f"{len(candidates)}件の候補を {OUTPUT_PATH} に出力しました。"
+          f"(used_words.jsonへの登録はアップロード成功後に upload_videos.py が行います)")
     for c in candidates:
         print(f"  - {c['word']} (score={c['score']})")
 

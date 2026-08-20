@@ -27,6 +27,7 @@ from arpabet_to_ipa import arpabet_to_ipa
 CANDIDATES_PATH = "candidates.json"
 VIDEO_DIR = "video_output"
 THUMBNAIL_DIR = "thumbnail_output"
+USED_WORDS_PATH = "used_words.json"
 
 # 初回運用時は "unlisted" にして、実際の見え方を確認してから
 # "public" に変更するのがおすすめ。
@@ -35,6 +36,18 @@ CATEGORY_ID = "27"  # Education
 
 MAX_RETRIES = 3
 RETRY_BACKOFF_SECONDS = 5
+
+
+def load_used_words() -> set:
+    if os.path.exists(USED_WORDS_PATH):
+        with open(USED_WORDS_PATH, encoding="utf-8") as f:
+            return set(json.load(f))
+    return set()
+
+
+def save_used_words(used: set) -> None:
+    with open(USED_WORDS_PATH, "w", encoding="utf-8") as f:
+        json.dump(sorted(used), f, ensure_ascii=False, indent=2)
 
 
 def build_youtube_client():
@@ -104,6 +117,7 @@ def main():
         return
 
     youtube = build_youtube_client()
+    used = load_used_words()
 
     for c in candidates:
         word = c["word"]
@@ -126,6 +140,12 @@ def main():
         except Exception as e:
             print(f"[Error] {word} のアップロードに失敗しました: {e}")
             continue
+
+        # アップロードが成功して初めて「使用済み」として記録する。
+        # (途中で失敗した単語を使用済み扱いにすると、動画が公開されないまま
+        #  二度と候補に上がらなくなってしまうため)
+        used.add(word.upper())
+        save_used_words(used)
 
         try:
             upload_thumbnail(youtube, video_id, thumbnail_path)
