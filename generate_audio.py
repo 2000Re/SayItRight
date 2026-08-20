@@ -24,31 +24,25 @@ from mutagen.mp3 import MP3
 from pydub import AudioSegment
 
 from arpabet_to_ipa import arpabet_to_ipa
-
-CANDIDATES_PATH = "candidates.json"
-OUTPUT_DIR = "audio_output"
-
-# 通常速度と、学習用のスロー読みの2パターンを作る
-SPEAKING_RATES = {
-    "normal": 1.0,
-    "slow": 0.6,
-}
-
-VOICE_NAME = "en-US-Neural2-D"  # 明瞭で聞き取りやすい男性ボイス（好みで変更可）
-LANGUAGE_CODE = "en-US"
+from config import (
+    CANDIDATES_PATH,
+    AUDIO_DIR as OUTPUT_DIR,
+    SPEAKING_RATES,
+    VOICE_NAME,
+    LANGUAGE_CODE,
+    MIN_EXPECTED_AUDIO_SECONDS as MIN_EXPECTED_SECONDS,
+    TTS_MAX_RETRIES as MAX_RETRIES,
+    TTS_RETRY_BACKOFF_SECONDS as RETRY_BACKOFF_SECONDS,
+    AUDIO_PAD_MS as PAD_MS,
+)
 
 # Google Cloud TTS(特にNeural2/WaveNet系)は、エラーを返さないまま
 # 音声が途中で切れる「サイレント途切れ」を起こすことが報告されている。
-# そのため生成後に長さをチェックし、短すぎる場合はリトライする。
-MIN_EXPECTED_SECONDS = 1.2  # break(300+800+500ms=1.6s)より短ければ明らかに異常
-MAX_RETRIES = 3
-RETRY_BACKOFF_SECONDS = 2
-
-# 前後に付与する無音の長さ(ミリ秒)。
-# SSMLの<break>はTTSエンジン内部の処理なので「サイレント途切れ」の
-# 影響を受けうるが、音声データに後付けする無音はTTSを経由しないため
-# 確実に反映される。
-PAD_MS = 3000
+# そのため生成後に長さをチェックし、短すぎる場合はリトライする(しきい値は config.py)。
+#
+# 前後に付与する無音の長さ(PAD_MS)について: SSMLの<break>はTTSエンジン内部の
+# 処理なので「サイレント途切れ」の影響を受けうるが、音声データに後付けする
+# 無音はTTSを経由しないため確実に反映される。
 
 
 def build_ssml(word: str, ipa: str) -> str:

@@ -1,0 +1,44 @@
+"""
+パイプライン全体で共有する運用パラメータ(件数・しきい値・リトライ回数・
+ファイルパスなど)を一元管理する。
+
+配色やCTA文言などのコンテンツ寄りの値は、調整する際に該当スクリプトを
+直接見た方がわかりやすいため、これまで通り各スクリプト内に残している。
+"""
+
+# --- 共有ファイルパス ---
+CANDIDATES_PATH = "candidates.json"
+USED_WORDS_PATH = "used_words.json"
+AUDIO_DIR = "audio_output"
+VIDEO_DIR = "video_output"
+THUMBNAIL_DIR = "thumbnail_output"
+
+# --- fetch_and_score.py: 単語選定 ---
+COMMON_WORDS_URL = (
+    "https://raw.githubusercontent.com/first20hours/google-10000-english/"
+    "master/google-10000-english-usa-no-swears-medium.txt"
+)
+POOL_SIZE = 15       # スコア上位からこの件数をプール
+PICK_N = 1           # 今回の動画用に実際に選ぶ件数
+MIN_LETTERS = 4      # これより短い単語は除外
+RECENT_PATTERN_WINDOW = 5  # 直近何件の投稿と綴りパターンの重複を避けるか
+
+# --- generate_audio.py: TTS ---
+VOICE_NAME = "en-US-Neural2-D"  # 明瞭で聞き取りやすい男性ボイス(好みで変更可)
+LANGUAGE_CODE = "en-US"
+SPEAKING_RATES = {
+    "normal": 1.0,
+    "slow": 0.6,
+}
+MIN_EXPECTED_AUDIO_SECONDS = 1.2  # break(300+800+500ms=1.6s)より短ければ明らかに異常
+TTS_MAX_RETRIES = 3
+TTS_RETRY_BACKOFF_SECONDS = 2
+AUDIO_PAD_MS = 3000  # 前後に付与する無音の長さ(ミリ秒)
+
+# --- upload_videos.py: YouTube アップロード ---
+DEFAULT_PRIVACY_STATUS = "public"  # 環境変数 YT_PRIVACY_STATUS で上書き可能
+YOUTUBE_CATEGORY_ID = "27"  # Education
+UPLOAD_MAX_RETRIES = 3
+UPLOAD_RETRY_BACKOFF_SECONDS = 5
+DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+DICTIONARY_API_TIMEOUT_SECONDS = 10

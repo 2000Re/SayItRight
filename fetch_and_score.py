@@ -22,18 +22,16 @@ import random
 import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
 
-from score_words import top_tricky_words, score_word
-
-USED_WORDS_PATH = "used_words.json"
-OUTPUT_PATH = "candidates.json"
-COMMON_WORDS_URL = (
-    "https://raw.githubusercontent.com/first20hours/google-10000-english/"
-    "master/google-10000-english-usa-no-swears-medium.txt"
+from score_words import score_word
+from config import (
+    CANDIDATES_PATH as OUTPUT_PATH,
+    USED_WORDS_PATH,
+    COMMON_WORDS_URL,
+    POOL_SIZE,
+    PICK_N,
+    MIN_LETTERS,
+    RECENT_PATTERN_WINDOW,
 )
-POOL_SIZE = 15       # スコア上位からこの件数をプール
-PICK_N = 1           # 今回の動画用に実際に選ぶ件数
-MIN_LETTERS = 4      # これより短い単語は除外
-RECENT_PATTERN_WINDOW = 5  # 直近何件の投稿と綴りパターンの重複を避けるか
 
 
 def load_used_words() -> list:
