@@ -38,16 +38,29 @@ MAX_RETRIES = 3
 RETRY_BACKOFF_SECONDS = 5
 
 
-def load_used_words() -> set:
-    if os.path.exists(USED_WORDS_PATH):
-        with open(USED_WORDS_PATH, encoding="utf-8") as f:
-            return set(json.load(f))
-    return set()
+def load_used_words() -> list:
+    """使用済み単語履歴を古い→新しい順で読み込む。
+
+    各要素は {"word": str, "patterns": list[str]}。旧形式(単語の文字列だけの
+    リスト)のファイルも読み込めるよう、文字列の要素は patterns 不明(空リスト)
+    として扱う。fetch_and_score.py の同名関数と同じ形式。"""
+    if not os.path.exists(USED_WORDS_PATH):
+        return []
+    with open(USED_WORDS_PATH, encoding="utf-8") as f:
+        raw = json.load(f)
+    history = []
+    for entry in raw:
+        if isinstance(entry, str):
+            history.append({"word": entry, "patterns": []})
+        else:
+            history.append({"word": entry["word"], "patterns": entry.get("patterns", [])})
+    return history
 
 
-def save_used_words(used: set) -> None:
+def save_used_words(history: list) -> None:
+    """使用済み単語履歴を古い→新しい順のまま保存する(直近パターン判定に使うため)。"""
     with open(USED_WORDS_PATH, "w", encoding="utf-8") as f:
-        json.dump(sorted(used), f, ensure_ascii=False, indent=2)
+        json.dump(history, f, ensure_ascii=False, indent=2)
 
 
 def build_youtube_client():
@@ -117,7 +130,7 @@ def main():
         return
 
     youtube = build_youtube_client()
-    used = load_used_words()
+    history = load_used_words()
 
     for c in candidates:
         word = c["word"]
@@ -144,8 +157,10 @@ def main():
         # アップロードが成功して初めて「使用済み」として記録する。
         # (途中で失敗した単語を使用済み扱いにすると、動画が公開されないまま
         #  二度と候補に上がらなくなってしまうため)
-        used.add(word.upper())
-        save_used_words(used)
+        # patterns も一緒に記録し、次回の fetch_and_score.py が直近と
+        # 綴りパターンが被る単語を避けられるようにする。
+        history.append({"word": word.upper(), "patterns": c.get("patterns", [])})
+        save_used_words(history)
 
         try:
             upload_thumbnail(youtube, video_id, thumbnail_path)
