@@ -1,0 +1,17 @@
+# パイプラインの各ステップが生成する出力(GitHub Actions artifactとしてのみ扱う)
+audio_output/
+video_output/
+thumbnail_output/
+
+# video_builder.py がPlaywrightスクリーンショット/Ken Burnsズーム用に
+# カレントディレクトリへ一時生成するファイル
+temp_*.png
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# エディタ/OS
+.DS_Store

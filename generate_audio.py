@@ -117,20 +117,31 @@ def add_silence_padding(audio_bytes: bytes, pad_ms: int = PAD_MS) -> bytes:
 def synthesize_with_retry(
     client: texttospeech.TextToSpeechClient, ssml: str, rate: float, label: str
 ) -> bytes:
-    """音声生成し、長さが異常に短い場合はリトライする。
-    Google Cloud TTSはエラーを返さないまま音声が途中で切れる
-    既知の不具合報告があるため、生成後に長さで検証する。"""
+    """音声生成し、長さが異常に短い場合や一時的なAPIエラーの場合はリトライする。
+    Google Cloud TTSはエラーを返さないまま音声が途中で切れる既知の不具合報告が
+    あるため、生成後に長さで検証する。また、レート制限やサービス一時断などの
+    例外も同じリトライ対象に含める(即座に単語を諦めないようにするため)。"""
     last_audio = b""
+    last_error = None
     for attempt in range(1, MAX_RETRIES + 1):
-        audio = synthesize(client, ssml, rate)
+        try:
+            audio = synthesize(client, ssml, rate)
+        except Exception as e:
+            last_error = e
+            print(f"    [{label}] 生成{attempt}回目: エラー({e})。リトライします。")
+            time.sleep(RETRY_BACKOFF_SECONDS)
+            continue
         duration = get_mp3_duration_seconds(audio)
         if duration >= MIN_EXPECTED_SECONDS:
             return audio
         print(f"    [{label}] 生成{attempt}回目: 長さ{duration:.2f}秒(異常に短い)。リトライします。")
         last_audio = audio
         time.sleep(RETRY_BACKOFF_SECONDS)
-    print(f"    [{label}] {MAX_RETRIES}回試しても正常な長さになりませんでした。最後の結果を使用します。")
-    return last_audio
+    if last_audio:
+        print(f"    [{label}] {MAX_RETRIES}回試しても正常な長さになりませんでした。最後の結果を使用します。")
+        return last_audio
+    print(f"    [{label}] {MAX_RETRIES}回試してもエラーが解消しませんでした。")
+    raise last_error
 
 
 def main():
