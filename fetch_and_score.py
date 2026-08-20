@@ -30,8 +30,8 @@ COMMON_WORDS_URL = (
     "https://raw.githubusercontent.com/first20hours/google-10000-english/"
     "master/google-10000-english-usa-no-swears-medium.txt"
 )
-POOL_SIZE = 30       # スコア上位からこの件数をプール
-PICK_N = 5           # 今回の動画用に実際に選ぶ件数
+POOL_SIZE = 15       # スコア上位からこの件数をプール
+PICK_N = 1           # 今回の動画用に実際に選ぶ件数
 MIN_LETTERS = 4      # これより短い単語は除外
 
 
