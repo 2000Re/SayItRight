@@ -1,0 +1,10 @@
+cmudict>=1.0.13
+requests>=2.31.0
+google-cloud-texttospeech>=2.16.0
+mutagen>=1.47.0
+pydub>=0.25.1
+moviepy>=2.0.0
+playwright>=1.45.0
+Pillow>=10.0.0
+google-auth>=2.30.0
+google-api-python-client>=2.130.0

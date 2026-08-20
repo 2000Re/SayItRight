@@ -1,0 +1,89 @@
+name: Fetch Pronunciation Candidates
+
+# 手動実行(即時)と定期実行(自動)の両方に対応
+on:
+  workflow_dispatch: {}
+  # schedule はGitHub Actions側の実行タイミングが不安定なため無効化。
+  # 代わりに cron-job.org から毎日決まった時刻に workflow_dispatch を
+  # API経由で呼び出す運用にしている。
+  # schedule:
+  #   - cron: "0 22 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-candidates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scoring script
+        run: python fetch_and_score.py
+
+      - name: Set up GCP credentials
+        run: printf '%s' "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > "$HOME/gcp-key.json"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Generate audio (TTS)
+        run: python generate_audio.py
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcp-key.json
+
+      - name: Install Playwright browser (Chromium)
+        run: python -m playwright install --with-deps chromium
+
+      - name: Generate videos
+        run: python create_videos.py
+
+      - name: Upload to YouTube
+        run: python upload_videos.py
+        env:
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+
+      - name: Commit updated candidates and used-words list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add candidates.json used_words.json
+          git diff --cached --quiet || git commit -m "chore: update pronunciation candidates"
+          git push
+
+      - name: Upload candidates as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidates
+          path: candidates.json
+
+      - name: Upload audio files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-output
+          path: audio_output/
+
+      - name: Upload video files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-output
+          path: video_output/
+
+      - name: Upload thumbnail files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thumbnail-output
+          path: thumbnail_output/
