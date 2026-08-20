@@ -16,11 +16,12 @@ import os
 
 from arpabet_to_ipa import arpabet_to_ipa
 from video_builder import build_word_video, generate_thumbnail
-
-CANDIDATES_PATH = "candidates.json"
-AUDIO_DIR = "audio_output"
-VIDEO_OUTPUT_DIR = "video_output"
-THUMBNAIL_OUTPUT_DIR = "thumbnail_output"
+from config import (
+    CANDIDATES_PATH,
+    AUDIO_DIR,
+    VIDEO_DIR as VIDEO_OUTPUT_DIR,
+    THUMBNAIL_DIR as THUMBNAIL_OUTPUT_DIR,
+)
 
 
 def main():

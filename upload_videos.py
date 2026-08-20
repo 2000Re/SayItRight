@@ -18,24 +18,28 @@ import os
 import time
 
 import google.oauth2.credentials
+import requests
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
 from arpabet_to_ipa import arpabet_to_ipa
-
-CANDIDATES_PATH = "candidates.json"
-VIDEO_DIR = "video_output"
-THUMBNAIL_DIR = "thumbnail_output"
-USED_WORDS_PATH = "used_words.json"
+from config import (
+    CANDIDATES_PATH,
+    VIDEO_DIR,
+    THUMBNAIL_DIR,
+    USED_WORDS_PATH,
+    DEFAULT_PRIVACY_STATUS,
+    YOUTUBE_CATEGORY_ID as CATEGORY_ID,
+    UPLOAD_MAX_RETRIES as MAX_RETRIES,
+    UPLOAD_RETRY_BACKOFF_SECONDS as RETRY_BACKOFF_SECONDS,
+    DICTIONARY_API_URL,
+    DICTIONARY_API_TIMEOUT_SECONDS,
+)
 
 # 初回運用時は "unlisted" にして、実際の見え方を確認してから
 # "public" に変更するのがおすすめ。
-PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", "public")
-CATEGORY_ID = "27"  # Education
-
-MAX_RETRIES = 3
-RETRY_BACKOFF_SECONDS = 5
+PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 
 
 def load_used_words() -> list:
@@ -75,13 +79,53 @@ def build_youtube_client():
     return build("youtube", "v3", credentials=creds)
 
 
-def build_metadata(word, ipa):
+def fetch_definition(word: str) -> dict | None:
+    """無料の辞書API(dictionaryapi.dev)から意味・例文を取得する。
+
+    SEO対策として説明欄に単語の意味を載せるための補助情報で、
+    無くても動画の投稿自体は成立させたいため、取得失敗時は
+    警告を出すだけでNoneを返し、呼び出し側で通常の説明文に
+    フォールバックする。"""
+    url = DICTIONARY_API_URL.format(word=word.lower())
+    try:
+        resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
+        resp.raise_for_status()
+        entries = resp.json()
+    except (requests.RequestException, ValueError) as e:
+        print(f"    [Info] {word} の意味の取得をスキップします({e})")
+        return None
+
+    for entry in entries:
+        for meaning in entry.get("meanings", []):
+            for definition in meaning.get("definitions", []):
+                text = definition.get("definition")
+                if not text:
+                    continue
+                return {
+                    "part_of_speech": meaning.get("partOfSpeech", ""),
+                    "definition": text,
+                    "example": definition.get("example"),
+                }
+    return None
+
+
+def build_metadata(word, ipa, lookup: dict | None = None):
     title = f"How to Pronounce {word}"
-    description = (
-        f"How do you pronounce \"{word}\"?\n"
-        f"Phonetic: /{ipa}/\n\n"
-        f"#pronunciation #english #howtopronounce"
-    )
+    lines = [
+        f'How do you pronounce "{word}"?',
+        f"Phonetic: /{ipa}/",
+    ]
+    if lookup and lookup.get("definition"):
+        lines.append("")
+        pos = lookup.get("part_of_speech")
+        label = f"Meaning ({pos})" if pos else "Meaning"
+        lines.append(f"{label}: {lookup['definition']}")
+        if lookup.get("example"):
+            lines.append(f'Example: "{lookup["example"]}"')
+    lines.append("")
+    lines.append("#pronunciation #english #howtopronounce")
+    description = "\n".join(lines)
+
     return {
         "snippet": {
             "title": title,
@@ -145,7 +189,8 @@ def main():
             continue
 
         print(f"アップロード中: {word}")
-        metadata = build_metadata(word, ipa)
+        lookup = fetch_definition(word)
+        metadata = build_metadata(word, ipa, lookup)
 
         try:
             video_id = upload_video(youtube, video_path, metadata)

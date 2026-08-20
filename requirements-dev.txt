@@ -1,0 +1,6 @@
+# テスト・lint用の開発依存関係。
+# 対象(score_words.py / arpabet_to_ipa.py)は標準ライブラリのみに依存する
+# 純粋関数なので、requirements.txt本体(cmudict/moviepy/playwright等)は
+# ここでは不要にしてCIを軽量に保っている。
+pytest>=8.0.0
+ruff>=0.6.0

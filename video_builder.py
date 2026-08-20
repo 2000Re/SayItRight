@@ -21,6 +21,8 @@ import uuid
 from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
 from PIL import Image
 
+from config import AUDIO_PAD_MS
+
 # ------------------------------------------------------------------
 # 動画キャンバスサイズ(横型 16:9)
 # ------------------------------------------------------------------
@@ -42,8 +44,9 @@ THUMBNAIL_TEXT_COLOR = "#111111"
 
 FONT_STACK = '"DejaVu Sans", "Liberation Sans", "Segoe UI", Roboto, sans-serif'
 
-# 前後の無音パディング秒数(generate_audio.py の PAD_MS と揃える)
-AUDIO_PAD_SECONDS = 3.0
+# 前後の無音パディング秒数。generate_audio.py が付与する無音(config.AUDIO_PAD_MS)
+# から算出することで、値がずれることを防ぐ。
+AUDIO_PAD_SECONDS = AUDIO_PAD_MS / 1000
 
 ENDING_CTAS = [
     "Follow for more tricky words!",
@@ -316,7 +319,6 @@ def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filen
         video_clip = concatenate_videoclips(
             intro_clips + slow_clips + normal_clips + ending_clips
         )
-        total_duration = video_clip.duration
 
         # --- 音声の配置 ---
         audio_sources = [
