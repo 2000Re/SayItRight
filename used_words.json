@@ -74,5 +74,11 @@
     "patterns": [
       "ough"
     ]
+  },
+  {
+    "word": "KNITTING",
+    "patterns": [
+      "kn-"
+    ]
   }
 ]
