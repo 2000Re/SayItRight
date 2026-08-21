@@ -12,9 +12,21 @@ on:
 permissions:
   contents: write
 
+# 手動実行と cron-job.org からの自動実行が重なった場合に、同じ単語が
+# 二重にアップロードされたり、used_words.json/candidates.json への
+# git push が競合したりするのを防ぐため、同時実行を1本に制限する。
+# (アップロード処理を中断すると中途半端な状態になりかねないため、
+#  実行中のジョブをキャンセルはせず、後続はキューで待たせる)
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   fetch-candidates:
     runs-on: ubuntu-latest
+    # TTS/動画生成/アップロードのどこかで詰まった場合に、ジョブが
+    # デフォルトの上限(最大6時間)まで張り付き続けるのを防ぐ安全弁。
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,6 +35,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -43,8 +57,24 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcp-key.json
 
+      # ブラウザ本体(~100MB超)のダウンロードをキャッシュでスキップする。
+      # OS側の共有ライブラリ(--with-deps相当)はGitHub-hostedランナーが
+      # ジョブごとにまっさらなVMのため、キャッシュの有無に関わらず
+      # 毎回インストールする必要がある。
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+
       - name: Install Playwright browser (Chromium)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: python -m playwright install --with-deps chromium
+
+      - name: Install Playwright OS dependencies (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: python -m playwright install-deps chromium
 
       - name: Generate videos
         run: python create_videos.py
