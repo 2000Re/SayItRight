@@ -1,5 +1,20 @@
 [
-  "HEIGHTS",
-  "SOUGHT",
-  "THOUGHTS"
+  {
+    "word": "HEIGHTS",
+    "patterns": []
+  },
+  {
+    "word": "SOUGHT",
+    "patterns": []
+  },
+  {
+    "word": "THOUGHTS",
+    "patterns": []
+  },
+  {
+    "word": "DAUGHTER",
+    "patterns": [
+      "augh"
+    ]
+  }
 ]

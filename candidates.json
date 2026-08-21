@@ -1,7 +1,10 @@
 [
   {
-    "word": "Thoughts",
-    "arpabet": "TH AO1 T S",
-    "score": 6
+    "word": "Daughter",
+    "arpabet": "D AO1 T ER0",
+    "score": 6,
+    "patterns": [
+      "augh"
+    ]
   }
 ]
