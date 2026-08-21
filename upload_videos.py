@@ -53,8 +53,12 @@ PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 # YouTube Data API v3の公式ドキュメントに基づく、1回あたりのクォータ消費コスト
 # (日次クォータ 10,000 units に対する目安として実行ログに表示する)。
 # リトライで複数回叩いた場合も、実際に送ったリクエスト数としてそのまま数える。
+#
+# videos.insert は長らく1600 unitsだったが、2025年12月4日にGoogleが
+# 約100 unitsに引き下げた(日次クォータ10,000 units ÷ 100 = 100本/日となり、
+# 別枠の「Video Uploads per day: 100」上限と一致する)。
 QUOTA_COST_PER_CALL = {
-    "videos.insert": 1600,
+    "videos.insert": 100,
     "thumbnails.set": 50,
     "videos.update": 50,
 }
@@ -65,7 +69,7 @@ def _log_api_usage_summary():
     """このスクリプト実行で消費したYouTube Data APIのクォータ概算をログに出す。
 
     GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで
-    (videos.insert=1600 units等の)おおよその消費量を把握できるようにする。"""
+    (videos.insert=100 units等の)おおよその消費量を把握できるようにする。"""
     total_units = sum(count * QUOTA_COST_PER_CALL[name] for name, count in _api_call_counts.items())
     print("=== API使用量(YouTube Data API v3、概算) ===")
     for name, count in _api_call_counts.items():
