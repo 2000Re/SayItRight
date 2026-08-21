@@ -1,10 +1,10 @@
 [
   {
-    "word": "Through",
-    "arpabet": "TH R UW1",
-    "score": 6,
+    "word": "Cheque",
+    "arpabet": "CH EH1 K",
+    "score": 5,
     "patterns": [
-      "ough"
+      "-que"
     ]
   }
 ]

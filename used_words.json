@@ -56,5 +56,11 @@
     "patterns": [
       "ough"
     ]
+  },
+  {
+    "word": "CHEQUE",
+    "patterns": [
+      "-que"
+    ]
   }
 ]
