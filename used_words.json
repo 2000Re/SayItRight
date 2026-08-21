@@ -50,5 +50,11 @@
     "patterns": [
       "augh"
     ]
+  },
+  {
+    "word": "THROUGH",
+    "patterns": [
+      "ough"
+    ]
   }
 ]
