@@ -14,6 +14,8 @@ video_output/ / thumbnail_output/ に出力する。
 import json
 import os
 
+from playwright.sync_api import sync_playwright
+
 from arpabet_to_ipa import arpabet_to_ipa
 from video_builder import build_word_video, generate_thumbnail
 from config import (
@@ -35,40 +37,48 @@ def main():
         print("candidates.json が空です。動画生成をスキップします。")
         return
 
-    for c in candidates:
-        word = c["word"]
-        arpabet = c["arpabet"]
-        ipa = arpabet_to_ipa(arpabet)
-
-        slow_path = os.path.join(AUDIO_DIR, f"{word.lower()}_slow.mp3")
-        normal_path = os.path.join(AUDIO_DIR, f"{word.lower()}_normal.mp3")
-
-        if not (os.path.exists(slow_path) and os.path.exists(normal_path)):
-            print(f"[Skip] {word}: 音声ファイルが見つかりません "
-                  f"({slow_path} / {normal_path})。generate_audio.pyを先に実行してください。")
-            continue
-
-        video_path = os.path.join(VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
-        thumbnail_path = os.path.join(THUMBNAIL_OUTPUT_DIR, f"{word.lower()}.jpg")
-
-        print(f"動画生成中: {word} (IPA: {ipa})")
+    # 単語ごとにPlaywrightブラウザを起動し直すと(動画4カット+サムネイルで
+    # 単語あたり2回起動)無駄が大きいため、バッチ全体で1つのブラウザを使い回す。
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
         try:
-            build_word_video(
-                word=word,
-                ipa=ipa,
-                audio_slow_path=slow_path,
-                audio_normal_path=normal_path,
-                output_filename=video_path,
-            )
-        except Exception as e:
-            print(f"[Error] {word} の動画生成に失敗しました: {e}")
-            continue
+            for c in candidates:
+                word = c["word"]
+                arpabet = c["arpabet"]
+                ipa = arpabet_to_ipa(arpabet)
 
-        print(f"サムネイル生成中: {word}")
-        try:
-            generate_thumbnail(word, thumbnail_path)
-        except Exception as e:
-            print(f"[Error] {word} のサムネイル生成に失敗しました: {e}")
+                slow_path = os.path.join(AUDIO_DIR, f"{word.lower()}_slow.mp3")
+                normal_path = os.path.join(AUDIO_DIR, f"{word.lower()}_normal.mp3")
+
+                if not (os.path.exists(slow_path) and os.path.exists(normal_path)):
+                    print(f"[Skip] {word}: 音声ファイルが見つかりません "
+                          f"({slow_path} / {normal_path})。generate_audio.pyを先に実行してください。")
+                    continue
+
+                video_path = os.path.join(VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
+                thumbnail_path = os.path.join(THUMBNAIL_OUTPUT_DIR, f"{word.lower()}.jpg")
+
+                print(f"動画生成中: {word} (IPA: {ipa})")
+                try:
+                    build_word_video(
+                        word=word,
+                        ipa=ipa,
+                        audio_slow_path=slow_path,
+                        audio_normal_path=normal_path,
+                        output_filename=video_path,
+                        browser=browser,
+                    )
+                except Exception as e:
+                    print(f"[Error] {word} の動画生成に失敗しました: {e}")
+                    continue
+
+                print(f"サムネイル生成中: {word}")
+                try:
+                    generate_thumbnail(word, thumbnail_path, browser=browser)
+                except Exception as e:
+                    print(f"[Error] {word} のサムネイル生成に失敗しました: {e}")
+        finally:
+            browser.close()
 
     print("全単語の動画・サムネイル生成処理が完了しました。")
 

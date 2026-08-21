@@ -106,8 +106,13 @@ def main():
     scored.sort(key=lambda s: s.score, reverse=True)
 
     if not scored:
-        print("候補が見つかりませんでした。used_words.json をリセットするか、"
-              "フィルタ条件を見直してください。")
+        message = ("候補が見つかりませんでした。used_words.json をリセットするか、"
+                    "フィルタ条件を見直してください。")
+        print(message)
+        # "::warning::" はGitHub Actionsのワークフローコマンド。実行結果画面に
+        # 黄色い警告として表示されるため、ログを開かなくても候補切れに気付ける。
+        # (ローカル実行時はただの標準出力になるだけで害はない)
+        print(f"::warning::候補単語が見つかりませんでした。{message}")
         with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
             json.dump([], f)
         return

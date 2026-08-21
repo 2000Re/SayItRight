@@ -227,54 +227,79 @@ def _build_thumbnail_html(word):
     )
 
 
-def generate_thumbnail(word, output_path):
+def generate_thumbnail(word, output_path, browser=None):
     """
     単語をどんと表示するだけのサムネイル(1280x720、黄色地に黒文字)を生成する。
-    動画本体の生成とは独立した、専用のPlaywrightセッションで完結させる。
-    """
-    from playwright.sync_api import sync_playwright
 
+    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
+    (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
+    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
+    このタブ専用のブラウザセッションを起動して完結させる。
+    """
     html_content = _build_thumbnail_html(word)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        try:
-            _screenshot_html(browser, html_content, output_path,
-                              width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
-        finally:
-            browser.close()
+    if browser is not None:
+        _screenshot_html(browser, html_content, output_path,
+                          width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
+    else:
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            owned_browser = p.chromium.launch(headless=True)
+            try:
+                _screenshot_html(owned_browser, html_content, output_path,
+                                  width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
+            finally:
+                owned_browser.close()
 
     print(f"[Thumbnail] 生成しました: {output_path}")
     return output_path
 
 
-def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename):
+def _take_word_screenshots(browser, word, ipa, bg_hex):
+    unique_id = uuid.uuid4().hex
+    intro_img = f"temp_intro_{unique_id}.png"
+    main_slow_img = f"temp_main_slow_{unique_id}.png"
+    main_normal_img = f"temp_main_normal_{unique_id}.png"
+    ending_img = f"temp_ending_{unique_id}.png"
+
+    _screenshot_html(browser, _build_intro_html(bg_hex), intro_img)
+    _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐢 slow"), main_slow_img)
+    _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img)
+    _screenshot_html(browser, _build_ending_html(word, ipa, bg_hex), ending_img)
+
+    return intro_img, main_slow_img, main_normal_img, ending_img
+
+
+def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename, browser=None):
     """
     単語1つ分の動画(mp4, 16:9横型)を生成する。
 
     audio_slow_path / audio_normal_path は generate_audio.py が出力した
     (前後 AUDIO_PAD_SECONDS 秒の無音つき)mp3を想定。ここで無音部分は
     subclippedで取り除いてから動画に配置する。
+
+    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
+    (generate_thumbnail と同様、バッチ処理時の起動コスト削減のため)。
+    渡さなければ従来通り、この関数専用のブラウザセッションを起動する。
     """
-    from playwright.sync_api import sync_playwright
-
     bg_hex = random.choice(BG_COLORS)
-    unique_id = uuid.uuid4().hex
 
-    intro_img = f"temp_intro_{unique_id}.png"
-    main_slow_img = f"temp_main_slow_{unique_id}.png"
-    main_normal_img = f"temp_main_normal_{unique_id}.png"
-    ending_img = f"temp_ending_{unique_id}.png"
+    if browser is not None:
+        intro_img, main_slow_img, main_normal_img, ending_img = _take_word_screenshots(
+            browser, word, ipa, bg_hex
+        )
+    else:
+        from playwright.sync_api import sync_playwright
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        try:
-            _screenshot_html(browser, _build_intro_html(bg_hex), intro_img)
-            _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐢 slow"), main_slow_img)
-            _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img)
-            _screenshot_html(browser, _build_ending_html(word, ipa, bg_hex), ending_img)
-        finally:
-            browser.close()
+        with sync_playwright() as p:
+            owned_browser = p.chromium.launch(headless=True)
+            try:
+                intro_img, main_slow_img, main_normal_img, ending_img = _take_word_screenshots(
+                    owned_browser, word, ipa, bg_hex
+                )
+            finally:
+                owned_browser.close()
 
     all_clips_to_close = []
     zoom_temp_paths = []

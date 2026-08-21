@@ -109,6 +109,16 @@ def fetch_definition(word: str) -> dict | None:
     return None
 
 
+def build_tags(word, lookup: dict | None = None):
+    tags = [
+        "pronunciation", "english", word.lower(), "how to pronounce",
+        "english pronunciation", "vocabulary", "english learning", "IPA",
+    ]
+    if lookup and lookup.get("part_of_speech"):
+        tags.append(lookup["part_of_speech"])
+    return tags
+
+
 def build_metadata(word, ipa, lookup: dict | None = None):
     title = f"How to Pronounce {word}"
     lines = [
@@ -130,13 +140,34 @@ def build_metadata(word, ipa, lookup: dict | None = None):
         "snippet": {
             "title": title,
             "description": description,
-            "tags": ["pronunciation", "english", word.lower(), "how to pronounce"],
+            "tags": build_tags(word, lookup),
             "categoryId": CATEGORY_ID,
+            # localizations機能(build_localizations)を使うには、動画の
+            # 基準言語(defaultLanguage)が設定されている必要がある。
+            "defaultLanguage": "en",
         },
         "status": {
             "privacyStatus": PRIVACY_STATUS,
             "selfDeclaredMadeForKids": False,
         },
+    }
+
+
+def build_localizations(word, ipa):
+    """タイトル/説明の日本語版を返す(YouTubeのlocalizations機能用)。
+
+    メインのタイトル/説明(英語)は変更せず、視聴者の言語設定が日本語の場合に
+    追加で表示される訳を提供する形。定型文のみ日本語化し、辞書APIから
+    取得した英語の定義・例文自体は翻訳しない(翻訳API未導入のため)。"""
+    return {
+        "ja": {
+            "title": f"「{word}」の発音、正しく言える?",
+            "description": (
+                f'英単語「{word}」はどう発音する?\n'
+                f"発音記号(IPA): /{ipa}/\n\n"
+                f"#発音 #英語 #英単語"
+            ),
+        }
     }
 
 
@@ -163,6 +194,17 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
         return
     media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
     youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
+
+
+def apply_localizations(youtube, video_id, localizations):
+    """日本語タイトル/説明(localizations)を設定する。
+
+    メインのメタデータとは独立した付加情報のため、失敗しても動画自体の
+    公開は妨げない(警告を出すだけで処理を継続する)。"""
+    youtube.videos().update(
+        part="localizations",
+        body={"id": video_id, "localizations": localizations},
+    ).execute()
 
 
 def main():
@@ -212,6 +254,12 @@ def main():
             print("  -> サムネイル設定完了")
         except Exception as e:
             print(f"[Warning] {word} のサムネイル設定に失敗しました: {e}")
+
+        try:
+            apply_localizations(youtube, video_id, build_localizations(word, ipa))
+            print("  -> 日本語ローカライズ設定完了")
+        except Exception as e:
+            print(f"[Warning] {word} の日本語ローカライズ設定に失敗しました: {e}")
 
     print("全単語のアップロード処理が完了しました。")
 
