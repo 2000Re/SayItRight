@@ -22,5 +22,11 @@
     "patterns": [
       "ough"
     ]
+  },
+  {
+    "word": "BOUTIQUE",
+    "patterns": [
+      "-que"
+    ]
   }
 ]
