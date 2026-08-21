@@ -12,6 +12,15 @@ candidates.json の各単語について、
   ただしhard2sayは別チャンネル用なので、これらは
   sheriff-shorts-bot側とは別の値(hard2say専用のOAuthクライアント/
   リフレッシュトークン)を使うこと。
+
+必要なOAuthスコープについて:
+  動画のアップロード(videos.insert)・サムネイル設定(thumbnails.set)だけなら
+  https://www.googleapis.com/auth/youtube.upload で足りるが、
+  日本語ローカライズ設定(videos.update, apply_localizations)には
+  https://www.googleapis.com/auth/youtube (または youtube.force-ssl)
+  スコープが必要。youtube.upload のみで発行したrefresh tokenだと
+  videos.update が403 insufficientPermissionsで失敗する
+  (アップロード自体は成功するので、失敗しても警告のみで処理は継続する)。
 """
 import json
 import os
@@ -258,6 +267,15 @@ def main():
         try:
             apply_localizations(youtube, video_id, build_localizations(word, ipa))
             print("  -> 日本語ローカライズ設定完了")
+        except HttpError as e:
+            if e.resp.status == 403:
+                print(f"[Warning] {word} の日本語ローカライズ設定に失敗しました(権限不足): {e}\n"
+                      f"    -> YT_REFRESH_TOKEN が youtube.upload スコープのみで発行されている"
+                      f"可能性があります。videos.update には youtube (または youtube.force-ssl) "
+                      f"スコープが必要です。OAuth同意画面で該当スコープを追加のうえ、"
+                      f"refresh tokenを再発行してください。")
+            else:
+                print(f"[Warning] {word} の日本語ローカライズ設定に失敗しました: {e}")
         except Exception as e:
             print(f"[Warning] {word} の日本語ローカライズ設定に失敗しました: {e}")
 
