@@ -28,5 +28,11 @@
     "patterns": [
       "-que"
     ]
+  },
+  {
+    "word": "EIGHT",
+    "patterns": [
+      "eigh"
+    ]
   }
 ]
