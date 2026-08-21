@@ -16,5 +16,11 @@
     "patterns": [
       "augh"
     ]
+  },
+  {
+    "word": "FOUGHT",
+    "patterns": [
+      "ough"
+    ]
   }
 ]

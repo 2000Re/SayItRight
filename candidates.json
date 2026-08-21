@@ -1,10 +1,10 @@
 [
   {
-    "word": "Daughter",
-    "arpabet": "D AO1 T ER0",
-    "score": 6,
+    "word": "Fought",
+    "arpabet": "F AO1 T",
+    "score": 5,
     "patterns": [
-      "augh"
+      "ough"
     ]
   }
 ]
