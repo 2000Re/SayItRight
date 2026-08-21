@@ -1,10 +1,10 @@
 [
   {
-    "word": "Naughty",
-    "arpabet": "N AO1 T IY0",
-    "score": 5,
+    "word": "Thought",
+    "arpabet": "TH AO1 T",
+    "score": 6,
     "patterns": [
-      "augh"
+      "ough"
     ]
   }
 ]
