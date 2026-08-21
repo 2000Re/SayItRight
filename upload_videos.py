@@ -50,6 +50,30 @@ from config import (
 # "public" に変更するのがおすすめ。
 PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 
+# YouTube Data API v3の公式ドキュメントに基づく、1回あたりのクォータ消費コスト
+# (日次クォータ 10,000 units に対する目安として実行ログに表示する)。
+# リトライで複数回叩いた場合も、実際に送ったリクエスト数としてそのまま数える。
+QUOTA_COST_PER_CALL = {
+    "videos.insert": 1600,
+    "thumbnails.set": 50,
+    "videos.update": 50,
+}
+_api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
+
+
+def _log_api_usage_summary():
+    """このスクリプト実行で消費したYouTube Data APIのクォータ概算をログに出す。
+
+    GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで
+    (videos.insert=1600 units等の)おおよその消費量を把握できるようにする。"""
+    total_units = sum(count * QUOTA_COST_PER_CALL[name] for name, count in _api_call_counts.items())
+    print("=== API使用量(YouTube Data API v3、概算) ===")
+    for name, count in _api_call_counts.items():
+        print(f"  {name}: {count}回 (1回あたり{QUOTA_COST_PER_CALL[name]} units)")
+    print(f"  概算クォータ消費: {total_units} units (日次上限 10,000 units の目安)")
+    print(f"  動画アップロード回数: {_api_call_counts['videos.insert']}回"
+          f" (日次上限100本の目安)")
+
 
 def load_used_words() -> list:
     """使用済み単語履歴を古い→新しい順で読み込む。
@@ -188,6 +212,7 @@ def upload_video(youtube, video_path, metadata):
     last_error = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
+            _api_call_counts["videos.insert"] += 1
             response = request.execute()
             return response["id"]
         except HttpError as e:
@@ -202,6 +227,7 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
         print(f"    [Warning] サムネイルが見つかりません: {thumbnail_path}")
         return
     media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
+    _api_call_counts["thumbnails.set"] += 1
     youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
 
 
@@ -210,6 +236,7 @@ def apply_localizations(youtube, video_id, localizations):
 
     メインのメタデータとは独立した付加情報のため、失敗しても動画自体の
     公開は妨げない(警告を出すだけで処理を継続する)。"""
+    _api_call_counts["videos.update"] += 1
     youtube.videos().update(
         part="localizations",
         body={"id": video_id, "localizations": localizations},
@@ -280,6 +307,7 @@ def main():
             print(f"[Warning] {word} の日本語ローカライズ設定に失敗しました: {e}")
 
     print("全単語のアップロード処理が完了しました。")
+    _log_api_usage_summary()
 
 
 if __name__ == "__main__":

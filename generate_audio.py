@@ -44,6 +44,11 @@ from config import (
 # 処理なので「サイレント途切れ」の影響を受けうるが、音声データに後付けする
 # 無音はTTSを経由しないため確実に反映される。
 
+# GCP Consoleの「Count of requests for Neural2 voices per minute」等の
+# クォータ画面を都度開かなくても、実行ログでリクエスト数を把握できるようにする
+# (リトライで複数回叩いた場合も、実際に送ったリクエスト数としてそのまま数える)。
+_tts_call_count = 0
+
 
 def build_ssml(word: str, ipa: str) -> str:
     """<phoneme>タグでIPA発音を固定したSSMLを組み立てる。
@@ -72,6 +77,7 @@ def build_ssml(word: str, ipa: str) -> str:
 
 
 def synthesize(client: texttospeech.TextToSpeechClient, ssml: str, rate: float) -> bytes:
+    global _tts_call_count
     synthesis_input = texttospeech.SynthesisInput(ssml=ssml)
     voice = texttospeech.VoiceSelectionParams(
         language_code=LANGUAGE_CODE,
@@ -81,6 +87,7 @@ def synthesize(client: texttospeech.TextToSpeechClient, ssml: str, rate: float) 
         audio_encoding=texttospeech.AudioEncoding.MP3,
         speaking_rate=rate,
     )
+    _tts_call_count += 1
     response = client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
@@ -177,6 +184,8 @@ def main():
             continue
 
     print(f"全{len(candidates)}語の音声生成が完了しました。")
+    print("=== API使用量(Google Cloud Text-to-Speech、概算) ===")
+    print(f"  synthesize_speech 呼び出し回数: {_tts_call_count}回 (リトライ含む)")
 
 
 if __name__ == "__main__":
