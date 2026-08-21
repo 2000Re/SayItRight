@@ -80,5 +80,11 @@
     "patterns": [
       "kn-"
     ]
+  },
+  {
+    "word": "NAUGHTY",
+    "patterns": [
+      "augh"
+    ]
   }
 ]
