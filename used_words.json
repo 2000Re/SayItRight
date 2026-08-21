@@ -68,5 +68,11 @@
     "patterns": [
       "eigh"
     ]
+  },
+  {
+    "word": "BOROUGH",
+    "patterns": [
+      "ough"
+    ]
   }
 ]
