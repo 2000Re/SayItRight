@@ -38,5 +38,11 @@
   {
     "word": "DEUTSCHE",
     "patterns": []
+  },
+  {
+    "word": "KNIGHTS",
+    "patterns": [
+      "kn-"
+    ]
   }
 ]

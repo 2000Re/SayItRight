@@ -1,8 +1,10 @@
 [
   {
-    "word": "Deutsche",
-    "arpabet": "D OY1 CH",
+    "word": "Knights",
+    "arpabet": "N AY1 T S",
     "score": 5,
-    "patterns": []
+    "patterns": [
+      "kn-"
+    ]
   }
 ]
