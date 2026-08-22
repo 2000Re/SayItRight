@@ -1,10 +1,8 @@
 [
   {
-    "word": "Thorough",
-    "arpabet": "TH ER1 OW0",
-    "score": 7,
-    "patterns": [
-      "ough"
-    ]
+    "word": "Deutsche",
+    "arpabet": "D OY1 CH",
+    "score": 5,
+    "patterns": []
   }
 ]
