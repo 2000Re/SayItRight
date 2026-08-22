@@ -31,6 +31,8 @@ from config import (
     PICK_N,
     MIN_LETTERS,
     RECENT_PATTERN_WINDOW,
+    DICTIONARY_API_URL,
+    DICTIONARY_API_TIMEOUT_SECONDS,
 )
 
 
@@ -82,6 +84,25 @@ def recent_patterns(history: list, window: int = RECENT_PATTERN_WINDOW) -> set:
     return patterns
 
 
+def is_known_word(word: str) -> bool:
+    """辞書API(dictionaryapi.dev)にエントリがあるかどうかを確認する。
+
+    "DEUTSCHE"のような、cmudict/頻出単語リストにたまたま含まれているだけの
+    英単語ではない語(外来語・固有名詞等)を候補から除外するために使う。
+    API側の一時的な障害やタイムアウトで確認できない場合は、
+    誤って候補を減らしすぎないよう「存在する」扱い(True)にフォールバックする。
+    プール(POOL_SIZE件)内でのみ呼び出す想定で、cmudict全体には使わない
+    (全語彙に対して呼ぶとAPI呼び出し数が多くなりすぎるため)。"""
+    url = DICTIONARY_API_URL.format(word=word.lower())
+    try:
+        resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
+    except requests.RequestException:
+        return True
+    if resp.status_code == 404:
+        return False
+    return True
+
+
 def load_common_words() -> set:
     """頻出1万語リストを取得し、大文字化して集合で返す。
     取得に失敗した場合は空集合を返し、呼び出し側でフォールバックする。"""
@@ -130,6 +151,17 @@ def main():
         return
 
     pool = scored[:POOL_SIZE]
+
+    # 辞書API(dictionaryapi.dev)に載っていない語("DEUTSCHE"のような
+    # 英単語ではない外来語・固有名詞等)を候補から除外する。
+    # プール内の呼び出しに留めることで、cmudict全体をスキャンする
+    # ことによる過剰なAPI呼び出しを避けている。
+    known_pool = [p for p in pool if is_known_word(p.word)]
+    if not known_pool:
+        print("プール内に辞書APIで確認できる単語がありませんでした。"
+              "フィルタなしで続行します。")
+    else:
+        pool = known_pool
 
     # 直近の投稿と綴りパターン(黙字系, -ough系など)が被らない候補を優先する。
     # 内容のマンネリ化(似た系統の単語が連続する)を避けるため。
