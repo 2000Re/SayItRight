@@ -84,11 +84,22 @@ def load_used_words() -> list:
 
     各要素は {"word": str, "patterns": list[str]}。旧形式(単語の文字列だけの
     リスト)のファイルも読み込めるよう、文字列の要素は patterns 不明(空リスト)
-    として扱う。fetch_and_score.py の同名関数と同じ形式。"""
+    として扱う。fetch_and_score.py の同名関数と同じ形式。
+
+    ファイルが空、または壊れたJSONの場合は、履歴なし(空リスト)として
+    扱う(手動編集や書き込み中の異常終了で空ファイルになるケースがあるため)。"""
     if not os.path.exists(USED_WORDS_PATH):
         return []
     with open(USED_WORDS_PATH, encoding="utf-8") as f:
-        raw = json.load(f)
+        content = f.read()
+    if not content.strip():
+        return []
+    try:
+        raw = json.loads(content)
+    except json.JSONDecodeError as e:
+        print(f"警告: {USED_WORDS_PATH} の読み込みに失敗しました({e})。"
+              f"使用済み単語なしとして続行します。")
+        return []
     history = []
     for entry in raw:
         if isinstance(entry, str):
