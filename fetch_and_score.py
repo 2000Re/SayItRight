@@ -48,11 +48,23 @@ def load_used_words() -> list:
      動画が1本失われたままになるため)
 
     旧形式(単語の文字列だけのリスト)のファイルも読み込めるよう、
-    文字列の要素は patterns 不明(空リスト)として扱う。"""
+    文字列の要素は patterns 不明(空リスト)として扱う。
+
+    ファイルが空、または壊れたJSONの場合は、履歴なし(空リスト)として
+    扱う(手動編集や書き込み中の異常終了で空ファイルになるケースがあるため。
+    使用済み単語の判定が緩くなるだけで、パイプライン全体は止めない)。"""
     if not os.path.exists(USED_WORDS_PATH):
         return []
     with open(USED_WORDS_PATH, encoding="utf-8") as f:
-        raw = json.load(f)
+        content = f.read()
+    if not content.strip():
+        return []
+    try:
+        raw = json.loads(content)
+    except json.JSONDecodeError as e:
+        print(f"警告: {USED_WORDS_PATH} の読み込みに失敗しました({e})。"
+              f"使用済み単語なしとして続行します。")
+        return []
     history = []
     for entry in raw:
         if isinstance(entry, str):
