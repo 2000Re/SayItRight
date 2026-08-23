@@ -1,8 +1,10 @@
 [
   {
-    "word": "Deutsche",
-    "arpabet": "D OY1 CH",
+    "word": "Brought",
+    "arpabet": "B R AO1 T",
     "score": 5,
-    "patterns": []
+    "patterns": [
+      "ough"
+    ]
   }
 ]

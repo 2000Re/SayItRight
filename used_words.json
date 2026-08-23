@@ -2,5 +2,11 @@
   {
     "word": "DEUTSCHE",
     "patterns": []
+  },
+  {
+    "word": "BROUGHT",
+    "patterns": [
+      "ough"
+    ]
   }
 ]
