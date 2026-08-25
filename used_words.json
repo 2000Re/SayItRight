@@ -14,5 +14,11 @@
     "patterns": [
       "eigh"
     ]
+  },
+  {
+    "word": "BOUTIQUE",
+    "patterns": [
+      "-que"
+    ]
   }
 ]
