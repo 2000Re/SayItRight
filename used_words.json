@@ -20,5 +20,11 @@
     "patterns": [
       "-que"
     ]
+  },
+  {
+    "word": "CAUGHT",
+    "patterns": [
+      "augh"
+    ]
   }
 ]

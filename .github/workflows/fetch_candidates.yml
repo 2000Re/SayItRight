@@ -92,7 +92,24 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add candidates.json used_words.json
           git diff --cached --quiet || git commit -m "chore: update pronunciation candidates"
-          git push
+
+          # git push はGitHub側の一時的な障害(Internal Server Error等)で
+          # 失敗することがある。この時点で動画は既にYouTubeへアップロード
+          # 済みなので、ここで諦めるとused_words.jsonへの登録だけが
+          # 失われ、将来同じ単語が重複して選ばれるリスクになる。
+          # そのため数回リトライする(間にpull --rebaseを挟み、他の実行が
+          # 先にpushしていた場合にも追従できるようにする)。
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "git push 失敗(${attempt}回目)。リトライします。"
+            sleep $((attempt * 10))
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          done
+          echo "git push が複数回失敗しました。used_words.json の更新が反映されていない" \
+               "可能性があります。手動での確認・修正が必要です。"
+          exit 1
 
       - name: Upload candidates as artifact
         uses: actions/upload-artifact@v4
