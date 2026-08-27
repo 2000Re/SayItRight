@@ -1,10 +1,10 @@
 [
   {
-    "word": "Boutique",
-    "arpabet": "B UW0 T IY1 K",
-    "score": 5,
+    "word": "Thoughts",
+    "arpabet": "TH AO1 T S",
+    "score": 6,
     "patterns": [
-      "-que"
+      "ough"
     ]
   }
 ]
