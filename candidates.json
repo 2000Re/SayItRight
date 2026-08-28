@@ -1,10 +1,10 @@
 [
   {
-    "word": "Thoughts",
-    "arpabet": "TH AO1 T S",
-    "score": 6,
+    "word": "Knight",
+    "arpabet": "N AY1 T",
+    "score": 5,
     "patterns": [
-      "ough"
+      "kn-"
     ]
   }
 ]

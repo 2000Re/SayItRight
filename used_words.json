@@ -32,5 +32,11 @@
     "patterns": [
       "ough"
     ]
+  },
+  {
+    "word": "KNIGHT",
+    "patterns": [
+      "kn-"
+    ]
   }
 ]
