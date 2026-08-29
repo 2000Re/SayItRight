@@ -1,13 +1,16 @@
 """
 video_builder.py
 
-単語 + IPA発音記号 + 音声(スロー/通常) から、YouTube通常動画用の
-横型動画(1920x1080, 16:9)を生成する。
+単語 + IPA発音記号 + 音声(スロー/通常) から、YouTube Shorts用の
+縦型動画(1080x1920, 9:16)を生成する。
 
-[Design] 縦型(9:16)かつ3分以内の動画はYouTubeに自動的にShorts判定され、
-Shortsフィード上ではカスタムサムネイルが表示されない。このチャンネルは
-サムネイル(単語をどんと表示)を主要な導線にしたいため、あえて横型(16:9)で
-作成し、時間の長さに関わらず「通常動画」として扱われるようにしている。
+[Design] 以前は横型(16:9)で作成し、サムネイル(単語をどんと表示)を
+主要な導線にする設計だった(縦型+短尺だとYouTubeがShorts判定し、
+Shortsフィード上ではカスタムサムネイルが表示されなくなるため)。
+横型「通常動画」では十分な再生数が得られなかったため、Shortsの
+フィード経由での露出を優先し、縦型に変更した。カスタムサムネイルは
+Shortsのスワイプ画面には出ないが、検索結果や埋め込み等では
+引き続き使われるため、サムネイル生成自体は維持している。
 
 sheriff-shorts-bot(everysheriff/video_generator.py)の以下の資産を流用:
   - Playwrightでのスクリーンショット撮影パターン(ブラウザは1回だけ起動)
@@ -24,10 +27,10 @@ from PIL import Image
 from config import AUDIO_PAD_MS
 
 # ------------------------------------------------------------------
-# 動画キャンバスサイズ(横型 16:9)
+# 動画キャンバスサイズ(Shorts用 縦型 9:16)
 # ------------------------------------------------------------------
-VIDEO_WIDTH = 1920
-VIDEO_HEIGHT = 1080
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
 
 # サムネイルサイズ(YouTube推奨: 1280x720, 16:9)
 THUMBNAIL_WIDTH = 1280
@@ -133,7 +136,7 @@ def _cleanup_temp_files(*paths):
 
 
 # ------------------------------------------------------------------
-# HTML組み立て(動画本編。16:9キャンバス)
+# HTML組み立て(動画本編。Shorts用 9:16キャンバス)
 # ------------------------------------------------------------------
 def _build_intro_html(bg_hex):
     return (
@@ -142,8 +145,8 @@ def _build_intro_html(bg_hex):
         f"body {{margin:0; padding:0; width:{VIDEO_WIDTH}px; height:{VIDEO_HEIGHT}px; background-color:{bg_hex}; "
         "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
         f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
-        ".prompt {font-size:88px; font-weight:800; text-align:center; width:1300px; line-height:1.3;}"
-        ".sub {font-size:44px; margin-top:36px; opacity:0.75;}"
+        ".prompt {font-size:64px; font-weight:800; text-align:center; width:820px; line-height:1.3;}"
+        ".sub {font-size:36px; margin-top:32px; opacity:0.75;}"
         "</style></head><body>"
         "<div class='prompt'>Can you pronounce this word?</div>"
         "<div class='sub'>🔊 listen carefully</div>"
@@ -161,9 +164,9 @@ def _build_main_html(word, ipa, bg_hex, label):
         f"body {{margin:0; padding:0; width:{VIDEO_WIDTH}px; height:{VIDEO_HEIGHT}px; background-color:{bg_hex}; "
         "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
         f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
-        ".word {font-size:170px; font-weight:800; text-align:center; word-break:break-word; padding:0 100px;}"
-        ".ipa {font-size:70px; margin-top:40px; opacity:0.8; letter-spacing:0.02em;}"
-        ".label {font-size:44px; margin-top:56px; padding:16px 40px; border-radius:100px; "
+        ".word {font-size:120px; font-weight:800; text-align:center; word-break:break-word; padding:0 60px;}"
+        ".ipa {font-size:52px; margin-top:36px; opacity:0.8; letter-spacing:0.02em;}"
+        ".label {font-size:34px; margin-top:48px; padding:14px 32px; border-radius:100px; "
         "background-color:rgba(242,237,228,0.12); font-weight:600;}"
         "</style></head><body>"
         f"<div class='word'>{safe_word}</div>"
@@ -183,10 +186,10 @@ def _build_ending_html(word, ipa, bg_hex):
         f"body {{margin:0; padding:0; width:{VIDEO_WIDTH}px; height:{VIDEO_HEIGHT}px; background-color:{bg_hex}; "
         "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
         f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
-        ".check {font-size:80px;}"
-        ".word {font-size:120px; font-weight:800; text-align:center; margin-top:16px; padding:0 100px; word-break:break-word;}"
-        ".ipa {font-size:54px; margin-top:20px; opacity:0.8;}"
-        ".cta {font-size:46px; margin-top:60px; font-weight:700; text-align:center; padding:0 120px;}"
+        ".check {font-size:64px;}"
+        ".word {font-size:90px; font-weight:800; text-align:center; margin-top:16px; padding:0 60px; word-break:break-word;}"
+        ".ipa {font-size:42px; margin-top:20px; opacity:0.8;}"
+        ".cta {font-size:36px; margin-top:56px; font-weight:700; text-align:center; padding:0 80px;}"
         "</style></head><body>"
         "<div class='check'>✅</div>"
         f"<div class='word'>{safe_word}</div>"
@@ -273,7 +276,7 @@ def _take_word_screenshots(browser, word, ipa, bg_hex):
 
 def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename, browser=None):
     """
-    単語1つ分の動画(mp4, 16:9横型)を生成する。
+    単語1つ分の動画(mp4, 9:16縦型、Shorts用)を生成する。
 
     audio_slow_path / audio_normal_path は generate_audio.py が出力した
     (前後 AUDIO_PAD_SECONDS 秒の無音つき)mp3を想定。ここで無音部分は
