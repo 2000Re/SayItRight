@@ -38,5 +38,11 @@
     "patterns": [
       "kn-"
     ]
+  },
+  {
+    "word": "THOROUGH",
+    "patterns": [
+      "ough"
+    ]
   }
 ]
