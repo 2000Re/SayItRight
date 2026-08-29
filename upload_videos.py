@@ -187,6 +187,7 @@ def build_tags(word, lookup: dict | None = None):
     tags = [
         "pronunciation", "english", word.lower(), "how to pronounce",
         "english pronunciation", "vocabulary", "english learning", "IPA",
+        "shorts",
     ]
     if lookup and lookup.get("part_of_speech"):
         tags.append(lookup["part_of_speech"])
@@ -207,7 +208,7 @@ def build_metadata(word, ipa, lookup: dict | None = None):
         if lookup.get("example"):
             lines.append(f'Example: "{lookup["example"]}"')
     lines.append("")
-    lines.append("#pronunciation #english #howtopronounce")
+    lines.append("#shorts #pronunciation #english #howtopronounce")
     description = "\n".join(lines)
 
     return {
@@ -239,7 +240,7 @@ def build_localizations(word, ipa):
             "description": (
                 f'英単語「{word}」はどう発音する?\n'
                 f"発音記号(IPA): /{ipa}/\n\n"
-                f"#発音 #英語 #英単語"
+                f"#shorts #発音 #英語 #英単語"
             ),
         }
     }

@@ -3,7 +3,7 @@ create_videos.py
 
 candidates.json の各単語について、
   audio_output/{word}_slow.mp3 / {word}_normal.mp3
-を使って動画(mp4, 16:9横型)とサムネイル(jpg)を生成し、
+を使って動画(mp4, 9:16縦型、Shorts用)とサムネイル(jpg)を生成し、
 video_output/ / thumbnail_output/ に出力する。
 
 前提:
