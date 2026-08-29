@@ -2,6 +2,8 @@
 audio_output/
 video_output/
 thumbnail_output/
+compilation_downloads/
+compilation_output/
 
 # video_builder.py がPlaywrightスクリーンショット/Ken Burnsズーム用に
 # カレントディレクトリへ一時生成するファイル
