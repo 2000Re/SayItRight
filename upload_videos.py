@@ -33,11 +33,11 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
 from arpabet_to_ipa import arpabet_to_ipa
+from used_words_store import load_used_words, save_used_words
 from config import (
     CANDIDATES_PATH,
     VIDEO_DIR,
     THUMBNAIL_DIR,
-    USED_WORDS_PATH,
     DEFAULT_PRIVACY_STATUS,
     YOUTUBE_CATEGORY_ID as CATEGORY_ID,
     UPLOAD_MAX_RETRIES as MAX_RETRIES,
@@ -79,42 +79,6 @@ def _log_api_usage_summary():
     print(f"  概算クォータ消費: {total_units} units (日次上限 10,000 units の目安)")
     print(f"  動画アップロード回数: {_api_call_counts['videos.insert']}回"
           f" (日次上限100本の目安)")
-
-
-def load_used_words() -> list:
-    """使用済み単語履歴を古い→新しい順で読み込む。
-
-    各要素は {"word": str, "patterns": list[str]}。旧形式(単語の文字列だけの
-    リスト)のファイルも読み込めるよう、文字列の要素は patterns 不明(空リスト)
-    として扱う。fetch_and_score.py の同名関数と同じ形式。
-
-    ファイルが空、または壊れたJSONの場合は、履歴なし(空リスト)として
-    扱う(手動編集や書き込み中の異常終了で空ファイルになるケースがあるため)。"""
-    if not os.path.exists(USED_WORDS_PATH):
-        return []
-    with open(USED_WORDS_PATH, encoding="utf-8") as f:
-        content = f.read()
-    if not content.strip():
-        return []
-    try:
-        raw = json.loads(content)
-    except json.JSONDecodeError as e:
-        print(f"警告: {USED_WORDS_PATH} の読み込みに失敗しました({e})。"
-              f"使用済み単語なしとして続行します。")
-        return []
-    history = []
-    for entry in raw:
-        if isinstance(entry, str):
-            history.append({"word": entry, "patterns": []})
-        else:
-            history.append({"word": entry["word"], "patterns": entry.get("patterns", [])})
-    return history
-
-
-def save_used_words(history: list) -> None:
-    """使用済み単語履歴を古い→新しい順のまま保存する(直近パターン判定に使うため)。"""
-    with open(USED_WORDS_PATH, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
 
 
 def build_youtube_client():
@@ -323,8 +287,10 @@ def main():
         # (途中で失敗した単語を使用済み扱いにすると、動画が公開されないまま
         #  二度と候補に上がらなくなってしまうため)
         # patterns も一緒に記録し、次回の fetch_and_score.py が直近と
-        # 綴りパターンが被る単語を避けられるようにする。
-        history.append({"word": word.upper(), "patterns": c.get("patterns", [])})
+        # 綴りパターンが被る単語を避けられるようにする。video_id は
+        # compile_shorts.py が結合動画作成時に公開済み動画をダウンロード
+        # するために使う。
+        history.append({"word": word.upper(), "patterns": c.get("patterns", []), "video_id": video_id})
         save_used_words(history)
 
         try:

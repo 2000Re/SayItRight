@@ -86,11 +86,22 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
 
+      # used_words.jsonにvideo_idが10件たまるごとに、公開済みのShortsを
+      # yt-dlpで取得し直して横型(16:9)の結合動画としてアップロードする。
+      # 本編パイプラインとは独立した追加機能なので、失敗しても後続の
+      # コミット処理はブロックしない(compile_shorts.py側で例外を吸収する)。
+      - name: Compile Shorts into a regular video (every 10 videos)
+        run: python compile_shorts.py
+        env:
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+
       - name: Commit updated candidates and used-words list
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add candidates.json used_words.json
+          git add candidates.json used_words.json compilation_state.json
           git diff --cached --quiet || git commit -m "chore: update pronunciation candidates"
 
           # git push はGitHub側の一時的な障害(Internal Server Error等)で
@@ -134,3 +145,12 @@ jobs:
         with:
           name: thumbnail-output
           path: thumbnail_output/
+
+      # compilation_output/ は10件たまった回にしか作られないため、
+      # それ以外の日は対象ファイルなしの警告が出るだけで正常。
+      - name: Upload compilation video as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compilation-output
+          path: compilation_output/
+          if-no-files-found: ignore

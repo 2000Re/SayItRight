@@ -16,16 +16,15 @@ sheriff-shorts-bot の movie.py 側から、この candidates.json を
 """
 
 import json
-import os
 import random
 
 import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
 
 from score_words import score_word
+from used_words_store import load_used_words
 from config import (
     CANDIDATES_PATH as OUTPUT_PATH,
-    USED_WORDS_PATH,
     COMMON_WORDS_URL,
     POOL_SIZE,
     PICK_N,
@@ -34,46 +33,6 @@ from config import (
     DICTIONARY_API_URL,
     DICTIONARY_API_TIMEOUT_SECONDS,
 )
-
-
-def load_used_words() -> list:
-    """既に使用済み(=アップロード成功済み)の単語履歴を、古い→新しい順で読み込む。
-
-    各要素は {"word": str, "patterns": list[str]} の形式。
-    (patterns は score_words.matched_patterns が返す綴りパターン名で、
-     直近と系統が被った単語を避けるために使う)
-
-    used_words.json 内の「使用済み」の記録は upload_videos.py が
-    YouTubeへのアップロードに成功した時点で初めて行う。
-    (TTS/動画生成/アップロードのいずれかで失敗した単語を
-     ここで使用済み扱いにしてしまうと、二度と候補に上がらず
-     動画が1本失われたままになるため)
-
-    旧形式(単語の文字列だけのリスト)のファイルも読み込めるよう、
-    文字列の要素は patterns 不明(空リスト)として扱う。
-
-    ファイルが空、または壊れたJSONの場合は、履歴なし(空リスト)として
-    扱う(手動編集や書き込み中の異常終了で空ファイルになるケースがあるため。
-    使用済み単語の判定が緩くなるだけで、パイプライン全体は止めない)。"""
-    if not os.path.exists(USED_WORDS_PATH):
-        return []
-    with open(USED_WORDS_PATH, encoding="utf-8") as f:
-        content = f.read()
-    if not content.strip():
-        return []
-    try:
-        raw = json.loads(content)
-    except json.JSONDecodeError as e:
-        print(f"警告: {USED_WORDS_PATH} の読み込みに失敗しました({e})。"
-              f"使用済み単語なしとして続行します。")
-        return []
-    history = []
-    for entry in raw:
-        if isinstance(entry, str):
-            history.append({"word": entry, "patterns": []})
-        else:
-            history.append({"word": entry["word"], "patterns": entry.get("patterns", [])})
-    return history
 
 
 def recent_patterns(history: list, window: int = RECENT_PATTERN_WINDOW) -> set:

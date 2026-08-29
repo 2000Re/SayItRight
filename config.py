@@ -44,3 +44,15 @@ DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
 DICTIONARY_API_TIMEOUT_SECONDS = 10
 DICTIONARY_API_MAX_RETRIES = 3
 DICTIONARY_API_RETRY_BACKOFF_SECONDS = 3
+
+# --- compile_shorts.py: Shorts結合動画 ---
+# Shorts(縦型9:16、3分以内)は本数を連結しても合計尺が短いままだと
+# 縦型ゆえにYouTubeにShorts判定されてしまうため、結合時は横型(16:9)
+# キャンバスにピラーボックス(左右に無地の帯)で配置し直す。
+COMPILATION_STATE_PATH = "compilation_state.json"
+COMPILATION_BATCH_SIZE = 10  # この件数たまるごとに結合動画を1本作る
+COMPILATION_DOWNLOAD_DIR = "compilation_downloads"
+COMPILATION_OUTPUT_DIR = "compilation_output"
+COMPILATION_VIDEO_WIDTH = 1920
+COMPILATION_VIDEO_HEIGHT = 1080
+COMPILATION_BG_COLOR = (23, 19, 16)  # video_builder.BG_COLORSの一色(#171310)と統一
