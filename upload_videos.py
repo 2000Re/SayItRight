@@ -44,6 +44,8 @@ from config import (
     UPLOAD_RETRY_BACKOFF_SECONDS as RETRY_BACKOFF_SECONDS,
     DICTIONARY_API_URL,
     DICTIONARY_API_TIMEOUT_SECONDS,
+    DICTIONARY_API_MAX_RETRIES,
+    DICTIONARY_API_RETRY_BACKOFF_SECONDS,
 )
 
 # 初回運用時は "unlisted" にして、実際の見え方を確認してから
@@ -133,27 +135,51 @@ def fetch_definition(word: str) -> dict | None:
     SEO対策として説明欄に単語の意味を載せるための補助情報で、
     無くても動画の投稿自体は成立させたいため、取得失敗時は
     警告を出すだけでNoneを返し、呼び出し側で通常の説明文に
-    フォールバックする。"""
+    フォールバックする。
+
+    タイムアウトや接続エラー、5xxエラーなど一時的な障害は数回リトライする。
+    404(その単語が辞書に無い)は再試行しても結果が変わらないため、
+    リトライせず即座に諦める。"""
     url = DICTIONARY_API_URL.format(word=word.lower())
-    try:
-        resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
-        resp.raise_for_status()
-        entries = resp.json()
-    except (requests.RequestException, ValueError) as e:
-        print(f"    [Info] {word} の意味の取得をスキップします({e})")
+    last_error = None
+
+    for attempt in range(1, DICTIONARY_API_MAX_RETRIES + 1):
+        try:
+            resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
+        except requests.RequestException as e:
+            last_error = e
+            print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
+            time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
+            continue
+
+        if resp.status_code == 404:
+            print(f"    [Info] {word} の意味は辞書に見つかりませんでした。")
+            return None
+
+        try:
+            resp.raise_for_status()
+            entries = resp.json()
+        except (requests.RequestException, ValueError) as e:
+            last_error = e
+            print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
+            time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
+            continue
+
+        for entry in entries:
+            for meaning in entry.get("meanings", []):
+                for definition in meaning.get("definitions", []):
+                    text = definition.get("definition")
+                    if not text:
+                        continue
+                    return {
+                        "part_of_speech": meaning.get("partOfSpeech", ""),
+                        "definition": text,
+                        "example": definition.get("example"),
+                    }
         return None
 
-    for entry in entries:
-        for meaning in entry.get("meanings", []):
-            for definition in meaning.get("definitions", []):
-                text = definition.get("definition")
-                if not text:
-                    continue
-                return {
-                    "part_of_speech": meaning.get("partOfSpeech", ""),
-                    "definition": text,
-                    "example": definition.get("example"),
-                }
+    print(f"    [Info] {word} の意味の取得を{DICTIONARY_API_MAX_RETRIES}回試しても"
+          f"取得できませんでした({last_error})。スキップします。")
     return None
 
 
