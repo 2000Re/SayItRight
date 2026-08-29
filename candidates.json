@@ -1,10 +1,10 @@
 [
   {
-    "word": "Knight",
-    "arpabet": "N AY1 T",
+    "word": "Cheque",
+    "arpabet": "CH EH1 K",
     "score": 5,
     "patterns": [
-      "kn-"
+      "-que"
     ]
   }
 ]
