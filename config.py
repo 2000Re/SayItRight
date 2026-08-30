@@ -56,3 +56,9 @@ COMPILATION_OUTPUT_DIR = "compilation_output"
 COMPILATION_VIDEO_WIDTH = 1920
 COMPILATION_VIDEO_HEIGHT = 1080
 COMPILATION_BG_COLOR = (23, 19, 16)  # video_builder.BG_COLORSの一色(#171310)と統一
+# 動画の削除・非公開化・著作権クレーム等で恒久的にダウンロードできない
+# ケースと、一時的なネットワーク不調を区別するためのリトライ回数。
+# ここで諦めた動画はcompilation_state.jsonのskipped_video_idsに記録し、
+# 結合対象から永久に除外する(次回以降ダウンロードを再試行しない)。
+COMPILATION_DOWNLOAD_MAX_RETRIES = 2
+COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS = 5
