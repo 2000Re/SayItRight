@@ -16,11 +16,16 @@ YouTubeに公開済みの動画をyt-dlpでダウンロードして1本の横型
 すでにYouTubeに公開済みの自分の動画をyt-dlpで取得し直す方式にしている
 (追加のストレージや再生成コストが不要なため)。
 
+[Design] 動画が削除・非公開化・著作権クレーム等で恒久的に取得できなく
+なった場合、その1本のせいで結合処理全体が永久に止まってしまわないよう、
+ダウンロードに一定回数失敗した動画は結合対象から除外し
+(compilation_state.pyのskipped_video_idsに記録)、残りの動画で結合を続行する。
+
 認証方式・環境変数はupload_videos.pyと同じ
 (YT_REFRESH_TOKEN / YT_CLIENT_ID / YT_CLIENT_SECRET)。
 """
-import json
 import os
+import time
 import uuid
 
 import google.oauth2.credentials
@@ -30,17 +35,32 @@ import yt_dlp
 from moviepy import VideoFileClip, CompositeVideoClip, ColorClip, concatenate_videoclips
 
 from used_words_store import load_used_words
+from compilation_state import load_compilation_state, save_compilation_state, select_pending, pillarbox_scale
 from config import (
-    COMPILATION_STATE_PATH,
     COMPILATION_BATCH_SIZE,
     COMPILATION_DOWNLOAD_DIR,
     COMPILATION_OUTPUT_DIR,
     COMPILATION_VIDEO_WIDTH,
     COMPILATION_VIDEO_HEIGHT,
     COMPILATION_BG_COLOR,
+    COMPILATION_DOWNLOAD_MAX_RETRIES,
+    COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS,
     DEFAULT_PRIVACY_STATUS,
     YOUTUBE_CATEGORY_ID,
 )
+
+# upload_videos.pyと同じく、実行ログだけでYouTube Data APIの
+# クォータ消費量(概算)を把握できるようにする。
+QUOTA_COST_PER_CALL = {"videos.insert": 100}
+_api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
+
+
+def _log_api_usage_summary():
+    total_units = sum(count * QUOTA_COST_PER_CALL[name] for name, count in _api_call_counts.items())
+    print("=== API使用量(YouTube Data API v3、概算) ===")
+    for name, count in _api_call_counts.items():
+        print(f"  {name}: {count}回 (1回あたり{QUOTA_COST_PER_CALL[name]} units)")
+    print(f"  概算クォータ消費: {total_units} units (日次上限 10,000 units の目安)")
 
 
 def build_youtube_client():
@@ -55,29 +75,6 @@ def build_youtube_client():
     return build("youtube", "v3", credentials=creds)
 
 
-def load_compilation_state() -> int:
-    """これまでに結合済みの件数(compilable historyの先頭から何件を消費したか)を読み込む。
-
-    used_words.json同様、ファイルが無い/空/壊れている場合は0件として扱い、
-    処理自体は止めない。"""
-    if not os.path.exists(COMPILATION_STATE_PATH):
-        return 0
-    with open(COMPILATION_STATE_PATH, encoding="utf-8") as f:
-        content = f.read()
-    if not content.strip():
-        return 0
-    try:
-        return json.loads(content).get("compiled_count", 0)
-    except json.JSONDecodeError as e:
-        print(f"警告: {COMPILATION_STATE_PATH} の読み込みに失敗しました({e})。0件として続行します。")
-        return 0
-
-
-def save_compilation_state(compiled_count: int) -> None:
-    with open(COMPILATION_STATE_PATH, "w", encoding="utf-8") as f:
-        json.dump({"compiled_count": compiled_count}, f, ensure_ascii=False, indent=2)
-
-
 def download_video(video_id: str, output_path: str) -> None:
     """公開済みの自分の動画をyt-dlpでダウンロードする。"""
     ydl_opts = {
@@ -90,13 +87,28 @@ def download_video(video_id: str, output_path: str) -> None:
         ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
 
 
+def download_video_with_retry(video_id: str, output_path: str) -> None:
+    """ダウンロード失敗を数回リトライする(一時的なネットワーク不調対策)。
+
+    それでも失敗する場合は例外を送出する。呼び出し側はこれを
+    「恒久的に取得不可能」とみなし、結合対象から除外する
+    (削除・非公開化・著作権クレーム等はリトライしても解決しないため)。"""
+    last_error = None
+    for attempt in range(1, COMPILATION_DOWNLOAD_MAX_RETRIES + 1):
+        try:
+            download_video(video_id, output_path)
+            return
+        except Exception as e:
+            last_error = e
+            print(f"    ダウンロード{attempt}回目失敗: {e}")
+            time.sleep(COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS)
+    raise last_error
+
+
 def pillarbox(clip):
     """縦長のクリップを、横型キャンバスの中央に配置し、左右を無地で埋める。"""
-    scale = COMPILATION_VIDEO_HEIGHT / clip.h
+    scale = pillarbox_scale(clip.w, clip.h, COMPILATION_VIDEO_WIDTH, COMPILATION_VIDEO_HEIGHT)
     resized = clip.resized(scale)
-    if resized.w > COMPILATION_VIDEO_WIDTH:
-        scale = COMPILATION_VIDEO_WIDTH / clip.w
-        resized = clip.resized(scale)
     bg = ColorClip(
         size=(COMPILATION_VIDEO_WIDTH, COMPILATION_VIDEO_HEIGHT),
         color=COMPILATION_BG_COLOR,
@@ -129,6 +141,7 @@ def build_compilation_metadata(words: list) -> dict:
 def upload_compilation(youtube, video_path: str, metadata: dict) -> str:
     media = MediaFileUpload(video_path, chunksize=-1, resumable=True, mimetype="video/mp4")
     request = youtube.videos().insert(part="snippet,status", body=metadata, media_body=media)
+    _api_call_counts["videos.insert"] += 1
     response = request.execute()
     return response["id"]
 
@@ -139,30 +152,46 @@ def main():
     # エントリは結合動画の元にできないため対象外にする。
     compilable = [h for h in history if h.get("video_id")]
 
-    compiled_count = load_compilation_state()
-    pending = compilable[compiled_count:]
+    state = load_compilation_state()
+    pending = select_pending(compilable, state)
 
-    if len(pending) < COMPILATION_BATCH_SIZE:
-        print(f"結合対象がまだ{len(pending)}件です({COMPILATION_BATCH_SIZE}件たまったら結合します)。今回はスキップします。")
+    if not pending:
+        print("結合対象がありません。")
         return
-
-    batch = pending[:COMPILATION_BATCH_SIZE]
-    print(f"{len(batch)}件の動画を結合します: {[b['word'] for b in batch]}")
 
     os.makedirs(COMPILATION_DOWNLOAD_DIR, exist_ok=True)
     os.makedirs(COMPILATION_OUTPUT_DIR, exist_ok=True)
 
+    batch = []
     downloaded_paths = []
+    newly_skipped_ids = []
     raw_clips = []
     pillarboxed_clips = []
     final_clip = None
+    upload_succeeded = False
 
     try:
-        for entry in batch:
+        for entry in pending:
+            if len(batch) >= COMPILATION_BATCH_SIZE:
+                break
             path = os.path.join(COMPILATION_DOWNLOAD_DIR, f"{entry['video_id']}.mp4")
             print(f"  ダウンロード中: {entry['word']} ({entry['video_id']})")
-            download_video(entry["video_id"], path)
+            try:
+                download_video_with_retry(entry["video_id"], path)
+            except Exception as e:
+                print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
+                      f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗したため、結合対象から除外します"
+                      f"(動画の削除/非公開化/著作権クレーム等の可能性があります: {e})")
+                newly_skipped_ids.append(entry["video_id"])
+                continue
             downloaded_paths.append(path)
+            batch.append(entry)
+
+        if len(batch) < COMPILATION_BATCH_SIZE:
+            print(f"結合対象がまだ{len(batch)}件です({COMPILATION_BATCH_SIZE}件たまったら結合します)。今回はスキップします。")
+            return
+
+        print(f"{len(batch)}件の動画を結合します: {[b['word'] for b in batch]}")
 
         for path in downloaded_paths:
             clip = VideoFileClip(path)
@@ -179,12 +208,19 @@ def main():
         metadata = build_compilation_metadata([b["word"] for b in batch])
         video_id = upload_compilation(youtube, output_path, metadata)
         print(f"[Compilation] アップロード完了: https://youtu.be/{video_id}")
+        _log_api_usage_summary()
 
         # アップロードが成功して初めて結合済みとして記録する
         # (途中で失敗した場合は次回同じバッチで再挑戦できるようにするため)
-        save_compilation_state(compiled_count + COMPILATION_BATCH_SIZE)
+        state["compiled_video_ids"].extend(b["video_id"] for b in batch)
+        upload_succeeded = True
 
     finally:
+        if newly_skipped_ids:
+            state["skipped_video_ids"].extend(newly_skipped_ids)
+        if newly_skipped_ids or upload_succeeded:
+            save_compilation_state(state)
+
         if final_clip:
             try:
                 final_clip.close()
