@@ -59,5 +59,12 @@
       "eigh"
     ],
     "video_id": "7iSjEWJq7Mo"
+  },
+  {
+    "word": "CHEQUE",
+    "patterns": [
+      "-que"
+    ],
+    "video_id": "MeNwKqsZ-Fo"
   }
 ]
