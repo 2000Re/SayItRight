@@ -266,10 +266,17 @@ def _take_word_screenshots(browser, word, ipa, bg_hex):
     main_normal_img = f"temp_main_normal_{unique_id}.png"
     ending_img = f"temp_ending_{unique_id}.png"
 
-    _screenshot_html(browser, _build_intro_html(bg_hex), intro_img)
-    _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐢 slow"), main_slow_img)
-    _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img)
-    _screenshot_html(browser, _build_ending_html(word, ipa, bg_hex), ending_img)
+    # 4枚のうち途中で撮影に失敗した場合、build_word_video側のtry/finally
+    # クリーンアップはこの関数の呼び出し後にしか効かないため、それより前に
+    # 撮影済みの一時PNGが残ってしまう。ここで自前で後始末してから再送出する。
+    try:
+        _screenshot_html(browser, _build_intro_html(bg_hex), intro_img)
+        _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐢 slow"), main_slow_img)
+        _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img)
+        _screenshot_html(browser, _build_ending_html(word, ipa, bg_hex), ending_img)
+    except Exception:
+        _cleanup_temp_files(intro_img, main_slow_img, main_normal_img, ending_img)
+        raise
 
     return intro_img, main_slow_img, main_normal_img, ending_img
 

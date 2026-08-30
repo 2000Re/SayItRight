@@ -70,6 +70,16 @@ def main():
                     )
                 except Exception as e:
                     print(f"[Error] {word} の動画生成に失敗しました: {e}")
+                    # write_videofileはffmpegへ直接書き込むため、エンコード
+                    # 途中(ディスク容量不足・ワークフローのタイムアウト等)で
+                    # 失敗すると不完全なmp4がそのまま残ることがある。
+                    # upload_videos.pyはファイルの存在チェックしかしないため、
+                    # ここで削除しておかないと壊れた動画がアップロードされうる。
+                    if os.path.exists(video_path):
+                        try:
+                            os.remove(video_path)
+                        except OSError as remove_error:
+                            print(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
                     continue
 
                 print(f"サムネイル生成中: {word}")
