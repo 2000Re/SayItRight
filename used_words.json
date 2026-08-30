@@ -1,48 +1,63 @@
 [
   {
     "word": "DEUTSCHE",
-    "patterns": []
+    "patterns": [],
+    "video_id": null
   },
   {
     "word": "BROUGHT",
     "patterns": [
       "ough"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "EIGHT",
     "patterns": [
       "eigh"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "BOUTIQUE",
     "patterns": [
       "-que"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "CAUGHT",
     "patterns": [
       "augh"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "THOUGHTS",
     "patterns": [
       "ough"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "KNIGHT",
     "patterns": [
       "kn-"
-    ]
+    ],
+    "video_id": null
   },
   {
     "word": "THOROUGH",
     "patterns": [
       "ough"
-    ]
+    ],
+    "video_id": null
+  },
+  {
+    "word": "HEIGHT",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "7iSjEWJq7Mo"
   }
 ]
