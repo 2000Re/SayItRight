@@ -1,10 +1,26 @@
 [
   {
-    "word": "Cheque",
-    "arpabet": "CH EH1 K",
-    "score": 5,
+    "word": "Although",
+    "arpabet": "AO2 L DH OW1",
+    "score": 6,
     "patterns": [
-      "-que"
+      "ough"
+    ]
+  },
+  {
+    "word": "Through",
+    "arpabet": "TH R UW1",
+    "score": 6,
+    "patterns": [
+      "ough"
+    ]
+  },
+  {
+    "word": "Borough",
+    "arpabet": "B ER1 OW2",
+    "score": 6,
+    "patterns": [
+      "ough"
     ]
   }
 ]

@@ -66,5 +66,26 @@
       "-que"
     ],
     "video_id": "MeNwKqsZ-Fo"
+  },
+  {
+    "word": "ALTHOUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "9uYJaZk8lME"
+  },
+  {
+    "word": "THROUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "DTd2GtxPb8g"
+  },
+  {
+    "word": "BOROUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "HwUU_o3z05I"
   }
 ]
