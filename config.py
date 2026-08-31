@@ -43,7 +43,12 @@ YOUTUBE_CATEGORY_ID = "27"  # Education
 UPLOAD_MAX_RETRIES = 3
 UPLOAD_RETRY_BACKOFF_SECONDS = 5
 DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
-DICTIONARY_API_TIMEOUT_SECONDS = 10
+# dictionaryapi.devは無料・認証不要のコミュニティ運営APIでSLAが無く、
+# 応答が遅い瞬間がある。PICK_N=3で1回の実行あたりの問い合わせ回数が
+# 増えたことで10秒では読み取りタイムアウトになるケースが目立ってきたため、
+# 20秒に延長した(単語が辞書に無い404は即座に諦めるため、ここを延ばしても
+# 「見つからない」判定が遅くなるわけではない)。
+DICTIONARY_API_TIMEOUT_SECONDS = 20
 DICTIONARY_API_MAX_RETRIES = 3
 DICTIONARY_API_RETRY_BACKOFF_SECONDS = 3
 
