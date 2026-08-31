@@ -98,6 +98,10 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          # yt-dlpがGitHub ActionsのIPをボット判定して弾く問題の緩和策(任意)。
+          # 未設定の場合はcookie無しで動作する(secrets.YT_DLP_COOKIES_TXTが
+          # 未登録でも空文字列として渡されるだけでエラーにはならない)。
+          YT_DLP_COOKIES_TXT: ${{ secrets.YT_DLP_COOKIES_TXT }}
 
       - name: Commit updated candidates and used-words list
         run: |
