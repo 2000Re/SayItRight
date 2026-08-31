@@ -14,6 +14,7 @@
   sample_cmudict.dict の小サンプルで動作確認する。
 """
 
+import random
 import re
 from dataclasses import dataclass, field
 from typing import List
@@ -86,6 +87,36 @@ def load_dict(path: str) -> dict:
             word = re.sub(r"\(\d+\)$", "", word)  # WORD(1) のような異形を除去
             entries[word] = arpabet
     return entries
+
+
+def pick_diverse(pool: List[WordScore], n: int) -> List[WordScore]:
+    """poolからn件選ぶ。同じバッチ(1回の実行でまとめて選ぶ単語群)内で
+    綴りパターンが重複しないよう優先する。
+
+    fetch_and_score.pyのdiverse_poolは「直近の投稿履歴」とのパターン重複を
+    除外するが、同じバッチ内で選ばれる候補同士が偶然同じパターンを共有する
+    ケースまでは防げない(例: THOUGH/THROUGH/BOROUGHが同時に選ばれ、
+    3本とも"ough"パターンになってしまった実例がある)。
+
+    十分な数の多様な候補が無い場合は、残り枠を多少パターンが被っても
+    プールから埋める(選定自体を諦めさせないため)。"""
+    shuffled = pool[:]
+    random.shuffle(shuffled)
+    picked = []
+    used_patterns = set()
+    leftover = []
+    for candidate in shuffled:
+        if len(picked) >= n:
+            leftover.append(candidate)
+            continue
+        if set(candidate.patterns) & used_patterns:
+            leftover.append(candidate)
+            continue
+        picked.append(candidate)
+        used_patterns.update(candidate.patterns)
+    if len(picked) < n:
+        picked.extend(leftover[: n - len(picked)])
+    return picked
 
 
 def top_tricky_words(entries: dict, top_n: int = 20, min_letters: int = 4):

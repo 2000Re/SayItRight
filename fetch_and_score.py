@@ -16,12 +16,11 @@ sheriff-shorts-bot の movie.py 側から、この candidates.json を
 """
 
 import json
-import random
 
 import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
 
-from score_words import score_word
+from score_words import score_word, pick_diverse
 from used_words_store import load_used_words
 from config import (
     CANDIDATES_PATH as OUTPUT_PATH,
@@ -133,7 +132,7 @@ def main():
     else:
         selection_pool = diverse_pool
 
-    picked = random.sample(selection_pool, min(PICK_N, len(selection_pool)))
+    picked = pick_diverse(selection_pool, min(PICK_N, len(selection_pool)))
 
     candidates = [
         {
