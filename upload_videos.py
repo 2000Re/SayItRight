@@ -33,6 +33,7 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
 from arpabet_to_ipa import arpabet_to_ipa
+from dictionary_lookup import parse_definition_response
 from used_words_store import load_used_words, save_used_words
 from config import (
     CANDIDATES_PATH,
@@ -94,7 +95,7 @@ def build_youtube_client():
 
 
 def fetch_definition(word: str) -> dict | None:
-    """無料の辞書API(dictionaryapi.dev)から意味・例文を取得する。
+    """Wiktionary(en.wiktionary.org)の無料APIから意味・例文を取得する。
 
     SEO対策として説明欄に単語の意味を載せるための補助情報で、
     無くても動画の投稿自体は成立させたいため、取得失敗時は
@@ -122,25 +123,14 @@ def fetch_definition(word: str) -> dict | None:
 
         try:
             resp.raise_for_status()
-            entries = resp.json()
+            data = resp.json()
         except (requests.RequestException, ValueError) as e:
             last_error = e
             print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
             time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
             continue
 
-        for entry in entries:
-            for meaning in entry.get("meanings", []):
-                for definition in meaning.get("definitions", []):
-                    text = definition.get("definition")
-                    if not text:
-                        continue
-                    return {
-                        "part_of_speech": meaning.get("partOfSpeech", ""),
-                        "definition": text,
-                        "example": definition.get("example"),
-                    }
-        return None
+        return parse_definition_response(data)
 
     print(f"    [Info] {word} の意味の取得を{DICTIONARY_API_MAX_RETRIES}回試しても"
           f"取得できませんでした({last_error})。スキップします。")

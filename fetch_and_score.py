@@ -21,6 +21,7 @@ import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
 
 from score_words import score_word, pick_diverse
+from dictionary_lookup import has_english_entry
 from used_words_store import load_used_words
 from config import (
     CANDIDATES_PATH as OUTPUT_PATH,
@@ -43,10 +44,12 @@ def recent_patterns(history: list, window: int = RECENT_PATTERN_WINDOW) -> set:
 
 
 def is_known_word(word: str) -> bool:
-    """辞書API(dictionaryapi.dev)にエントリがあるかどうかを確認する。
+    """Wiktionary(en.wiktionary.org)に英語のエントリがあるかどうかを確認する。
 
     "DEUTSCHE"のような、cmudict/頻出単語リストにたまたま含まれているだけの
     英単語ではない語(外来語・固有名詞等)を候補から除外するために使う。
+    Wiktionaryは他言語のエントリのみ存在する語でも200を返すことがあるため、
+    ステータスコードだけでなく"en"キーの中身まで確認する。
     API側の一時的な障害やタイムアウトで確認できない場合は、
     誤って候補を減らしすぎないよう「存在する」扱い(True)にフォールバックする。
     プール(POOL_SIZE件)内でのみ呼び出す想定で、cmudict全体には使わない
@@ -58,7 +61,10 @@ def is_known_word(word: str) -> bool:
         return True
     if resp.status_code == 404:
         return False
-    return True
+    try:
+        return has_english_entry(resp.json())
+    except ValueError:
+        return True
 
 
 def load_common_words() -> set:
