@@ -21,8 +21,14 @@ YouTubeに公開済みの動画をyt-dlpでダウンロードして1本の横型
 ダウンロードに一定回数失敗した動画は結合対象から除外し
 (compilation_state.pyのskipped_video_idsに記録)、残りの動画で結合を続行する。
 
-認証方式・環境変数はupload_videos.pyと同じ
+YouTube Data API(アップロード用)の認証方式・環境変数はupload_videos.pyと同じ
 (YT_REFRESH_TOKEN / YT_CLIENT_ID / YT_CLIENT_SECRET)。
+
+yt-dlpでのダウンロードには別途、環境変数 YT_DLP_COOKIES_TXT(任意)で
+Netscape形式のcookies.txtの中身を渡せる。GitHub ActionsのようなデータセンターのIP
+からのアクセスはYouTube側にボット判定され「Sign in to confirm you're not a bot」で
+弾かれることがあり、ログイン済みアカウントのcookieを渡すことで回避しやすくなる
+(未設定でも従来通りandroidクライアント優先の緩和策のみで動作する)。
 """
 import os
 import time
@@ -81,7 +87,29 @@ def build_youtube_client():
     return build("youtube", "v3", credentials=creds)
 
 
-def download_video(video_id: str, output_path: str) -> None:
+def write_cookies_file() -> str | None:
+    """環境変数 YT_DLP_COOKIES_TXT(ログイン済みブラウザからエクスポートした
+    Netscape形式のcookies.txtの中身)が設定されていれば、一時ファイルに
+    書き出してそのパスを返す。設定されていなければNoneを返す
+    (cookie無しでも従来通りandroidクライアント優先で動作する)。
+
+    [Design] GitHub ActionsのようなデータセンターのIPからのアクセスは、
+    YouTube側に「Sign in to confirm you're not a bot」でボット判定され
+    弾かれることがある(実際に本番で複数回発生した)。player_clientの
+    変更だけでは回避しきれない場合があり、yt-dlp公式もこの種のエラーに
+    対してcookie認証を推奨している。ログイン済みの実アカウントのcookieを
+    渡すことで、ボット判定を受けにくくする狙い。"""
+    content = os.environ.get("YT_DLP_COOKIES_TXT")
+    if not content:
+        return None
+    os.makedirs(COMPILATION_DOWNLOAD_DIR, exist_ok=True)
+    path = os.path.join(COMPILATION_DOWNLOAD_DIR, "cookies.txt")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    return path
+
+
+def download_video(video_id: str, output_path: str, cookies_path: str | None = None) -> None:
     """公開済みの自分の動画をyt-dlpでダウンロードする。"""
     ydl_opts = {
         "outtmpl": output_path,
@@ -96,11 +124,13 @@ def download_video(video_id: str, output_path: str) -> None:
         # (万能の解決策ではなく、YouTube側の仕様変更で効かなくなる可能性がある)
         "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
     }
+    if cookies_path:
+        ydl_opts["cookiefile"] = cookies_path
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
 
 
-def download_video_with_retry(video_id: str, output_path: str) -> None:
+def download_video_with_retry(video_id: str, output_path: str, cookies_path: str | None = None) -> None:
     """ダウンロード失敗を数回リトライする(一時的なネットワーク不調対策)。
 
     それでも失敗する場合は例外を送出する。呼び出し側は is_permanently_unavailable()
@@ -110,7 +140,7 @@ def download_video_with_retry(video_id: str, output_path: str) -> None:
     last_error = None
     for attempt in range(1, COMPILATION_DOWNLOAD_MAX_RETRIES + 1):
         try:
-            download_video(video_id, output_path)
+            download_video(video_id, output_path, cookies_path)
             return
         except Exception as e:
             last_error = e
@@ -175,6 +205,7 @@ def main():
 
     os.makedirs(COMPILATION_DOWNLOAD_DIR, exist_ok=True)
     os.makedirs(COMPILATION_OUTPUT_DIR, exist_ok=True)
+    cookies_path = write_cookies_file()
 
     batch = []
     downloaded_paths = []
@@ -191,7 +222,7 @@ def main():
             path = os.path.join(COMPILATION_DOWNLOAD_DIR, f"{entry['video_id']}.mp4")
             print(f"  ダウンロード中: {entry['word']} ({entry['video_id']})")
             try:
-                download_video_with_retry(entry["video_id"], path)
+                download_video_with_retry(entry["video_id"], path, cookies_path)
             except Exception as e:
                 if is_permanently_unavailable(e):
                     print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
@@ -267,6 +298,13 @@ def main():
                     os.remove(path)
             except Exception as e:
                 print(f"[Warning] Failed to remove temp file {path}: {e}")
+        # cookieはログイン済みアカウントの認証情報のため、実行後は残さない
+        if cookies_path:
+            try:
+                if os.path.exists(cookies_path):
+                    os.remove(cookies_path)
+            except Exception as e:
+                print(f"[Warning] Failed to remove cookies file {cookies_path}: {e}")
 
 
 if __name__ == "__main__":
