@@ -35,7 +35,13 @@ import yt_dlp
 from moviepy import VideoFileClip, CompositeVideoClip, ColorClip, concatenate_videoclips
 
 from used_words_store import load_used_words
-from compilation_state import load_compilation_state, save_compilation_state, select_pending, pillarbox_scale
+from compilation_state import (
+    load_compilation_state,
+    save_compilation_state,
+    select_pending,
+    pillarbox_scale,
+    is_permanently_unavailable,
+)
 from config import (
     COMPILATION_BATCH_SIZE,
     COMPILATION_DOWNLOAD_DIR,
@@ -82,6 +88,13 @@ def download_video(video_id: str, output_path: str) -> None:
         "format": "best[ext=mp4]/best",
         "quiet": True,
         "no_warnings": True,
+        # GitHub ActionsのようなデータセンターのIPからのアクセスは、
+        # YouTube側に「Sign in to confirm you're not a bot」でボット判定
+        # され弾かれることがある。web以外のクライアント(android)はこの
+        # チェックを要求されにくいことが知られているため、cookie等の
+        # 追加設定なしに試せる緩和策としてandroidクライアントを優先する。
+        # (万能の解決策ではなく、YouTube側の仕様変更で効かなくなる可能性がある)
+        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
@@ -90,9 +103,10 @@ def download_video(video_id: str, output_path: str) -> None:
 def download_video_with_retry(video_id: str, output_path: str) -> None:
     """ダウンロード失敗を数回リトライする(一時的なネットワーク不調対策)。
 
-    それでも失敗する場合は例外を送出する。呼び出し側はこれを
-    「恒久的に取得不可能」とみなし、結合対象から除外する
-    (削除・非公開化・著作権クレーム等はリトライしても解決しないため)。"""
+    それでも失敗する場合は例外を送出する。呼び出し側は is_permanently_unavailable()
+    で「恒久的に取得不可能」と判断できた場合のみ結合対象から除外する。それ以外の
+    エラー(ボット判定・レート制限等)は実行環境側の一時的な問題の可能性が高いため、
+    ここで諦めても skipped_video_ids には入れず、次回同じ動画から再試行する。"""
     last_error = None
     for attempt in range(1, COMPILATION_DOWNLOAD_MAX_RETRIES + 1):
         try:
@@ -179,11 +193,22 @@ def main():
             try:
                 download_video_with_retry(entry["video_id"], path)
             except Exception as e:
+                if is_permanently_unavailable(e):
+                    print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
+                          f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗したため、結合対象から除外します"
+                          f"(動画の削除/非公開化/著作権クレーム等の可能性があります: {e})")
+                    newly_skipped_ids.append(entry["video_id"])
+                    continue
+                # ボット判定・レート制限・ネットワーク不調等、動画自体では
+                # なく実行環境側の一時的な問題である可能性が高いエラー。
+                # ここで結合対象から除外してしまうと、実際には取得可能な
+                # 動画が二度と結合対象にならなくなるため、除外せずに今回の
+                # 結合処理自体を中断する(次回同じ動画から再試行する)。
                 print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
-                      f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗したため、結合対象から除外します"
-                      f"(動画の削除/非公開化/著作権クレーム等の可能性があります: {e})")
-                newly_skipped_ids.append(entry["video_id"])
-                continue
+                      f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗しました。動画自体ではなく"
+                      f"実行環境側の一時的な問題の可能性があるため、結合対象から除外せず"
+                      f"今回の結合処理を中断します(次回同じ動画から再試行します): {e}")
+                raise
             downloaded_paths.append(path)
             batch.append(entry)
 

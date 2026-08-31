@@ -80,3 +80,32 @@ def test_pillarbox_scale_falls_back_to_width_when_height_based_scale_overflows()
     scale = compilation_state.pillarbox_scale(2000, 100, 1920, 1080)
     assert scale == 1920 / 2000
     assert 2000 * scale <= 1920
+
+
+def test_is_permanently_unavailable_detects_known_permanent_reasons():
+    assert compilation_state.is_permanently_unavailable(Exception("Video unavailable"))
+    assert compilation_state.is_permanently_unavailable(Exception("This video is private"))
+    assert compilation_state.is_permanently_unavailable(
+        Exception("This video has been removed by the uploader")
+    )
+    assert compilation_state.is_permanently_unavailable(
+        Exception("This video contains content from X, who has blocked it on copyright grounds")
+    )
+
+
+def test_is_permanently_unavailable_treats_bot_check_as_transient():
+    # 実際に本番で発生した回帰: GitHub ActionsのIPがYouTubeにボット判定
+    # されるエラーは動画自体の恒久的な問題ではないため、
+    # skipped_video_idsに入れてはいけない(誤って5本が入る事故があった)。
+    error = Exception(
+        "ERROR: [youtube] abcdefghijk: Sign in to confirm you’re not a bot. "
+        "Use --cookies-from-browser or --cookies for the authentication."
+    )
+    assert not compilation_state.is_permanently_unavailable(error)
+
+
+def test_is_permanently_unavailable_treats_unknown_errors_as_transient():
+    assert not compilation_state.is_permanently_unavailable(Exception("Read timed out"))
+    assert not compilation_state.is_permanently_unavailable(
+        Exception("HTTP Error 429: Too Many Requests")
+    )
