@@ -1,24 +1,24 @@
 [
   {
-    "word": "Although",
-    "arpabet": "AO2 L DH OW1",
+    "word": "Daughter",
+    "arpabet": "D AO1 T ER0",
     "score": 6,
     "patterns": [
-      "ough"
+      "augh"
     ]
   },
   {
-    "word": "Through",
-    "arpabet": "TH R UW1",
-    "score": 6,
+    "word": "Knitting",
+    "arpabet": "N IH1 T IH0 NG",
+    "score": 5,
     "patterns": [
-      "ough"
+      "kn-"
     ]
   },
   {
-    "word": "Borough",
-    "arpabet": "B ER1 OW2",
-    "score": 6,
+    "word": "Ought",
+    "arpabet": "AO1 T",
+    "score": 5,
     "patterns": [
       "ough"
     ]

@@ -87,5 +87,26 @@
       "ough"
     ],
     "video_id": "HwUU_o3z05I"
+  },
+  {
+    "word": "DAUGHTER",
+    "patterns": [
+      "augh"
+    ],
+    "video_id": "hGpy1xzq7Ms"
+  },
+  {
+    "word": "KNITTING",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "Q7ldOf03px4"
+  },
+  {
+    "word": "OUGHT",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "ahfBxgXTnno"
   }
 ]
