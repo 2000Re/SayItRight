@@ -26,7 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     # TTS/動画生成/アップロードのどこかで詰まった場合に、ジョブが
     # デフォルトの上限(最大6時間)まで張り付き続けるのを防ぐ安全弁。
-    timeout-minutes: 30
+    # PICK_N=3(1回の実行で3本処理)になったため、以前(PICK_N=1)の
+    # 30分では正常系でもタイムアウトしかねず、余裕を持って60分にしている。
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -19,9 +19,11 @@ COMMON_WORDS_URL = (
     "master/google-10000-english-usa-no-swears-medium.txt"
 )
 POOL_SIZE = 15       # スコア上位からこの件数をプール
-PICK_N = 1           # 今回の動画用に実際に選ぶ件数
+PICK_N = 3           # 今回の動画用に実際に選ぶ件数(1回の実行で3本アップロード)
 MIN_LETTERS = 4      # これより短い単語は除外
-RECENT_PATTERN_WINDOW = 5  # 直近何件の投稿と綴りパターンの重複を避けるか
+# 直近何件の投稿と綴りパターンの重複を避けるか。PICK_N=3で1回の実行あたり
+# 3件消費するため、以前(PICK_N=1)と同じ日数分をカバーするよう3倍にしている。
+RECENT_PATTERN_WINDOW = 15
 
 # --- generate_audio.py: TTS ---
 VOICE_NAME = "en-US-Neural2-D"  # 明瞭で聞き取りやすい男性ボイス(好みで変更可)
