@@ -278,10 +278,16 @@ def main():
         # (途中で失敗した単語を使用済み扱いにすると、動画が公開されないまま
         #  二度と候補に上がらなくなってしまうため)
         # patterns も一緒に記録し、次回の fetch_and_score.py が直近と
-        # 綴りパターンが被る単語を避けられるようにする。video_id は
-        # compile_shorts.py が結合動画作成時に公開済み動画をダウンロード
-        # するために使う。
-        history.append({"word": word.upper(), "patterns": c.get("patterns", []), "video_id": video_id})
+        # 綴りパターンが被る単語を避けられるようにする。run_id は
+        # compile_shorts.py が結合動画作成時に、この回の video-output
+        # アーティファクト(GitHub Actions)から動画本体を取得するために使う
+        # (GITHUB_RUN_ID はGitHub Actionsが各実行に自動設定する環境変数)。
+        history.append({
+            "word": word.upper(),
+            "patterns": c.get("patterns", []),
+            "video_id": video_id,
+            "run_id": os.environ.get("GITHUB_RUN_ID"),
+        })
         save_used_words(history)
 
         try:

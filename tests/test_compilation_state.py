@@ -1,4 +1,8 @@
+import io
 import json
+import zipfile
+
+import pytest
 
 import compilation_state
 
@@ -82,30 +86,40 @@ def test_pillarbox_scale_falls_back_to_width_when_height_based_scale_overflows()
     assert 2000 * scale <= 1920
 
 
-def test_is_permanently_unavailable_detects_known_permanent_reasons():
-    assert compilation_state.is_permanently_unavailable(Exception("Video unavailable"))
-    assert compilation_state.is_permanently_unavailable(Exception("This video is private"))
-    assert compilation_state.is_permanently_unavailable(
-        Exception("This video has been removed by the uploader")
-    )
-    assert compilation_state.is_permanently_unavailable(
-        Exception("This video contains content from X, who has blocked it on copyright grounds")
-    )
+def test_find_artifact_matches_by_name():
+    artifacts = [
+        {"name": "candidates", "id": 1},
+        {"name": "video-output", "id": 2},
+        {"name": "audio-output", "id": 3},
+    ]
+    assert compilation_state.find_artifact(artifacts, "video-output") == {"name": "video-output", "id": 2}
 
 
-def test_is_permanently_unavailable_treats_bot_check_as_transient():
-    # 実際に本番で発生した回帰: GitHub ActionsのIPがYouTubeにボット判定
-    # されるエラーは動画自体の恒久的な問題ではないため、
-    # skipped_video_idsに入れてはいけない(誤って5本が入る事故があった)。
-    error = Exception(
-        "ERROR: [youtube] abcdefghijk: Sign in to confirm you’re not a bot. "
-        "Use --cookies-from-browser or --cookies for the authentication."
-    )
-    assert not compilation_state.is_permanently_unavailable(error)
+def test_find_artifact_returns_none_when_missing():
+    artifacts = [{"name": "candidates", "id": 1}]
+    assert compilation_state.find_artifact(artifacts, "video-output") is None
 
 
-def test_is_permanently_unavailable_treats_unknown_errors_as_transient():
-    assert not compilation_state.is_permanently_unavailable(Exception("Read timed out"))
-    assert not compilation_state.is_permanently_unavailable(
-        Exception("HTTP Error 429: Too Many Requests")
-    )
+def test_find_artifact_handles_empty_list():
+    assert compilation_state.find_artifact([], "video-output") is None
+
+
+def test_extract_zip_member_reads_matching_file():
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("although.mp4", b"fake video bytes")
+        zf.writestr("through.mp4", b"other video bytes")
+    zip_bytes = buf.getvalue()
+
+    assert compilation_state.extract_zip_member(zip_bytes, "although.mp4") == b"fake video bytes"
+    assert compilation_state.extract_zip_member(zip_bytes, "through.mp4") == b"other video bytes"
+
+
+def test_extract_zip_member_raises_key_error_when_missing():
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("although.mp4", b"fake video bytes")
+    zip_bytes = buf.getvalue()
+
+    with pytest.raises(KeyError):
+        compilation_state.extract_zip_member(zip_bytes, "missing.mp4")

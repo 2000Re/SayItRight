@@ -69,9 +69,20 @@ COMPILATION_OUTPUT_DIR = "compilation_output"
 COMPILATION_VIDEO_WIDTH = 1920
 COMPILATION_VIDEO_HEIGHT = 1080
 COMPILATION_BG_COLOR = (23, 19, 16)  # video_builder.BG_COLORSの一色(#171310)と統一
-# 動画の削除・非公開化・著作権クレーム等で恒久的にダウンロードできない
-# ケースと、一時的なネットワーク不調を区別するためのリトライ回数。
-# ここで諦めた動画はcompilation_state.jsonのskipped_video_idsに記録し、
-# 結合対象から永久に除外する(次回以降ダウンロードを再試行しない)。
+# GitHub ActionsのIPがYouTube側にボット判定される問題(player_client変更・
+# cookie認証のいずれでも解決しなかった)を根本的に回避するため、動画本体は
+# YouTubeからyt-dlpで再ダウンロードせず、create_videos.pyが生成した時点で
+# GitHub Actionsアーティファクト(video-output)として保存済みのものを
+# GitHub Actions APIから取得する方式にした。
+#
+# アーティファクトの取得先(該当runのID)が見つからない/保持期限切れ等の
+# 「恒久的に取得不可能」なケースと、一時的なネットワーク不調を区別するための
+# リトライ回数。前者はcompilation_state.jsonのskipped_video_idsに記録し、
+# 結合対象から永久に除外する(次回以降取得を再試行しない)。
 COMPILATION_DOWNLOAD_MAX_RETRIES = 2
 COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS = 5
+COMPILATION_GITHUB_API_TIMEOUT_SECONDS = 20
+# GitHub Actionsアーティファクトのデフォルト保持期間は90日(組織/リポジトリの
+# 設定で変更されていなければ)。COMPILATION_BATCH_SIZE(10件)たまるまでの
+# 実運用上の日数は十分この範囲に収まる想定。
+COMPILATION_ARTIFACT_NAME = "video-output"

@@ -3,8 +3,7 @@ compile_shorts.py
 
 used_words.json に記録された「使用済み(=アップロード成功済み)」の動画のうち、
 まだ結合動画に使っていないものが COMPILATION_BATCH_SIZE 件たまったら、
-YouTubeに公開済みの動画をyt-dlpでダウンロードして1本の横型(16:9)動画に
-結合し、「通常動画」として再アップロードする。
+1本の横型(16:9)動画に結合し、「通常動画」として再アップロードする。
 
 [Design] Shorts(縦型9:16、3分以内)を単純に何本か連結しても、合計尺が
 3分以内のままだと縦型ゆえにYouTubeにShorts判定されてしまう
@@ -12,32 +11,38 @@ YouTubeに公開済みの動画をyt-dlpでダウンロードして1本の横型
 そのため結合時に各クリップを横型(16:9)キャンバスにピラーボックス
 (左右に無地の帯)で配置し直し、確実に「通常動画」として扱われるようにする。
 
-動画ファイル自体はGitHub Actionsの実行間で永続化していないため、
-すでにYouTubeに公開済みの自分の動画をyt-dlpで取得し直す方式にしている
-(追加のストレージや再生成コストが不要なため)。
+[Design] 動画本体の取得元について: 当初はYouTubeに公開済みの動画をyt-dlpで
+再ダウンロードする方式だったが、GitHub ActionsのIPがYouTube側に
+「Sign in to confirm you're not a bot」でボット判定される問題が
+player_client変更・cookie認証のいずれでも解決しなかった(cookieを渡しても
+なお拒否された)。YouTube側の対ボット対策は年々強化されており、
+データセンターのIPからは根本的に不利な戦いのため、YouTube/yt-dlpに一切
+依存しない方式に変更した: create_videos.pyが生成した動画は既に
+fetch_candidates.ymlの「Upload video files as artifact」ステップで
+GitHub Actionsアーティファクト(video-output)として保存されているため、
+これをGitHub Actions APIから取得する。取得元のrunは、upload_videos.pyが
+used_words.jsonへ記録する各エントリのrun_id(GITHUB_RUN_ID)で特定する。
 
-[Design] 動画が削除・非公開化・著作権クレーム等で恒久的に取得できなく
-なった場合、その1本のせいで結合処理全体が永久に止まってしまわないよう、
-ダウンロードに一定回数失敗した動画は結合対象から除外し
+[Design] アーティファクトの保持期限切れ・該当runが見つからない等の
+「恒久的に取得不可能」なケースで、その1本のせいで結合処理全体が永久に
+止まってしまわないよう、該当エントリは結合対象から除外し
 (compilation_state.pyのskipped_video_idsに記録)、残りの動画で結合を続行する。
+run_idが記録されていない旧いエントリ(この方式導入前にアップロードされた
+もの)は、そもそもどのrunのアーティファクトか特定できないため結合対象外にする。
 
-YouTube Data API(アップロード用)の認証方式・環境変数はupload_videos.pyと同じ
-(YT_REFRESH_TOKEN / YT_CLIENT_ID / YT_CLIENT_SECRET)。
-
-yt-dlpでのダウンロードには別途、環境変数 YT_DLP_COOKIES_TXT(任意)で
-Netscape形式のcookies.txtの中身を渡せる。GitHub ActionsのようなデータセンターのIP
-からのアクセスはYouTube側にボット判定され「Sign in to confirm you're not a bot」で
-弾かれることがあり、ログイン済みアカウントのcookieを渡すことで回避しやすくなる
-(未設定でも従来通りandroidクライアント優先の緩和策のみで動作する)。
+YouTube Data API(結合動画のアップロード用)の認証方式・環境変数は
+upload_videos.pyと同じ(YT_REFRESH_TOKEN / YT_CLIENT_ID / YT_CLIENT_SECRET)。
+GitHub Actions APIの認証には環境変数 GITHUB_TOKEN(ワークフロー側で
+secrets.GITHUB_TOKEN を渡す。追加のシークレット登録は不要)を使う。
 """
 import os
 import time
 import uuid
 
 import google.oauth2.credentials
+import requests
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
-import yt_dlp
 from moviepy import VideoFileClip, CompositeVideoClip, ColorClip, concatenate_videoclips
 
 from used_words_store import load_used_words
@@ -46,7 +51,8 @@ from compilation_state import (
     save_compilation_state,
     select_pending,
     pillarbox_scale,
-    is_permanently_unavailable,
+    find_artifact,
+    extract_zip_member,
 )
 from config import (
     COMPILATION_BATCH_SIZE,
@@ -57,9 +63,20 @@ from config import (
     COMPILATION_BG_COLOR,
     COMPILATION_DOWNLOAD_MAX_RETRIES,
     COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS,
+    COMPILATION_GITHUB_API_TIMEOUT_SECONDS,
+    COMPILATION_ARTIFACT_NAME,
     DEFAULT_PRIVACY_STATUS,
     YOUTUBE_CATEGORY_ID,
 )
+
+GITHUB_API_BASE = "https://api.github.com"
+
+
+class ArtifactUnavailableError(Exception):
+    """該当エントリの動画アーティファクトが恒久的に取得できない
+    (該当runが見つからない/保持期限切れ/アーティファクト内に対象の
+    ファイルが無い、等)。リトライしても解決しないため、呼び出し側は
+    このエントリを結合対象から除外してよい。"""
 
 # upload_videos.pyと同じく、実行ログだけでYouTube Data APIの
 # クォータ消費量(概算)を把握できるようにする。
@@ -87,64 +104,83 @@ def build_youtube_client():
     return build("youtube", "v3", credentials=creds)
 
 
-def write_cookies_file() -> str | None:
-    """環境変数 YT_DLP_COOKIES_TXT(ログイン済みブラウザからエクスポートした
-    Netscape形式のcookies.txtの中身)が設定されていれば、一時ファイルに
-    書き出してそのパスを返す。設定されていなければNoneを返す
-    (cookie無しでも従来通りandroidクライアント優先で動作する)。
-
-    [Design] GitHub ActionsのようなデータセンターのIPからのアクセスは、
-    YouTube側に「Sign in to confirm you're not a bot」でボット判定され
-    弾かれることがある(実際に本番で複数回発生した)。player_clientの
-    変更だけでは回避しきれない場合があり、yt-dlp公式もこの種のエラーに
-    対してcookie認証を推奨している。ログイン済みの実アカウントのcookieを
-    渡すことで、ボット判定を受けにくくする狙い。"""
-    content = os.environ.get("YT_DLP_COOKIES_TXT")
-    if not content:
-        return None
-    os.makedirs(COMPILATION_DOWNLOAD_DIR, exist_ok=True)
-    path = os.path.join(COMPILATION_DOWNLOAD_DIR, "cookies.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content)
-    return path
-
-
-def download_video(video_id: str, output_path: str, cookies_path: str | None = None) -> None:
-    """公開済みの自分の動画をyt-dlpでダウンロードする。"""
-    ydl_opts = {
-        "outtmpl": output_path,
-        "format": "best[ext=mp4]/best",
-        "quiet": True,
-        "no_warnings": True,
-        # GitHub ActionsのようなデータセンターのIPからのアクセスは、
-        # YouTube側に「Sign in to confirm you're not a bot」でボット判定
-        # され弾かれることがある。web以外のクライアント(android)はこの
-        # チェックを要求されにくいことが知られているため、cookie等の
-        # 追加設定なしに試せる緩和策としてandroidクライアントを優先する。
-        # (万能の解決策ではなく、YouTube側の仕様変更で効かなくなる可能性がある)
-        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+def _github_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
     }
-    if cookies_path:
-        ydl_opts["cookiefile"] = cookies_path
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
 
 
-def download_video_with_retry(video_id: str, output_path: str, cookies_path: str | None = None) -> None:
-    """ダウンロード失敗を数回リトライする(一時的なネットワーク不調対策)。
+def download_video(entry: dict, output_path: str) -> None:
+    """entryが記録しているGitHub Actions run_idから、その回の
+    video-outputアーティファクトを取得し、対象の単語のmp4を取り出す。
 
-    それでも失敗する場合は例外を送出する。呼び出し側は is_permanently_unavailable()
-    で「恒久的に取得不可能」と判断できた場合のみ結合対象から除外する。それ以外の
-    エラー(ボット判定・レート制限等)は実行環境側の一時的な問題の可能性が高いため、
-    ここで諦めても skipped_video_ids には入れず、次回同じ動画から再試行する。"""
+    run_id未記録・該当runが見つからない・アーティファクトの保持期限切れ・
+    アーティファクト内に対象ファイルが無い、のいずれもArtifactUnavailableError
+    (恒久的に取得不可能)を送出する。それ以外(ネットワークエラー・GitHub API側の
+    5xx等)は通常のExceptionとして送出し、一時的な問題として上位でリトライ対象にする。"""
+    run_id = entry.get("run_id")
+    if not run_id:
+        raise ArtifactUnavailableError(
+            f"{entry['word']}: run_idが記録されていないため取得できません"
+            "(この方式の導入前にアップロードされたエントリの可能性があります)"
+        )
+
+    repo = os.environ["GITHUB_REPOSITORY"]
+    headers = _github_headers()
+
+    resp = requests.get(
+        f"{GITHUB_API_BASE}/repos/{repo}/actions/runs/{run_id}/artifacts",
+        headers=headers,
+        timeout=COMPILATION_GITHUB_API_TIMEOUT_SECONDS,
+    )
+    if resp.status_code == 404:
+        raise ArtifactUnavailableError(f"run {run_id} が見つかりません(削除された可能性があります)")
+    resp.raise_for_status()
+
+    artifact = find_artifact(resp.json().get("artifacts", []), COMPILATION_ARTIFACT_NAME)
+    if artifact is None:
+        raise ArtifactUnavailableError(f"run {run_id} に{COMPILATION_ARTIFACT_NAME}アーティファクトが見つかりません")
+    if artifact.get("expired"):
+        raise ArtifactUnavailableError(f"run {run_id} の{COMPILATION_ARTIFACT_NAME}アーティファクトは保持期限切れです")
+
+    zip_resp = requests.get(
+        artifact["archive_download_url"],
+        headers=headers,
+        timeout=COMPILATION_GITHUB_API_TIMEOUT_SECONDS,
+    )
+    zip_resp.raise_for_status()
+
+    member_name = f"{entry['word'].lower()}.mp4"
+    try:
+        content = extract_zip_member(zip_resp.content, member_name)
+    except KeyError:
+        raise ArtifactUnavailableError(
+            f"{COMPILATION_ARTIFACT_NAME}アーティファクト内に{member_name}が見つかりません"
+        )
+
+    with open(output_path, "wb") as f:
+        f.write(content)
+
+
+def download_video_with_retry(entry: dict, output_path: str) -> None:
+    """取得失敗を数回リトライする(一時的なネットワーク不調対策)。
+
+    ArtifactUnavailableError(恒久的に取得不可能)は即座に再送出し、リトライしない
+    (リトライしても結果が変わらないため)。それ以外のエラーは
+    COMPILATION_DOWNLOAD_MAX_RETRIES回までリトライし、それでも失敗する場合は
+    例外を送出する。呼び出し側は例外の型で恒久的/一時的を判別する。"""
     last_error = None
     for attempt in range(1, COMPILATION_DOWNLOAD_MAX_RETRIES + 1):
         try:
-            download_video(video_id, output_path, cookies_path)
+            download_video(entry, output_path)
             return
+        except ArtifactUnavailableError:
+            raise
         except Exception as e:
             last_error = e
-            print(f"    ダウンロード{attempt}回目失敗: {e}")
+            print(f"    取得{attempt}回目失敗: {e}")
             time.sleep(COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS)
     raise last_error
 
@@ -192,9 +228,10 @@ def upload_compilation(youtube, video_path: str, metadata: dict) -> str:
 
 def main():
     history = load_used_words()
-    # video_id が無い(旧形式のまま/アップロード時にvideo_id記録前の)
-    # エントリは結合動画の元にできないため対象外にする。
-    compilable = [h for h in history if h.get("video_id")]
+    # video_id/run_idが無い(旧形式のまま、またはこの方式導入前に
+    # アップロードされた)エントリは、どのrunのアーティファクトか
+    # 特定できないため結合対象外にする。
+    compilable = [h for h in history if h.get("video_id") and h.get("run_id")]
 
     state = load_compilation_state()
     pending = select_pending(compilable, state)
@@ -205,7 +242,6 @@ def main():
 
     os.makedirs(COMPILATION_DOWNLOAD_DIR, exist_ok=True)
     os.makedirs(COMPILATION_OUTPUT_DIR, exist_ok=True)
-    cookies_path = write_cookies_file()
 
     batch = []
     downloaded_paths = []
@@ -220,25 +256,24 @@ def main():
             if len(batch) >= COMPILATION_BATCH_SIZE:
                 break
             path = os.path.join(COMPILATION_DOWNLOAD_DIR, f"{entry['video_id']}.mp4")
-            print(f"  ダウンロード中: {entry['word']} ({entry['video_id']})")
+            print(f"  取得中: {entry['word']} ({entry['video_id']}, run {entry['run_id']})")
             try:
-                download_video_with_retry(entry["video_id"], path, cookies_path)
+                download_video_with_retry(entry, path)
+            except ArtifactUnavailableError as e:
+                print(f"::warning::{entry['word']} ({entry['video_id']}) のアーティファクトが"
+                      f"恒久的に取得できないため、結合対象から除外します: {e}")
+                newly_skipped_ids.append(entry["video_id"])
+                continue
             except Exception as e:
-                if is_permanently_unavailable(e):
-                    print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
-                          f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗したため、結合対象から除外します"
-                          f"(動画の削除/非公開化/著作権クレーム等の可能性があります: {e})")
-                    newly_skipped_ids.append(entry["video_id"])
-                    continue
-                # ボット判定・レート制限・ネットワーク不調等、動画自体では
-                # なく実行環境側の一時的な問題である可能性が高いエラー。
-                # ここで結合対象から除外してしまうと、実際には取得可能な
-                # 動画が二度と結合対象にならなくなるため、除外せずに今回の
-                # 結合処理自体を中断する(次回同じ動画から再試行する)。
-                print(f"::warning::{entry['word']} ({entry['video_id']}) のダウンロードに"
-                      f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗しました。動画自体ではなく"
-                      f"実行環境側の一時的な問題の可能性があるため、結合対象から除外せず"
-                      f"今回の結合処理を中断します(次回同じ動画から再試行します): {e}")
+                # ネットワークエラー・GitHub API側の5xx等、恒久的とは判断
+                # できない一時的な問題である可能性が高い。ここで結合対象から
+                # 除外してしまうと、実際には取得可能な動画が二度と結合対象に
+                # ならなくなるため、除外せずに今回の結合処理自体を中断する
+                # (次回同じ動画から再試行する)。
+                print(f"::warning::{entry['word']} ({entry['video_id']}) の取得に"
+                      f"{COMPILATION_DOWNLOAD_MAX_RETRIES}回失敗しました。恒久的な問題とは"
+                      f"判断できないため、結合対象から除外せず今回の結合処理を中断します"
+                      f"(次回同じ動画から再試行します): {e}")
                 raise
             downloaded_paths.append(path)
             batch.append(entry)
@@ -298,13 +333,6 @@ def main():
                     os.remove(path)
             except Exception as e:
                 print(f"[Warning] Failed to remove temp file {path}: {e}")
-        # cookieはログイン済みアカウントの認証情報のため、実行後は残さない
-        if cookies_path:
-            try:
-                if os.path.exists(cookies_path):
-                    os.remove(cookies_path)
-            except Exception as e:
-                print(f"[Warning] Failed to remove cookies file {cookies_path}: {e}")
 
 
 if __name__ == "__main__":

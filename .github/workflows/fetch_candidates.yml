@@ -11,6 +11,9 @@ on:
 
 permissions:
   contents: write
+  # compile_shorts.pyがGitHub Actions APIで過去のvideo-outputアーティファクト
+  # を取得するために必要(YouTubeへのyt-dlp再ダウンロードをやめたため)。
+  actions: read
 
 # 手動実行と cron-job.org からの自動実行が重なった場合に、同じ単語が
 # 二重にアップロードされたり、used_words.json/candidates.json への
@@ -81,6 +84,16 @@ jobs:
       - name: Generate videos
         run: python create_videos.py
 
+      # compile_shorts.pyが後で(この回も含めて)GitHub Actions API経由で
+      # 動画本体を取得し直せるよう、YouTubeへのアップロードより前に
+      # アーティファクトとして保存しておく必要がある(video_output/の中身は
+      # この時点以降変化しないため、ここでアップロードして問題ない)。
+      - name: Upload video files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-output
+          path: video_output/
+
       - name: Upload to YouTube
         run: python upload_videos.py
         env:
@@ -88,8 +101,12 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
 
-      # used_words.jsonにvideo_idが10件たまるごとに、公開済みのShortsを
-      # yt-dlpで取得し直して横型(16:9)の結合動画としてアップロードする。
+      # used_words.jsonにvideo_id/run_idが10件たまるごとに、各動画が生成
+      # された回のvideo-outputアーティファクト(GitHub Actions API経由)から
+      # 動画本体を取得し直し、横型(16:9)の結合動画としてアップロードする。
+      # (以前はYouTubeからyt-dlpで再ダウンロードしていたが、GitHub Actionsの
+      # IPがボット判定される問題が解決できなかったため、YouTube/yt-dlpに
+      # 依存しないこの方式に変更した)
       # 本編パイプラインとは独立した追加機能なので、失敗しても後続の
       # コミット処理はブロックしない(compile_shorts.py側で例外を吸収する)。
       - name: Compile Shorts into a regular video (every 10 videos)
@@ -98,10 +115,7 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
-          # yt-dlpがGitHub ActionsのIPをボット判定して弾く問題の緩和策(任意)。
-          # 未設定の場合はcookie無しで動作する(secrets.YT_DLP_COOKIES_TXTが
-          # 未登録でも空文字列として渡されるだけでエラーにはならない)。
-          YT_DLP_COOKIES_TXT: ${{ secrets.YT_DLP_COOKIES_TXT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit updated candidates and used-words list
         run: |
@@ -139,12 +153,6 @@ jobs:
         with:
           name: audio-output
           path: audio_output/
-
-      - name: Upload video files as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: video-output
-          path: video_output/
 
       - name: Upload thumbnail files as artifact
         uses: actions/upload-artifact@v4

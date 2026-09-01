@@ -13,9 +13,13 @@ from config import USED_WORDS_PATH
 def load_used_words() -> list:
     """使用済み単語履歴を古い→新しい順で読み込む。
 
-    各要素は {"word": str, "patterns": list[str], "video_id": str | None}。
+    各要素は
+    {"word": str, "patterns": list[str], "video_id": str | None, "run_id": str | None}。
     (patterns は score_words.matched_patterns が返す綴りパターン名、
-     video_id はYouTubeへのアップロード成功時に記録される動画ID)
+     video_id はYouTubeへのアップロード成功時に記録される動画ID、
+     run_id はその動画を生成したGitHub Actionsの実行ID。compile_shorts.pyが
+     video-outputアーティファクトからYouTube経由を介さずに動画本体を
+     取得し直すために使う)
 
     used_words.json 内の「使用済み」の記録は upload_videos.py が
     YouTubeへのアップロードに成功した時点で初めて行う。
@@ -44,12 +48,13 @@ def load_used_words() -> list:
     history = []
     for entry in raw:
         if isinstance(entry, str):
-            history.append({"word": entry, "patterns": [], "video_id": None})
+            history.append({"word": entry, "patterns": [], "video_id": None, "run_id": None})
         else:
             history.append({
                 "word": entry["word"],
                 "patterns": entry.get("patterns", []),
                 "video_id": entry.get("video_id"),
+                "run_id": entry.get("run_id"),
             })
     return history
 
