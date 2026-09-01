@@ -1,26 +1,10 @@
 [
   {
-    "word": "Neighbor",
-    "arpabet": "N EY1 B ER0",
-    "score": 6,
-    "patterns": [
-      "eigh"
-    ]
-  },
-  {
-    "word": "Laughing",
-    "arpabet": "L AE1 F IH0 NG",
+    "word": "Wrapped",
+    "arpabet": "R AE1 P T",
     "score": 5,
     "patterns": [
-      "augh"
-    ]
-  },
-  {
-    "word": "Fought",
-    "arpabet": "F AO1 T",
-    "score": 5,
-    "patterns": [
-      "ough"
+      "wr-"
     ]
   }
 ]
