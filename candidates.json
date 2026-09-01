@@ -1,10 +1,26 @@
 [
   {
-    "word": "Wrapped",
-    "arpabet": "R AE1 P T",
+    "word": "Fighting",
+    "arpabet": "F AY1 T IH0 NG",
     "score": 5,
     "patterns": [
-      "wr-"
+      "igh"
+    ]
+  },
+  {
+    "word": "League",
+    "arpabet": "L IY1 G",
+    "score": 5,
+    "patterns": [
+      "gu[ae]"
+    ]
+  },
+  {
+    "word": "Higher",
+    "arpabet": "HH AY1 ER0",
+    "score": 5,
+    "patterns": [
+      "igh"
     ]
   }
 ]

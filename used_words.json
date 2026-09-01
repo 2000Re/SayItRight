@@ -156,5 +156,29 @@
     ],
     "video_id": "pcHC23Pdhyc",
     "run_id": "33556687321"
+  },
+  {
+    "word": "FIGHTING",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "e5NreQ42VzA",
+    "run_id": "33560741404"
+  },
+  {
+    "word": "LEAGUE",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "S85d5etzkLo",
+    "run_id": "33560741404"
+  },
+  {
+    "word": "HIGHER",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "RFkjo8MtUmc",
+    "run_id": "33560741404"
   }
 ]
