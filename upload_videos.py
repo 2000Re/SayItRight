@@ -131,7 +131,12 @@ def fetch_definition(word: str) -> dict | None:
             time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
             continue
 
-        return parse_definition_response(data)
+        lookup = parse_definition_response(data)
+        if lookup:
+            print(f"    [Info] {word} の意味を取得しました: {lookup['definition']}")
+        else:
+            print(f"    [Info] {word} の英語の定義が見つかりませんでした。")
+        return lookup
 
     print(f"    [Info] {word} の意味の取得を{DICTIONARY_API_MAX_RETRIES}回試しても"
           f"取得できませんでした({last_error})。スキップします。")
