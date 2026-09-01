@@ -51,6 +51,12 @@ DICTIONARY_API_URL = "https://en.wiktionary.org/api/rest_v1/page/definition/{wor
 DICTIONARY_API_TIMEOUT_SECONDS = 20
 DICTIONARY_API_MAX_RETRIES = 3
 DICTIONARY_API_RETRY_BACKOFF_SECONDS = 3
+# WikimediaのAPI利用ポリシー(https://meta.wikimedia.org/wiki/User-Agent_policy)
+# は、クライアントを識別できるUser-Agentヘッダーの送信を必須としており、
+# 無い場合(Pythonのrequestsのデフォルト値等)は403 Forbiddenで拒否される。
+DICTIONARY_API_HEADERS = {
+    "User-Agent": "SayItRight/1.0 (https://github.com/2000Re/SayItRight)"
+}
 
 # --- compile_shorts.py: Shorts結合動画 ---
 # Shorts(縦型9:16、3分以内)は本数を連結しても合計尺が短いままだと
