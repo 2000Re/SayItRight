@@ -47,6 +47,7 @@ from config import (
     DICTIONARY_API_TIMEOUT_SECONDS,
     DICTIONARY_API_MAX_RETRIES,
     DICTIONARY_API_RETRY_BACKOFF_SECONDS,
+    DICTIONARY_API_HEADERS,
 )
 
 # 初回運用時は "unlisted" にして、実際の見え方を確認してから
@@ -110,7 +111,7 @@ def fetch_definition(word: str) -> dict | None:
 
     for attempt in range(1, DICTIONARY_API_MAX_RETRIES + 1):
         try:
-            resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
+            resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS, headers=DICTIONARY_API_HEADERS)
         except requests.RequestException as e:
             last_error = e
             print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")

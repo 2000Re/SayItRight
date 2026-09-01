@@ -32,6 +32,7 @@ from config import (
     RECENT_PATTERN_WINDOW,
     DICTIONARY_API_URL,
     DICTIONARY_API_TIMEOUT_SECONDS,
+    DICTIONARY_API_HEADERS,
 )
 
 
@@ -56,7 +57,7 @@ def is_known_word(word: str) -> bool:
     (全語彙に対して呼ぶとAPI呼び出し数が多くなりすぎるため)。"""
     url = DICTIONARY_API_URL.format(word=word.lower())
     try:
-        resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS)
+        resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS, headers=DICTIONARY_API_HEADERS)
     except requests.RequestException:
         return True
     if resp.status_code == 404:
