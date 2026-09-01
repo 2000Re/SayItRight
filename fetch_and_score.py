@@ -22,6 +22,7 @@ import requests
 
 from score_words import score_word, pick_diverse
 from dictionary_lookup import has_english_entry
+from content_safety import is_blocked
 from used_words_store import load_used_words
 from config import (
     CANDIDATES_PATH as OUTPUT_PATH,
@@ -95,6 +96,11 @@ def main():
         if word in used_words_set:
             continue
         if not word.isalpha() or len(word) < MIN_LETTERS:
+            continue
+        # 差別的スラーは常用語リストの取得成否に関わらず必ず除外する
+        # (常用語リストの取得失敗時はフィルタなしで続行する設計のため、
+        #  それとは独立した安全策が必要。詳細はcontent_safety.py参照)。
+        if is_blocked(word):
             continue
         # 常用語リストが取得できた場合のみ、そのリストで絞り込む
         # (固有名詞・専門用語・レアな姓名などをここで除外する)
