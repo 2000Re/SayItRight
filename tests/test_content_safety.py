@@ -17,3 +17,10 @@ def test_is_blocked_returns_false_for_ordinary_words():
     assert not is_blocked("KNIGHT")
     assert not is_blocked("THOUGH")
     assert not is_blocked("PRONOUNCE")
+
+
+def test_is_blocked_detects_general_profanity():
+    assert is_blocked("FUCK")
+    assert is_blocked("fuck")
+    assert is_blocked("Shit")
+    assert is_blocked("BITCH")
