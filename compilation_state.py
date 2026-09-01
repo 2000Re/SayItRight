@@ -3,12 +3,14 @@ compilation_state.py
 
 compile_shorts.py の結合状態(結合済み・恒久的に取得不可能な動画)を管理する。
 
-yt-dlp/moviepy/google-api-python-client 等の重い依存を持たないため、
+moviepy/google-api-python-client 等の重い依存を持たないため、
 requirements-dev.txt だけの軽量なテスト環境からもインポートしてテストできる
 (used_words_store.py と同じ狙いでcompile_shorts.pyから切り出している)。
 """
+import io
 import json
 import os
+import zipfile
 
 from config import COMPILATION_STATE_PATH
 
@@ -57,33 +59,18 @@ def select_pending(compilable: list, state: dict) -> list:
     return [h for h in compilable if h["video_id"] not in exclude]
 
 
-# 「恒久的に取得不可能(=リトライしても再結合対象にしても意味がない)」と
-# 判断できる既知のエラーメッセージ。動画の削除・非公開化・著作権クレーム等、
-# YouTube側がその動画自体を理由に拒否している場合のみ該当する。
-#
-# [重要] ここに含まれない全てのエラー(「Sign in to confirm you're not a
-# bot」のようなボット判定、レート制限、ネットワーク不調等)は、動画自体では
-# なく実行環境側に起因する一時的な問題である可能性が高いとみなし、恒久
-# スキップの対象にしない(=skipped_video_idsに入れない)。誤って恒久
-# スキップに分類すると、実際には取得可能な動画が二度と結合対象にならなく
-# なってしまうため、判定は「恒久的とわかっているものだけを拾う」ホワイト
-# リスト方式にしている(実際にこの取り違えで問題のない動画5本が誤って
-# skipped_video_idsに入る事故が過去に起きている)。
-_PERMANENTLY_UNAVAILABLE_MARKERS = (
-    "video unavailable",
-    "video is unavailable",
-    "video has been removed",
-    "private video",
-    "this video is private",
-    "account associated with this video has been terminated",
-    "copyright",
-    "no longer available",
-)
+def find_artifact(artifacts: list, name: str) -> dict | None:
+    """GitHub Actions APIが返すアーティファクト一覧から、名前が一致する
+    ものを探す(見つからなければNone)。"""
+    return next((a for a in artifacts if a.get("name") == name), None)
 
 
-def is_permanently_unavailable(error: Exception) -> bool:
-    message = str(error).lower()
-    return any(marker in message for marker in _PERMANENTLY_UNAVAILABLE_MARKERS)
+def extract_zip_member(zip_bytes: bytes, member_name: str) -> bytes:
+    """GitHub Actionsアーティファクト(zip)のバイト列から、指定した
+    ファイル1件の中身を取り出す。見つからない場合はKeyErrorを送出する
+    (zipfile.ZipFile.readの標準動作)。"""
+    with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+        return zf.read(member_name)
 
 
 def pillarbox_scale(clip_width: int, clip_height: int, canvas_width: int, canvas_height: int) -> float:
