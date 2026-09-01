@@ -108,5 +108,26 @@
       "ough"
     ],
     "video_id": "ahfBxgXTnno"
+  },
+  {
+    "word": "NEIGHBOR",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "MfTGZxefJA0"
+  },
+  {
+    "word": "LAUGHING",
+    "patterns": [
+      "augh"
+    ],
+    "video_id": "kiwKe3uBBQU"
+  },
+  {
+    "word": "FOUGHT",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "3gfs2PkmEO8"
   }
 ]

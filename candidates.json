@@ -1,23 +1,23 @@
 [
   {
-    "word": "Daughter",
-    "arpabet": "D AO1 T ER0",
+    "word": "Neighbor",
+    "arpabet": "N EY1 B ER0",
     "score": 6,
+    "patterns": [
+      "eigh"
+    ]
+  },
+  {
+    "word": "Laughing",
+    "arpabet": "L AE1 F IH0 NG",
+    "score": 5,
     "patterns": [
       "augh"
     ]
   },
   {
-    "word": "Knitting",
-    "arpabet": "N IH1 T IH0 NG",
-    "score": 5,
-    "patterns": [
-      "kn-"
-    ]
-  },
-  {
-    "word": "Ought",
-    "arpabet": "AO1 T",
+    "word": "Fought",
+    "arpabet": "F AO1 T",
     "score": 5,
     "patterns": [
       "ough"
