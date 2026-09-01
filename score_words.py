@@ -35,6 +35,17 @@ TRICKY_PATTERNS = [
     ("-que", r"que$"),     # queue, unique
     ("sc[iey]", r"sc[iey]"),  # scissors, science
     ("dg", r"dg"),         # judge (soft g pattern)
+    ("igh", r"(?<!e)igh"),  # night, light, right, sight, bright, flight
+                            # ("eigh"と重複させないため、eの直後のighは除外)
+    ("-alk", r"alk$"),     # walk, talk, chalk, stalk
+    ("-alm", r"alm$"),     # calm, palm, psalm, balm
+    ("-alf", r"alf$"),     # half, calf, behalf
+    ("wh-", r"^wh"),       # who, whole, what, when
+    ("ph", r"ph"),         # phone, photo, elephant, phrase
+    ("mn$", r"mn$"),       # autumn, column, solemn, hymn
+    ("stle$", r"stle$"),   # castle, whistle, hustle, bristle
+    ("sten$", r"sten$"),   # listen, fasten, hasten, moisten, glisten
+    ("gu[ae]", r"gu[ae]"),  # guess, guitar, guard, guide
 ]
 
 VOWELS = set("AEIOU")
