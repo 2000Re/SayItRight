@@ -180,7 +180,7 @@ def main():
                     out_f.write(padded_audio)
                 print(f"  -> {out_path} ({duration:.2f}秒、前後{PAD_MS/1000:.0f}秒無音付き)")
         except Exception as e:
-            print(f"[Error] {word} の音声生成に失敗しました: {e}")
+            print(f"::error::{word} の音声生成に失敗しました: {e}")
             continue
 
     print(f"全{len(candidates)}語の音声生成が完了しました。")

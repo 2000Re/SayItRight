@@ -69,7 +69,7 @@ def main():
                         browser=browser,
                     )
                 except Exception as e:
-                    print(f"[Error] {word} の動画生成に失敗しました: {e}")
+                    print(f"::error::{word} の動画生成に失敗しました: {e}")
                     # write_videofileはffmpegへ直接書き込むため、エンコード
                     # 途中(ディスク容量不足・ワークフローのタイムアウト等)で
                     # 失敗すると不完全なmp4がそのまま残ることがある。
@@ -86,7 +86,7 @@ def main():
                 try:
                     generate_thumbnail(word, thumbnail_path, browser=browser)
                 except Exception as e:
-                    print(f"[Error] {word} のサムネイル生成に失敗しました: {e}")
+                    print(f"::error::{word} のサムネイル生成に失敗しました: {e}")
         finally:
             browser.close()
 

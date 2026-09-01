@@ -271,7 +271,7 @@ def main():
             video_id = upload_video(youtube, video_path, metadata)
             print(f"  -> https://youtu.be/{video_id}")
         except Exception as e:
-            print(f"[Error] {word} のアップロードに失敗しました: {e}")
+            print(f"::error::{word} のアップロードに失敗しました: {e}")
             continue
 
         # アップロードが成功して初めて「使用済み」として記録する。
