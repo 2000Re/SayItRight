@@ -8,6 +8,18 @@ def test_matched_patterns_detects_silent_letter_patterns():
     assert "ough" in matched_patterns("though")
 
 
+def test_matched_patterns_igh_excludes_eigh_overlap():
+    # "igh"は本番で実際に起きた回帰(プールがeigh/kn-/wr-/ough/augh系の
+    # 少数パターンに偏り、直近ウィンドウで使い切られて候補が1件まで
+    # 枯渇した)を受けて追加したパターン。既存の"eigh"と二重にマッチして
+    # eigh系の単語のスコアをさらに底上げしてしまわないよう、
+    # eの直後のighは除外する。
+    assert "igh" in matched_patterns("knight")
+    assert "igh" in matched_patterns("light")
+    assert "igh" not in matched_patterns("weight")
+    assert "igh" not in matched_patterns("freight")
+
+
 def test_matched_patterns_returns_empty_for_plain_word():
     assert matched_patterns("cat") == []
 
