@@ -1,26 +1,27 @@
 [
   {
-    "word": "Freight",
-    "arpabet": "F R EY1 T",
+    "word": "Wright",
+    "arpabet": "R AY1 T",
+    "score": 7,
+    "patterns": [
+      "wr-",
+      "igh"
+    ]
+  },
+  {
+    "word": "Heights",
+    "arpabet": "HH AY1 T S",
     "score": 5,
     "patterns": [
       "eigh"
     ]
   },
   {
-    "word": "Sapphire",
-    "arpabet": "S AE1 F AY0 ER0",
+    "word": "Sought",
+    "arpabet": "S AO1 T",
     "score": 5,
     "patterns": [
-      "ph"
-    ]
-  },
-  {
-    "word": "Knowing",
-    "arpabet": "N OW1 IH0 NG",
-    "score": 5,
-    "patterns": [
-      "kn-"
+      "ough"
     ]
   }
 ]

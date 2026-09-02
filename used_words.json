@@ -228,5 +228,30 @@
     ],
     "video_id": "cPuThNE5iv0",
     "run_id": "33643570386"
+  },
+  {
+    "word": "WRIGHT",
+    "patterns": [
+      "wr-",
+      "igh"
+    ],
+    "video_id": "UaefHJMo4Hk",
+    "run_id": "33680681898"
+  },
+  {
+    "word": "HEIGHTS",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "RWLOmvgxF20",
+    "run_id": "33680681898"
+  },
+  {
+    "word": "SOUGHT",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "71kDJ2olB4g",
+    "run_id": "33680681898"
   }
 ]
