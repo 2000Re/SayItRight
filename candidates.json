@@ -1,26 +1,26 @@
 [
   {
-    "word": "Bought",
-    "arpabet": "B AA1 T",
+    "word": "Freight",
+    "arpabet": "F R EY1 T",
     "score": 5,
     "patterns": [
-      "ough"
+      "eigh"
     ]
   },
   {
-    "word": "Highway",
-    "arpabet": "HH AY1 W EY2",
+    "word": "Sapphire",
+    "arpabet": "S AE1 F AY0 ER0",
     "score": 5,
     "patterns": [
-      "igh"
+      "ph"
     ]
   },
   {
-    "word": "Naughty",
-    "arpabet": "N AO1 T IY0",
+    "word": "Knowing",
+    "arpabet": "N OW1 IH0 NG",
     "score": 5,
     "patterns": [
-      "augh"
+      "kn-"
     ]
   }
 ]

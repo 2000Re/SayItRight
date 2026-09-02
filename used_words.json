@@ -204,5 +204,29 @@
     ],
     "video_id": "IAPF14oV6C4",
     "run_id": "33609966291"
+  },
+  {
+    "word": "FREIGHT",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "Kfzg7GUc0C8",
+    "run_id": "33643570386"
+  },
+  {
+    "word": "SAPPHIRE",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "BKn7XWgXGRY",
+    "run_id": "33643570386"
+  },
+  {
+    "word": "KNOWING",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "cPuThNE5iv0",
+    "run_id": "33643570386"
   }
 ]
