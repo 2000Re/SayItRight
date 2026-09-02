@@ -180,5 +180,29 @@
     ],
     "video_id": "RFkjo8MtUmc",
     "run_id": "33560741404"
+  },
+  {
+    "word": "BOUGHT",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "0fgQlhiH2dE",
+    "run_id": "33609966291"
+  },
+  {
+    "word": "HIGHWAY",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "qHVyoQ5qt6U",
+    "run_id": "33609966291"
+  },
+  {
+    "word": "NAUGHTY",
+    "patterns": [
+      "augh"
+    ],
+    "video_id": "IAPF14oV6C4",
+    "run_id": "33609966291"
   }
 ]

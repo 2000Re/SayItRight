@@ -1,26 +1,26 @@
 [
   {
-    "word": "Fighting",
-    "arpabet": "F AY1 T IH0 NG",
+    "word": "Bought",
+    "arpabet": "B AA1 T",
+    "score": 5,
+    "patterns": [
+      "ough"
+    ]
+  },
+  {
+    "word": "Highway",
+    "arpabet": "HH AY1 W EY2",
     "score": 5,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "League",
-    "arpabet": "L IY1 G",
+    "word": "Naughty",
+    "arpabet": "N AO1 T IY0",
     "score": 5,
     "patterns": [
-      "gu[ae]"
-    ]
-  },
-  {
-    "word": "Higher",
-    "arpabet": "HH AY1 ER0",
-    "score": 5,
-    "patterns": [
-      "igh"
+      "augh"
     ]
   }
 ]
