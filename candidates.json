@@ -1,26 +1,26 @@
 [
   {
-    "word": "Taught",
-    "arpabet": "T AO1 T",
-    "score": 5,
-    "patterns": [
-      "augh"
-    ]
-  },
-  {
-    "word": "Antique",
-    "arpabet": "AE0 N T IY1 K",
+    "word": "Bridge",
+    "arpabet": "B R IH1 JH",
     "score": 4,
     "patterns": [
-      "-que"
+      "dg"
     ]
   },
   {
-    "word": "Whether",
-    "arpabet": "W EH1 DH ER0",
+    "word": "Wrapping",
+    "arpabet": "R AE1 P IH0 NG",
     "score": 5,
     "patterns": [
-      "wh-"
+      "wr-"
+    ]
+  },
+  {
+    "word": "Shepherd",
+    "arpabet": "SH EH1 P ER0 D",
+    "score": 5,
+    "patterns": [
+      "ph"
     ]
   }
 ]

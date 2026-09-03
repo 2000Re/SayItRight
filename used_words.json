@@ -310,5 +310,29 @@
     ],
     "video_id": "r3P7Nr8CLts",
     "run_id": "33735249016"
+  },
+  {
+    "word": "BRIDGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "k95f8-gc--0",
+    "run_id": "33756550714"
+  },
+  {
+    "word": "WRAPPING",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "446H9r606DY",
+    "run_id": "33756550714"
+  },
+  {
+    "word": "SHEPHERD",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "pEL7yPjucic",
+    "run_id": "33756550714"
   }
 ]
