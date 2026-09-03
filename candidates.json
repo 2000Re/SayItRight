@@ -1,27 +1,26 @@
 [
   {
-    "word": "Knights",
-    "arpabet": "N AY1 T S",
-    "score": 7,
+    "word": "Taught",
+    "arpabet": "T AO1 T",
+    "score": 5,
     "patterns": [
-      "kn-",
-      "igh"
+      "augh"
     ]
   },
   {
-    "word": "Thought",
-    "arpabet": "TH AO1 T",
-    "score": 6,
+    "word": "Antique",
+    "arpabet": "AE0 N T IY1 K",
+    "score": 4,
     "patterns": [
-      "ough"
+      "-que"
     ]
   },
   {
-    "word": "Though",
-    "arpabet": "DH OW1",
-    "score": 6,
+    "word": "Whether",
+    "arpabet": "W EH1 DH ER0",
+    "score": 5,
     "patterns": [
-      "ough"
+      "wh-"
     ]
   }
 ]

@@ -286,5 +286,29 @@
     ],
     "video_id": "F0MkPl5Bzk0",
     "run_id": "33734620176"
+  },
+  {
+    "word": "TAUGHT",
+    "patterns": [
+      "augh"
+    ],
+    "video_id": "GvjygFsXZ2c",
+    "run_id": "33735249016"
+  },
+  {
+    "word": "ANTIQUE",
+    "patterns": [
+      "-que"
+    ],
+    "video_id": "tb2smf6Ihh8",
+    "run_id": "33735249016"
+  },
+  {
+    "word": "WHETHER",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "r3P7Nr8CLts",
+    "run_id": "33735249016"
   }
 ]
