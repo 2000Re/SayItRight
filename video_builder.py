@@ -8,9 +8,8 @@ video_builder.py
 主要な導線にする設計だった(縦型+短尺だとYouTubeがShorts判定し、
 Shortsフィード上ではカスタムサムネイルが表示されなくなるため)。
 横型「通常動画」では十分な再生数が得られなかったため、Shortsの
-フィード経由での露出を優先し、縦型に変更した。カスタムサムネイルは
-Shortsのスワイプ画面には出ないが、検索結果や埋め込み等では
-引き続き使われるため、サムネイル生成自体は維持している。
+フィード経由での露出を優先し、縦型に変更した。サムネイル生成は
+その後、Shorts本編には使われない機能として削除した。
 
 sheriff-shorts-bot(everysheriff/video_generator.py)の以下の資産を流用:
   - Playwrightでのスクリーンショット撮影パターン(ブラウザは1回だけ起動)
@@ -32,18 +31,10 @@ from config import AUDIO_PAD_MS
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-# サムネイルサイズ(YouTube推奨: 1280x720, 16:9)
-THUMBNAIL_WIDTH = 1280
-THUMBNAIL_HEIGHT = 720
-
 # 背景色バリエーション(sheriff-shorts-botと同系統の落ち着いた配色)
 BG_COLORS = [
     "#171310", "#221C18", "#1C211B", "#2B1E18", "#181C24",
 ]
-
-# サムネイル配色: 黄色地に黒文字(高視認性の定番配色)
-THUMBNAIL_BG_COLOR = "#FFD400"
-THUMBNAIL_TEXT_COLOR = "#111111"
 
 FONT_STACK = '"DejaVu Sans", "Liberation Sans", "Segoe UI", Roboto, sans-serif'
 
@@ -199,66 +190,6 @@ def _build_ending_html(word, ipa, bg_hex):
     )
 
 
-# ------------------------------------------------------------------
-# サムネイル(黄色地に黒文字。単語のみをどんと表示)
-# ------------------------------------------------------------------
-def _build_thumbnail_html(word):
-    safe_word = _html_escape(word)
-    # 単語の長さに応じてフォントサイズを自動調整(長い単語がはみ出さないように)
-    length = len(word)
-    if length <= 6:
-        font_size = 220
-    elif length <= 10:
-        font_size = 170
-    elif length <= 14:
-        font_size = 130
-    else:
-        font_size = 100
-
-    return (
-        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
-        "<style>"
-        f"body {{margin:0; padding:0; width:{THUMBNAIL_WIDTH}px; height:{THUMBNAIL_HEIGHT}px; "
-        f"background-color:{THUMBNAIL_BG_COLOR}; color:{THUMBNAIL_TEXT_COLOR}; "
-        "display:flex; justify-content:center; align-items:center; "
-        f"box-sizing:border-box; font-family:{FONT_STACK};}}"
-        f".word {{font-size:{font_size}px; font-weight:900; text-align:center; "
-        "word-break:break-word; padding:0 60px; letter-spacing:-0.01em;}}"
-        "</style></head><body>"
-        f"<div class='word'>{safe_word}</div>"
-        "</body></html>"
-    )
-
-
-def generate_thumbnail(word, output_path, browser=None):
-    """
-    単語をどんと表示するだけのサムネイル(1280x720、黄色地に黒文字)を生成する。
-
-    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
-    (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
-    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
-    このタブ専用のブラウザセッションを起動して完結させる。
-    """
-    html_content = _build_thumbnail_html(word)
-
-    if browser is not None:
-        _screenshot_html(browser, html_content, output_path,
-                          width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
-    else:
-        from playwright.sync_api import sync_playwright
-
-        with sync_playwright() as p:
-            owned_browser = p.chromium.launch(headless=True)
-            try:
-                _screenshot_html(owned_browser, html_content, output_path,
-                                  width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
-            finally:
-                owned_browser.close()
-
-    print(f"[Thumbnail] 生成しました: {output_path}")
-    return output_path
-
-
 def _take_word_screenshots(browser, word, ipa, bg_hex):
     unique_id = uuid.uuid4().hex
     intro_img = f"temp_intro_{unique_id}.png"
@@ -290,8 +221,9 @@ def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filen
     subclippedで取り除いてから動画に配置する。
 
     browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
-    (generate_thumbnail と同様、バッチ処理時の起動コスト削減のため)。
-    渡さなければ従来通り、この関数専用のブラウザセッションを起動する。
+    (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
+    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
+    この関数専用のブラウザセッションを起動する。
     """
     bg_hex = random.choice(BG_COLORS)
 

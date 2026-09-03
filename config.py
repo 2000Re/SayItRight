@@ -11,7 +11,6 @@ CANDIDATES_PATH = "candidates.json"
 USED_WORDS_PATH = "used_words.json"
 AUDIO_DIR = "audio_output"
 VIDEO_DIR = "video_output"
-THUMBNAIL_DIR = "thumbnail_output"
 
 # --- fetch_and_score.py: 単語選定 ---
 COMMON_WORDS_URL = (
