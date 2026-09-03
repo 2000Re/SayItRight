@@ -334,5 +334,29 @@
     ],
     "video_id": "pEL7yPjucic",
     "run_id": "33756550714"
+  },
+  {
+    "word": "WEIGHTED",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "lDxRBli9Kd4",
+    "run_id": "33803888450"
+  },
+  {
+    "word": "AUTUMN",
+    "patterns": [
+      "mn$"
+    ],
+    "video_id": "4idJWxBIDSg",
+    "run_id": "33803888450"
+  },
+  {
+    "word": "WEIGHT",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "MyBow_KJKsg",
+    "run_id": "33803888450"
   }
 ]

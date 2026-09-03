@@ -1,26 +1,26 @@
 [
   {
-    "word": "Bridge",
-    "arpabet": "B R IH1 JH",
+    "word": "Weighted",
+    "arpabet": "W EY1 T IH0 D",
+    "score": 5,
+    "patterns": [
+      "eigh"
+    ]
+  },
+  {
+    "word": "Autumn",
+    "arpabet": "AO1 T AH0 M",
     "score": 4,
     "patterns": [
-      "dg"
+      "mn$"
     ]
   },
   {
-    "word": "Wrapping",
-    "arpabet": "R AE1 P IH0 NG",
+    "word": "Weight",
+    "arpabet": "W EY1 T",
     "score": 5,
     "patterns": [
-      "wr-"
-    ]
-  },
-  {
-    "word": "Shepherd",
-    "arpabet": "SH EH1 P ER0 D",
-    "score": 5,
-    "patterns": [
-      "ph"
+      "eigh"
     ]
   }
 ]
