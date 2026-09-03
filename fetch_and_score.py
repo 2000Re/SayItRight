@@ -138,10 +138,20 @@ def main():
     # 内容のマンネリ化(似た系統の単語が連続する)を避けるため。
     avoid = recent_patterns(history)
     diverse_pool = [p for p in pool if not (set(p.patterns) & avoid)] if avoid else pool
-    if avoid and not diverse_pool:
+
+    # 被らない候補だけではPICK_N件に満たない場合、パターンが被る候補で
+    # 不足分を補う(スコア上位から)。ここで打ち切ってPICK_N未満のまま
+    # 投稿するより、多少パターンが被っても本数を確保する方を優先する。
+    # (実例: 直近ウィンドウが上位パターンを使い切っており、被らない候補が
+    #  1件しかプールに無かったため3件中1件しか選ばれなかったことがある)
+    target = min(PICK_N, len(pool))
+    if avoid and len(diverse_pool) < target:
+        fallback = [p for p in pool if p not in diverse_pool]
+        shortfall = target - len(diverse_pool)
         print(f"直近{RECENT_PATTERN_WINDOW}件のパターン{sorted(avoid)}と被らない候補が"
-              f"プール内になかったため、プール全体から選びます。")
-        selection_pool = pool
+              f"{len(diverse_pool)}件しかプール内になかったため、"
+              f"残り{shortfall}件はパターンが被る候補で補います。")
+        selection_pool = diverse_pool + fallback[:shortfall]
     else:
         selection_pool = diverse_pool
 
