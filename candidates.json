@@ -1,27 +1,10 @@
 [
   {
-    "word": "Wright",
-    "arpabet": "R AY1 T",
-    "score": 7,
-    "patterns": [
-      "wr-",
-      "igh"
-    ]
-  },
-  {
-    "word": "Heights",
-    "arpabet": "HH AY1 T S",
+    "word": "Tongue",
+    "arpabet": "T AH1 NG",
     "score": 5,
     "patterns": [
-      "eigh"
-    ]
-  },
-  {
-    "word": "Sought",
-    "arpabet": "S AO1 T",
-    "score": 5,
-    "patterns": [
-      "ough"
+      "gu[ae]"
     ]
   }
 ]
