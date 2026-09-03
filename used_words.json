@@ -261,5 +261,30 @@
     ],
     "video_id": "uhDQpcTvzKU",
     "run_id": "33708508534"
+  },
+  {
+    "word": "KNIGHTS",
+    "patterns": [
+      "kn-",
+      "igh"
+    ],
+    "video_id": "uHmh5k5rb4s",
+    "run_id": "33734620176"
+  },
+  {
+    "word": "THOUGHT",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "fX5Q3ON-GLM",
+    "run_id": "33734620176"
+  },
+  {
+    "word": "THOUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "F0MkPl5Bzk0",
+    "run_id": "33734620176"
   }
 ]

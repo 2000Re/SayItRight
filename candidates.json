@@ -1,10 +1,27 @@
 [
   {
-    "word": "Tongue",
-    "arpabet": "T AH1 NG",
-    "score": 5,
+    "word": "Knights",
+    "arpabet": "N AY1 T S",
+    "score": 7,
     "patterns": [
-      "gu[ae]"
+      "kn-",
+      "igh"
+    ]
+  },
+  {
+    "word": "Thought",
+    "arpabet": "TH AO1 T",
+    "score": 6,
+    "patterns": [
+      "ough"
+    ]
+  },
+  {
+    "word": "Though",
+    "arpabet": "DH OW1",
+    "score": 6,
+    "patterns": [
+      "ough"
     ]
   }
 ]
