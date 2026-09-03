@@ -3,8 +3,7 @@ create_videos.py
 
 candidates.json の各単語について、
   audio_output/{word}_slow.mp3 / {word}_normal.mp3
-を使って動画(mp4, 9:16縦型、Shorts用)とサムネイル(jpg)を生成し、
-video_output/ / thumbnail_output/ に出力する。
+を使って動画(mp4, 9:16縦型、Shorts用)を生成し、video_output/ に出力する。
 
 前提:
   - generate_audio.py が事前に実行済みで、audio_output/ に音声があること
@@ -17,18 +16,16 @@ import os
 from playwright.sync_api import sync_playwright
 
 from arpabet_to_ipa import arpabet_to_ipa
-from video_builder import build_word_video, generate_thumbnail
+from video_builder import build_word_video
 from config import (
     CANDIDATES_PATH,
     AUDIO_DIR,
     VIDEO_DIR as VIDEO_OUTPUT_DIR,
-    THUMBNAIL_DIR as THUMBNAIL_OUTPUT_DIR,
 )
 
 
 def main():
     os.makedirs(VIDEO_OUTPUT_DIR, exist_ok=True)
-    os.makedirs(THUMBNAIL_OUTPUT_DIR, exist_ok=True)
 
     with open(CANDIDATES_PATH, encoding="utf-8") as f:
         candidates = json.load(f)
@@ -37,8 +34,8 @@ def main():
         print("candidates.json が空です。動画生成をスキップします。")
         return
 
-    # 単語ごとにPlaywrightブラウザを起動し直すと(動画4カット+サムネイルで
-    # 単語あたり2回起動)無駄が大きいため、バッチ全体で1つのブラウザを使い回す。
+    # 単語ごとにPlaywrightブラウザを起動し直すと無駄が大きいため、
+    # バッチ全体で1つのブラウザを使い回す。
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         try:
@@ -56,7 +53,6 @@ def main():
                     continue
 
                 video_path = os.path.join(VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
-                thumbnail_path = os.path.join(THUMBNAIL_OUTPUT_DIR, f"{word.lower()}.jpg")
 
                 print(f"動画生成中: {word} (IPA: {ipa})")
                 try:
@@ -81,16 +77,10 @@ def main():
                         except OSError as remove_error:
                             print(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
                     continue
-
-                print(f"サムネイル生成中: {word}")
-                try:
-                    generate_thumbnail(word, thumbnail_path, browser=browser)
-                except Exception as e:
-                    print(f"::error::{word} のサムネイル生成に失敗しました: {e}")
         finally:
             browser.close()
 
-    print("全単語の動画・サムネイル生成処理が完了しました。")
+    print("全単語の動画生成処理が完了しました。")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@ upload_videos.py
 
 candidates.json の各単語について、
   video_output/{word}.mp4
-  thumbnail_output/{word}.jpg
 をYouTubeにアップロードする。
 
 認証方式はsheriff-shorts-bot(movie.py)と同じパターン:
@@ -14,7 +13,7 @@ candidates.json の各単語について、
   リフレッシュトークン)を使うこと。
 
 必要なOAuthスコープについて:
-  動画のアップロード(videos.insert)・サムネイル設定(thumbnails.set)だけなら
+  動画のアップロード(videos.insert)だけなら
   https://www.googleapis.com/auth/youtube.upload で足りるが、
   日本語ローカライズ設定(videos.update, apply_localizations)には
   https://www.googleapis.com/auth/youtube (または youtube.force-ssl)
@@ -38,7 +37,6 @@ from used_words_store import load_used_words, save_used_words
 from config import (
     CANDIDATES_PATH,
     VIDEO_DIR,
-    THUMBNAIL_DIR,
     DEFAULT_PRIVACY_STATUS,
     YOUTUBE_CATEGORY_ID as CATEGORY_ID,
     UPLOAD_MAX_RETRIES as MAX_RETRIES,
@@ -63,7 +61,6 @@ PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 # 別枠の「Video Uploads per day: 100」上限と一致する)。
 QUOTA_COST_PER_CALL = {
     "videos.insert": 100,
-    "thumbnails.set": 50,
     "videos.update": 50,
 }
 _api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
@@ -224,15 +221,6 @@ def upload_video(youtube, video_path, metadata):
     raise last_error
 
 
-def upload_thumbnail(youtube, video_id, thumbnail_path):
-    if not os.path.exists(thumbnail_path):
-        print(f"    [Warning] サムネイルが見つかりません: {thumbnail_path}")
-        return
-    media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
-    _api_call_counts["thumbnails.set"] += 1
-    youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
-
-
 def apply_localizations(youtube, video_id, localizations):
     """日本語タイトル/説明(localizations)を設定する。
 
@@ -262,7 +250,6 @@ def main():
         ipa = arpabet_to_ipa(arpabet)
 
         video_path = os.path.join(VIDEO_DIR, f"{word.lower()}.mp4")
-        thumbnail_path = os.path.join(THUMBNAIL_DIR, f"{word.lower()}.jpg")
 
         if not os.path.exists(video_path):
             print(f"[Skip] {word}: 動画ファイルが見つかりません({video_path})")
@@ -294,12 +281,6 @@ def main():
             "run_id": os.environ.get("GITHUB_RUN_ID"),
         })
         save_used_words(history)
-
-        try:
-            upload_thumbnail(youtube, video_id, thumbnail_path)
-            print("  -> サムネイル設定完了")
-        except Exception as e:
-            print(f"[Warning] {word} のサムネイル設定に失敗しました: {e}")
 
         try:
             apply_localizations(youtube, video_id, build_localizations(word, ipa))

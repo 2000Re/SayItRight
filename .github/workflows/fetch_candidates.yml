@@ -154,12 +154,6 @@ jobs:
           name: audio-output
           path: audio_output/
 
-      - name: Upload thumbnail files as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thumbnail-output
-          path: thumbnail_output/
-
       # compilation_output/ は10件たまった回にしか作られないため、
       # それ以外の日は対象ファイルなしの警告が出るだけで正常。
       - name: Upload compilation video as artifact
