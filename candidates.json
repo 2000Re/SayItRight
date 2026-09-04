@@ -1,26 +1,26 @@
 [
   {
-    "word": "Weighted",
-    "arpabet": "W EY1 T IH0 D",
+    "word": "Lighting",
+    "arpabet": "L AY1 T IH0 NG",
     "score": 5,
     "patterns": [
-      "eigh"
+      "igh"
     ]
   },
   {
-    "word": "Autumn",
-    "arpabet": "AO1 T AH0 M",
+    "word": "Dialogue",
+    "arpabet": "D AY1 AH0 L AO2 G",
     "score": 4,
     "patterns": [
-      "mn$"
+      "gu[ae]"
     ]
   },
   {
-    "word": "Weight",
-    "arpabet": "W EY1 T",
-    "score": 5,
+    "word": "Delight",
+    "arpabet": "D IH0 L AY1 T",
+    "score": 4,
     "patterns": [
-      "eigh"
+      "igh"
     ]
   }
 ]

@@ -358,5 +358,29 @@
     ],
     "video_id": "MyBow_KJKsg",
     "run_id": "33803888450"
+  },
+  {
+    "word": "LIGHTING",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "s2jQmaPyvY0",
+    "run_id": "33837838549"
+  },
+  {
+    "word": "DIALOGUE",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "18Dfs12cNss",
+    "run_id": "33837838549"
+  },
+  {
+    "word": "DELIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "NZI0EjMBnAU",
+    "run_id": "33837838549"
   }
 ]
