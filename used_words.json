@@ -382,5 +382,29 @@
     ],
     "video_id": "NZI0EjMBnAU",
     "run_id": "33837838549"
+  },
+  {
+    "word": "DOUBT",
+    "patterns": [
+      "bt"
+    ],
+    "video_id": "qzxCGyxkQNQ",
+    "run_id": "33874193725"
+  },
+  {
+    "word": "FIGHTER",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "uij7u5yuktE",
+    "run_id": "33874193725"
+  },
+  {
+    "word": "ENOUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "2c2YRCUj2CU",
+    "run_id": "33874193725"
   }
 ]

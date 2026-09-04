@@ -1,26 +1,26 @@
 [
   {
-    "word": "Lighting",
-    "arpabet": "L AY1 T IH0 NG",
+    "word": "Doubt",
+    "arpabet": "D AW1 T",
+    "score": 4,
+    "patterns": [
+      "bt"
+    ]
+  },
+  {
+    "word": "Fighter",
+    "arpabet": "F AY1 T ER0",
     "score": 5,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Dialogue",
-    "arpabet": "D AY1 AH0 L AO2 G",
+    "word": "Enough",
+    "arpabet": "IH0 N AH1 F",
     "score": 4,
     "patterns": [
-      "gu[ae]"
-    ]
-  },
-  {
-    "word": "Delight",
-    "arpabet": "D IH0 L AY1 T",
-    "score": 4,
-    "patterns": [
-      "igh"
+      "ough"
     ]
   }
 ]
