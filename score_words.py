@@ -130,6 +130,59 @@ def pick_diverse(pool: List[WordScore], n: int) -> List[WordScore]:
     return picked
 
 
+def fill_batch_avoiding_repeats(
+    picked: List[WordScore],
+    scored: List[WordScore],
+    avoid: set,
+    pool_size: int,
+    extended_pool_size: int,
+    is_known_word,
+) -> List[WordScore]:
+    """pick_diverse()の結果(picked)に同じバッチ内で綴りパターンが重複する
+    候補が含まれる場合、scored(スコア降順の全候補)のpool_size件より先を
+    探索し、パターンが重複しない代替候補が見つかれば差し替える。
+
+    pick_diverse()はpool_size件のプール内で完結する設計のため、そのプール
+    自体が少数のパターン(例: "dg"系の短い頻出語)に占有されていると、
+    代替が無く同じパターンのまま確定してしまう(実例: BADGE/DODGE/FRIDGEが
+    同時に選ばれ、3本とも"dg"パターンになってしまったことがある)。
+    無制限に下位まで探すとis_known_word(Wiktionary API呼び出し)が
+    膨らむため、探索範囲はscored[pool_size:extended_pool_size]に限定する
+    (pool_size件目までは既にpickedの選定時に検討済みのため、そこに代替が
+    無かったからこそ重複が起きている)。"""
+    used_patterns = set()
+    duplicate_positions = []
+    for i, c in enumerate(picked):
+        if set(c.patterns) & used_patterns:
+            duplicate_positions.append(i)
+        else:
+            used_patterns.update(c.patterns)
+
+    if not duplicate_positions:
+        return picked
+
+    result = list(picked)
+    picked_words = {c.word for c in picked}
+
+    for i in duplicate_positions:
+        for candidate in scored[pool_size:extended_pool_size]:
+            if candidate.word in picked_words:
+                continue
+            if set(candidate.patterns) & avoid:
+                continue
+            if set(candidate.patterns) & used_patterns:
+                continue
+            if not is_known_word(candidate.word):
+                continue
+            picked_words.discard(result[i].word)
+            picked_words.add(candidate.word)
+            used_patterns.update(candidate.patterns)
+            result[i] = candidate
+            break
+
+    return result
+
+
 def top_tricky_words(entries: dict, top_n: int = 20, min_letters: int = 4):
     scored = []
     for word, arpabet in entries.items():

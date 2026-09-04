@@ -18,6 +18,11 @@ COMMON_WORDS_URL = (
     "master/google-10000-english-usa-no-swears-medium.txt"
 )
 POOL_SIZE = 15       # スコア上位からこの件数をプール
+# 同じバッチ内で綴りパターンが重複した場合に代替候補を探す範囲
+# (POOL_SIZE件目より先、この件数まで)。実例: BADGE/DODGE/FRIDGEが
+# 同時に選ばれ、3本とも"dg"パターンになってしまったことがある。
+# 無制限に探すとis_known_word(Wiktionary API呼び出し)が膨らむため上限を設ける。
+EXTENDED_POOL_SIZE = 60
 PICK_N = 3           # 今回の動画用に実際に選ぶ件数(1回の実行で3本アップロード)
 MIN_LETTERS = 4      # これより短い単語は除外
 # 直近何件の投稿と綴りパターンの重複を避けるか。上位スコアの候補が
