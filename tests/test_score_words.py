@@ -1,6 +1,12 @@
 import random
 
-from score_words import score_word, matched_patterns, count_phonemes, pick_diverse
+from score_words import (
+    score_word,
+    matched_patterns,
+    count_phonemes,
+    pick_diverse,
+    fill_batch_avoiding_repeats,
+)
 
 
 def test_matched_patterns_detects_silent_letter_patterns():
@@ -87,3 +93,83 @@ def test_pick_diverse_respects_requested_count():
     pool = [score_word("CAT", "K AE1 T"), score_word("DOG", "D AO1 G")]
     assert len(pick_diverse(pool, 1)) == 1
     assert len(pick_diverse(pool, 2)) == 2
+
+
+def test_fill_batch_avoiding_repeats_replaces_duplicates_with_beyond_pool_candidates():
+    # 本番で実際に起きた回帰: BADGE/DODGE/FRIDGEが同時に選ばれ、3本とも
+    # "dg"パターンになってしまった。プール(pool_size件)内に代替が無くても、
+    # それより先(スコア下位)に別パターンの候補があれば差し替えるべき。
+    badge = score_word("BADGE", "B AE1 JH")
+    dodge = score_word("DODGE", "D AA1 JH")
+    fridge = score_word("FRIDGE", "F R IH1 JH")
+    gnome = score_word("GNOME", "N OW1 M")
+    knife = score_word("KNIFE", "N AY1 F")
+
+    picked = [badge, dodge, fridge]
+    scored = picked + [gnome, knife]
+
+    result = fill_batch_avoiding_repeats(
+        picked, scored, avoid=set(), pool_size=3, extended_pool_size=10,
+        is_known_word=lambda w: True,
+    )
+
+    assert len(result) == 3
+    seen_patterns = set()
+    for p in result:
+        assert not (set(p.patterns) & seen_patterns), (
+            f"バッチ内でパターンが重複した: {[c.word for c in result]}"
+        )
+        seen_patterns.update(p.patterns)
+    # 最初のBADGEは残り、DODGE/FRIDGEがGNOME/KNIFEに差し替わっているはず
+    assert result[0] == badge
+    assert {p.word for p in result} == {"BADGE", "GNOME", "KNIFE"}
+
+
+def test_fill_batch_avoiding_repeats_returns_unchanged_when_no_duplicates():
+    badge = score_word("BADGE", "B AE1 JH")
+    gnome = score_word("GNOME", "N OW1 M")
+    knife = score_word("KNIFE", "N AY1 F")
+    picked = [badge, gnome, knife]
+
+    result = fill_batch_avoiding_repeats(
+        picked, picked, avoid=set(), pool_size=3, extended_pool_size=10,
+        is_known_word=lambda w: True,
+    )
+
+    assert result == picked
+
+
+def test_fill_batch_avoiding_repeats_keeps_duplicate_when_no_alternative_found():
+    badge = score_word("BADGE", "B AE1 JH")
+    dodge = score_word("DODGE", "D AA1 JH")
+    fridge = score_word("FRIDGE", "F R IH1 JH")
+    picked = [badge, dodge, fridge]
+
+    # scoredにpool_size(3件)より先の代替候補が無い場合は変えようがない
+    result = fill_batch_avoiding_repeats(
+        picked, picked, avoid=set(), pool_size=3, extended_pool_size=10,
+        is_known_word=lambda w: True,
+    )
+
+    assert result == picked
+
+
+def test_fill_batch_avoiding_repeats_skips_candidates_matching_avoid_or_not_known():
+    badge = score_word("BADGE", "B AE1 JH")
+    dodge = score_word("DODGE", "D AA1 JH")
+    fridge = score_word("FRIDGE", "F R IH1 JH")
+    gnome = score_word("GNOME", "N OW1 M")  # avoid対象("gn-")なのでスキップされる
+    knife = score_word("KNIFE", "N AY1 F")  # is_known_word=Falseなのでスキップされる
+    wrist = score_word("WRIST", "R IH1 S T")  # 唯一の有効な代替
+
+    picked = [badge, dodge, fridge]
+    scored = picked + [gnome, knife, wrist]
+
+    result = fill_batch_avoiding_repeats(
+        picked, scored, avoid={"gn-"}, pool_size=3, extended_pool_size=10,
+        is_known_word=lambda w: w != "KNIFE",
+    )
+
+    # 有効な代替(WRIST)は1件しか無いため、重複していた2件(DODGE/FRIDGE)の
+    # うち1件だけが差し替わり、もう1件は代替が尽きてそのまま残る
+    assert {p.word for p in result} == {"BADGE", "WRIST", "FRIDGE"}

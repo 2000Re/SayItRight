@@ -20,7 +20,7 @@ import json
 import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
 
-from score_words import score_word, pick_diverse
+from score_words import score_word, pick_diverse, fill_batch_avoiding_repeats
 from dictionary_lookup import has_english_entry
 from content_safety import is_blocked
 from used_words_store import load_used_words
@@ -28,6 +28,7 @@ from config import (
     CANDIDATES_PATH as OUTPUT_PATH,
     COMMON_WORDS_URL,
     POOL_SIZE,
+    EXTENDED_POOL_SIZE,
     PICK_N,
     MIN_LETTERS,
     RECENT_PATTERN_WINDOW,
@@ -156,6 +157,20 @@ def main():
         selection_pool = diverse_pool
 
     picked = pick_diverse(selection_pool, min(PICK_N, len(selection_pool)))
+
+    # pick_diverse()はプール(pool)内で完結する設計のため、プール自体が
+    # 少数のパターンに占有されていると重複したまま確定してしまう
+    # (実例: BADGE/DODGE/FRIDGEが同時に選ばれ、3本とも"dg"パターンに
+    #  なってしまったことがある)。バッチ内に重複が残っている場合、
+    # プールより先(スコア下位)まで探して代替候補が無いか試みる。
+    before_words = {p.word for p in picked}
+    picked = fill_batch_avoiding_repeats(
+        picked, scored, avoid, POOL_SIZE, EXTENDED_POOL_SIZE, is_known_word
+    )
+    replaced = [p.word for p in picked if p.word not in before_words]
+    if replaced:
+        print(f"バッチ内で綴りパターンが重複していたため、"
+              f"プール({POOL_SIZE}件)より先から{replaced}を代替候補として補いました。")
 
     candidates = [
         {
