@@ -1,26 +1,26 @@
 [
   {
-    "word": "Doubt",
-    "arpabet": "D AW1 T",
+    "word": "Fridge",
+    "arpabet": "F R IH1 JH",
     "score": 4,
     "patterns": [
-      "bt"
+      "dg"
     ]
   },
   {
-    "word": "Fighter",
-    "arpabet": "F AY1 T ER0",
-    "score": 5,
+    "word": "Badge",
+    "arpabet": "B AE1 JH",
+    "score": 4,
     "patterns": [
-      "igh"
+      "dg"
     ]
   },
   {
-    "word": "Enough",
-    "arpabet": "IH0 N AH1 F",
+    "word": "Dodge",
+    "arpabet": "D AA1 JH",
     "score": 4,
     "patterns": [
-      "ough"
+      "dg"
     ]
   }
 ]

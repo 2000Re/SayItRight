@@ -406,5 +406,29 @@
     ],
     "video_id": "2c2YRCUj2CU",
     "run_id": "33874193725"
+  },
+  {
+    "word": "FRIDGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "O_37brMchNw",
+    "run_id": "33917613007"
+  },
+  {
+    "word": "BADGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "NP16O8TiRWo",
+    "run_id": "33917613007"
+  },
+  {
+    "word": "DODGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "3_orahz0bA8",
+    "run_id": "33917613007"
   }
 ]
