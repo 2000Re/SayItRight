@@ -478,5 +478,29 @@
     ],
     "video_id": "G2VqcyboWKw",
     "run_id": "33966831881"
+  },
+  {
+    "word": "STRAIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "RrSkGNF8fd8",
+    "run_id": "33990935634"
+  },
+  {
+    "word": "LAUGH",
+    "patterns": [
+      "augh"
+    ],
+    "video_id": "Yx_LpD7aJKw",
+    "run_id": "33990935634"
+  },
+  {
+    "word": "MURPHY",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "svZSZ1Keib0",
+    "run_id": "33990935634"
   }
 ]

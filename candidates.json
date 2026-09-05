@@ -1,26 +1,26 @@
 [
   {
-    "word": "Lighter",
-    "arpabet": "L AY1 T ER0",
+    "word": "Straight",
+    "arpabet": "S T R EY1 T",
     "score": 5,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Guess",
-    "arpabet": "G EH1 S",
+    "word": "Laugh",
+    "arpabet": "L AE1 F",
     "score": 4,
     "patterns": [
-      "gu[ae]"
+      "augh"
     ]
   },
   {
-    "word": "Knife",
-    "arpabet": "N AY1 F",
+    "word": "Murphy",
+    "arpabet": "M ER1 F IY0",
     "score": 4,
     "patterns": [
-      "kn-"
+      "ph"
     ]
   }
 ]
