@@ -1,26 +1,26 @@
 [
   {
-    "word": "Fridge",
-    "arpabet": "F R IH1 JH",
-    "score": 4,
+    "word": "Weights",
+    "arpabet": "W EY1 T S",
+    "score": 5,
     "patterns": [
-      "dg"
+      "eigh"
     ]
   },
   {
-    "word": "Badge",
-    "arpabet": "B AE1 JH",
+    "word": "Gnome",
+    "arpabet": "N OW1 M",
     "score": 4,
     "patterns": [
-      "dg"
+      "gn-"
     ]
   },
   {
-    "word": "Dodge",
-    "arpabet": "D AA1 JH",
-    "score": 4,
+    "word": "Fighters",
+    "arpabet": "F AY1 T ER0 Z",
+    "score": 5,
     "patterns": [
-      "dg"
+      "igh"
     ]
   }
 ]

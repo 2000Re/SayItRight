@@ -430,5 +430,29 @@
     ],
     "video_id": "3_orahz0bA8",
     "run_id": "33917613007"
+  },
+  {
+    "word": "WEIGHTS",
+    "patterns": [
+      "eigh"
+    ],
+    "video_id": "_ExfOBNCCXk",
+    "run_id": "33945314881"
+  },
+  {
+    "word": "GNOME",
+    "patterns": [
+      "gn-"
+    ],
+    "video_id": "Vz0sPtMJCuw",
+    "run_id": "33945314881"
+  },
+  {
+    "word": "FIGHTERS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "lWczvji8dyg",
+    "run_id": "33945314881"
   }
 ]
