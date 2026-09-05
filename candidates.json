@@ -1,26 +1,26 @@
 [
   {
-    "word": "Weights",
-    "arpabet": "W EY1 T S",
-    "score": 5,
-    "patterns": [
-      "eigh"
-    ]
-  },
-  {
-    "word": "Gnome",
-    "arpabet": "N OW1 M",
-    "score": 4,
-    "patterns": [
-      "gn-"
-    ]
-  },
-  {
-    "word": "Fighters",
-    "arpabet": "F AY1 T ER0 Z",
+    "word": "Lighter",
+    "arpabet": "L AY1 T ER0",
     "score": 5,
     "patterns": [
       "igh"
+    ]
+  },
+  {
+    "word": "Guess",
+    "arpabet": "G EH1 S",
+    "score": 4,
+    "patterns": [
+      "gu[ae]"
+    ]
+  },
+  {
+    "word": "Knife",
+    "arpabet": "N AY1 F",
+    "score": 4,
+    "patterns": [
+      "kn-"
     ]
   }
 ]

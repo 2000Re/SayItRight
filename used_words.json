@@ -454,5 +454,29 @@
     ],
     "video_id": "lWczvji8dyg",
     "run_id": "33945314881"
+  },
+  {
+    "word": "LIGHTER",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "d333KZWq0qM",
+    "run_id": "33966831881"
+  },
+  {
+    "word": "GUESS",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "vbB89Sj9TIs",
+    "run_id": "33966831881"
+  },
+  {
+    "word": "KNIFE",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "G2VqcyboWKw",
+    "run_id": "33966831881"
   }
 ]
