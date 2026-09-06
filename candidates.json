@@ -1,26 +1,24 @@
 [
   {
-    "word": "Bright",
-    "arpabet": "B R AY1 T",
-    "score": 4,
+    "word": "Highways",
+    "arpabet": "HH AY1 W EY2 Z",
+    "score": 5,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Judge",
-    "arpabet": "JH AH1 JH",
+    "word": "Occurred",
+    "arpabet": "AH0 K ER1 D",
     "score": 4,
-    "patterns": [
-      "dg"
-    ]
+    "patterns": []
   },
   {
-    "word": "Obtained",
-    "arpabet": "AH0 B T EY1 N D",
+    "word": "Rough",
+    "arpabet": "R AH1 F",
     "score": 4,
     "patterns": [
-      "bt"
+      "ough"
     ]
   }
 ]

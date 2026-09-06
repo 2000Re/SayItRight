@@ -526,5 +526,27 @@
     ],
     "video_id": "kBThcy1SXjw",
     "run_id": "34012210576"
+  },
+  {
+    "word": "HIGHWAYS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "uzOaMGDvDP8",
+    "run_id": "34033937076"
+  },
+  {
+    "word": "OCCURRED",
+    "patterns": [],
+    "video_id": "ntNDlWooPtY",
+    "run_id": "34033937076"
+  },
+  {
+    "word": "ROUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "EaWcsxVmc-U",
+    "run_id": "34033937076"
   }
 ]
