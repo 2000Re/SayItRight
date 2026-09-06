@@ -1,24 +1,24 @@
 [
   {
-    "word": "Highways",
-    "arpabet": "HH AY1 W EY2 Z",
-    "score": 5,
+    "word": "Knives",
+    "arpabet": "N AY1 V Z",
+    "score": 4,
     "patterns": [
-      "igh"
+      "kn-"
     ]
   },
   {
-    "word": "Occurred",
-    "arpabet": "AH0 K ER1 D",
+    "word": "Scene",
+    "arpabet": "S IY1 N",
+    "score": 4,
+    "patterns": [
+      "sc[iey]"
+    ]
+  },
+  {
+    "word": "Searched",
+    "arpabet": "S ER1 CH T",
     "score": 4,
     "patterns": []
-  },
-  {
-    "word": "Rough",
-    "arpabet": "R AH1 F",
-    "score": 4,
-    "patterns": [
-      "ough"
-    ]
   }
 ]

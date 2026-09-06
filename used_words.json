@@ -548,5 +548,27 @@
     ],
     "video_id": "EaWcsxVmc-U",
     "run_id": "34033937076"
+  },
+  {
+    "word": "KNIVES",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "BxUtOUQ-wkI",
+    "run_id": "34058854632"
+  },
+  {
+    "word": "SCENE",
+    "patterns": [
+      "sc[iey]"
+    ],
+    "video_id": "69Vr7fWXlhg",
+    "run_id": "34058854632"
+  },
+  {
+    "word": "SEARCHED",
+    "patterns": [],
+    "video_id": "2A04Lyz8O2U",
+    "run_id": "34058854632"
   }
 ]
