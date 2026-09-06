@@ -20,12 +20,20 @@ import html
 import re
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
+# <style>/<script>はタグ記号だけでなく中身(CSS/JS)ごと除去する必要がある。
+# 単純に_HTML_TAG_REでタグだけ除去すると、Wiktionaryが定義文に埋め込む
+# TemplateStyles由来の<style>(例: ".mw-parser-output .defdate{...}")の
+# 中身がテキストとして残ってしまう(実例: "Fridge"の動画説明欄に
+# ".mw-parser-output .defdate{font-size:smaller}" がそのまま出てしまった)。
+_HTML_ELEMENT_WITH_CONTENT_RE = re.compile(r"<(style|script)\b[^>]*>.*?</\1>", re.IGNORECASE | re.DOTALL)
 
 
 def strip_html(text: str) -> str:
     """Wiktionaryのdefinition/example文字列に含まれるHTMLタグ(<a>, <i>等)を
-    除去し、HTMLエンティティ(&amp;等)をデコードする。"""
-    return html.unescape(_HTML_TAG_RE.sub("", text)).strip()
+    除去し、HTMLエンティティ(&amp;等)をデコードする。<style>/<script>は
+    中身(CSS/JS)ごと除去する。"""
+    without_style_scripts = _HTML_ELEMENT_WITH_CONTENT_RE.sub("", text)
+    return html.unescape(_HTML_TAG_RE.sub("", without_style_scripts)).strip()
 
 
 def parse_definition_response(data: dict) -> dict | None:

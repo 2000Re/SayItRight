@@ -9,6 +9,21 @@ def test_strip_html_handles_plain_text():
     assert strip_html("no tags here") == "no tags here"
 
 
+def test_strip_html_removes_style_element_with_its_content():
+    # 実例: "Fridge"の動画説明欄にWiktionaryのTemplateStyles由来の<style>の
+    # 中身がそのまま出てしまった("A refrigerator. .mw-parser-output
+    # .defdate{font-size:smaller}")。タグ記号だけでなく中身ごと除去する。
+    text = (
+        'A refrigerator.<style data-mw-deduplicate="TemplateStyles:r12345">'
+        ".mw-parser-output .defdate{font-size:smaller}</style>"
+    )
+    assert strip_html(text) == "A refrigerator."
+
+
+def test_strip_html_removes_script_element_with_its_content():
+    assert strip_html("Before<script>alert('x')</script>After") == "BeforeAfter"
+
+
 def test_parse_definition_response_extracts_first_english_definition():
     # en.wiktionary.org の /page/definition/{word} が返す実際の形式を模した
     # サンプル(HTML付きの定義文・例文を含む)
