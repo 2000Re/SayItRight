@@ -1,26 +1,26 @@
 [
   {
-    "word": "Straight",
-    "arpabet": "S T R EY1 T",
-    "score": 5,
+    "word": "Bright",
+    "arpabet": "B R AY1 T",
+    "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Laugh",
-    "arpabet": "L AE1 F",
+    "word": "Judge",
+    "arpabet": "JH AH1 JH",
     "score": 4,
     "patterns": [
-      "augh"
+      "dg"
     ]
   },
   {
-    "word": "Murphy",
-    "arpabet": "M ER1 F IY0",
+    "word": "Obtained",
+    "arpabet": "AH0 B T EY1 N D",
     "score": 4,
     "patterns": [
-      "ph"
+      "bt"
     ]
   }
 ]

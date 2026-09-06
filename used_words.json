@@ -502,5 +502,29 @@
     ],
     "video_id": "svZSZ1Keib0",
     "run_id": "33990935634"
+  },
+  {
+    "word": "BRIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "yZGNT7wukHE",
+    "run_id": "34012210576"
+  },
+  {
+    "word": "JUDGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "74oKPw85WtQ",
+    "run_id": "34012210576"
+  },
+  {
+    "word": "OBTAINED",
+    "patterns": [
+      "bt"
+    ],
+    "video_id": "kBThcy1SXjw",
+    "run_id": "34012210576"
   }
 ]
