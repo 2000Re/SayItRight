@@ -1,26 +1,26 @@
 [
   {
-    "word": "Flights",
-    "arpabet": "F L AY1 T S",
+    "word": "Flight",
+    "arpabet": "F L AY1 T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Lodge",
-    "arpabet": "L AA1 JH",
+    "word": "Roughly",
+    "arpabet": "R AH1 F L IY0",
     "score": 4,
     "patterns": [
-      "dg"
+      "ough"
     ]
   },
   {
-    "word": "Whale",
-    "arpabet": "W EY1 L",
+    "word": "Write",
+    "arpabet": "R AY1 T",
     "score": 4,
     "patterns": [
-      "wh-"
+      "wr-"
     ]
   }
 ]

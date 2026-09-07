@@ -618,5 +618,29 @@
     ],
     "video_id": "9AQW9z8Jpto",
     "run_id": "34123393620"
+  },
+  {
+    "word": "FLIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "HXBbhJ2Ic1g",
+    "run_id": "34160468741"
+  },
+  {
+    "word": "ROUGHLY",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "8uhRXv0a-Fk",
+    "run_id": "34160468741"
+  },
+  {
+    "word": "WRITE",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "3PPLDQm11ao",
+    "run_id": "34160468741"
   }
 ]
