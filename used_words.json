@@ -594,5 +594,29 @@
     ],
     "video_id": "6zkOZCZK_QQ",
     "run_id": "34084140933"
+  },
+  {
+    "word": "FLIGHTS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "haJu3y4ttKE",
+    "run_id": "34123393620"
+  },
+  {
+    "word": "LODGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "QdSzgfKwxXw",
+    "run_id": "34123393620"
+  },
+  {
+    "word": "WHALE",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "9AQW9z8Jpto",
+    "run_id": "34123393620"
   }
 ]

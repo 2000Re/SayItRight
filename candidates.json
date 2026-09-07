@@ -1,26 +1,26 @@
 [
   {
-    "word": "Fight",
-    "arpabet": "F AY1 T",
+    "word": "Flights",
+    "arpabet": "F L AY1 T S",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Phase",
-    "arpabet": "F EY1 Z",
+    "word": "Lodge",
+    "arpabet": "L AA1 JH",
     "score": 4,
     "patterns": [
-      "ph"
+      "dg"
     ]
   },
   {
-    "word": "Thumb",
-    "arpabet": "TH AH1 M",
+    "word": "Whale",
+    "arpabet": "W EY1 L",
     "score": 4,
     "patterns": [
-      "-mb"
+      "wh-"
     ]
   }
 ]
