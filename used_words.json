@@ -570,5 +570,29 @@
     "patterns": [],
     "video_id": "2A04Lyz8O2U",
     "run_id": "34058854632"
+  },
+  {
+    "word": "FIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "YUM5xU0ONss",
+    "run_id": "34084140933"
+  },
+  {
+    "word": "PHASE",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "eMzazqRcRUo",
+    "run_id": "34084140933"
+  },
+  {
+    "word": "THUMB",
+    "patterns": [
+      "-mb"
+    ],
+    "video_id": "6zkOZCZK_QQ",
+    "run_id": "34084140933"
   }
 ]

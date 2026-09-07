@@ -1,24 +1,26 @@
 [
   {
-    "word": "Knives",
-    "arpabet": "N AY1 V Z",
+    "word": "Fight",
+    "arpabet": "F AY1 T",
     "score": 4,
     "patterns": [
-      "kn-"
+      "igh"
     ]
   },
   {
-    "word": "Scene",
-    "arpabet": "S IY1 N",
+    "word": "Phase",
+    "arpabet": "F EY1 Z",
     "score": 4,
     "patterns": [
-      "sc[iey]"
+      "ph"
     ]
   },
   {
-    "word": "Searched",
-    "arpabet": "S ER1 CH T",
+    "word": "Thumb",
+    "arpabet": "TH AH1 M",
     "score": 4,
-    "patterns": []
+    "patterns": [
+      "-mb"
+    ]
   }
 ]
