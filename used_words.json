@@ -686,5 +686,29 @@
     "patterns": [],
     "video_id": "J1CqWLeJtfM",
     "run_id": "34227663876"
+  },
+  {
+    "word": "HIGHLAND",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "q37XqCtQrwI",
+    "run_id": "34276442004"
+  },
+  {
+    "word": "LODGING",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "tacObWDUHCs",
+    "run_id": "34276442004"
+  },
+  {
+    "word": "WHATEVER",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "SVH4M0rH7SI",
+    "run_id": "34276442004"
   }
 ]

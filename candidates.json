@@ -1,24 +1,26 @@
 [
   {
-    "word": "Highly",
-    "arpabet": "HH AY1 L IY0",
+    "word": "Highland",
+    "arpabet": "HH AY1 L AH0 N D",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Phone",
-    "arpabet": "F OW1 N",
+    "word": "Lodging",
+    "arpabet": "L AA1 JH IH0 NG",
     "score": 4,
     "patterns": [
-      "ph"
+      "dg"
     ]
   },
   {
-    "word": "Achieved",
-    "arpabet": "AH0 CH IY1 V D",
-    "score": 3,
-    "patterns": []
+    "word": "Whatever",
+    "arpabet": "W AH2 T EH1 V ER0",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
