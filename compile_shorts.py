@@ -71,6 +71,10 @@ from config import (
 
 GITHUB_API_BASE = "https://api.github.com"
 
+# 通常動画(結合版)用の再生リストID。upload_videos.pyのSHORTS_PLAYLIST_IDと
+# 同様、未設定の場合は再生リストへの追加をスキップする。
+COMPILATION_PLAYLIST_ID = os.environ.get("YOUTUBE_COMPILATION_PLAYLIST_ID")
+
 
 class ArtifactUnavailableError(Exception):
     """該当エントリの動画アーティファクトが恒久的に取得できない
@@ -80,7 +84,7 @@ class ArtifactUnavailableError(Exception):
 
 # upload_videos.pyと同じく、実行ログだけでYouTube Data APIの
 # クォータ消費量(概算)を把握できるようにする。
-QUOTA_COST_PER_CALL = {"videos.insert": 100}
+QUOTA_COST_PER_CALL = {"videos.insert": 100, "playlistItems.insert": 50}
 _api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
 
 
@@ -226,6 +230,25 @@ def upload_compilation(youtube, video_path: str, metadata: dict) -> str:
     return response["id"]
 
 
+def add_to_playlist(youtube, playlist_id, video_id):
+    """動画を再生リスト(playlist_id)に追加する。playlist_idが未設定
+    (Secret未登録)の場合は何もしない。メインのアップロードとは独立した
+    付加情報のため、失敗しても動画自体の公開は妨げない(呼び出し側で
+    警告を出すだけで処理を継続する想定)。"""
+    if not playlist_id:
+        return
+    _api_call_counts["playlistItems.insert"] += 1
+    youtube.playlistItems().insert(
+        part="snippet",
+        body={
+            "snippet": {
+                "playlistId": playlist_id,
+                "resourceId": {"kind": "youtube#video", "videoId": video_id},
+            }
+        },
+    ).execute()
+
+
 def main():
     history = load_used_words()
     # video_id/run_idが無い(旧形式のまま、またはこの方式導入前に
@@ -299,6 +322,14 @@ def main():
         metadata = build_compilation_metadata([b["word"] for b in batch])
         video_id = upload_compilation(youtube, output_path, metadata)
         print(f"[Compilation] アップロード完了: https://youtu.be/{video_id}")
+
+        try:
+            add_to_playlist(youtube, COMPILATION_PLAYLIST_ID, video_id)
+            if COMPILATION_PLAYLIST_ID:
+                print("  -> 再生リストに追加完了")
+        except Exception as e:
+            print(f"[Warning] 再生リストへの追加に失敗しました: {e}")
+
         _log_api_usage_summary()
 
         # アップロードが成功して初めて結合済みとして記録する

@@ -100,6 +100,7 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YOUTUBE_SHORTS_PLAYLIST_ID: ${{ secrets.YOUTUBE_SHORTS_PLAYLIST_ID }}
 
       # used_words.jsonにvideo_id/run_idが10件たまるごとに、各動画が生成
       # された回のvideo-outputアーティファクト(GitHub Actions API経由)から
@@ -116,6 +117,7 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YOUTUBE_COMPILATION_PLAYLIST_ID: ${{ secrets.YOUTUBE_COMPILATION_PLAYLIST_ID }}
 
       - name: Commit updated candidates and used-words list
         run: |

@@ -15,10 +15,11 @@ candidates.json の各単語について、
 必要なOAuthスコープについて:
   動画のアップロード(videos.insert)だけなら
   https://www.googleapis.com/auth/youtube.upload で足りるが、
-  日本語ローカライズ設定(videos.update, apply_localizations)には
+  日本語ローカライズ設定(videos.update, apply_localizations)や
+  再生リストへの追加(playlistItems.insert, add_to_playlist)には
   https://www.googleapis.com/auth/youtube (または youtube.force-ssl)
   スコープが必要。youtube.upload のみで発行したrefresh tokenだと
-  videos.update が403 insufficientPermissionsで失敗する
+  これらが403 insufficientPermissionsで失敗する
   (アップロード自体は成功するので、失敗しても警告のみで処理は継続する)。
 """
 import json
@@ -52,6 +53,11 @@ from config import (
 # "public" に変更するのがおすすめ。
 PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 
+# Shorts用の再生リストID(再生リストIDは非公開情報ではないが、Secret運用の
+# 統一性のため他のYT_*同様に環境変数から読む)。未設定の場合は再生リストへの
+# 追加をスキップし、動画投稿自体は通常通り継続する。
+SHORTS_PLAYLIST_ID = os.environ.get("YOUTUBE_SHORTS_PLAYLIST_ID")
+
 # YouTube Data API v3の公式ドキュメントに基づく、1回あたりのクォータ消費コスト
 # (日次クォータ 10,000 units に対する目安として実行ログに表示する)。
 # リトライで複数回叩いた場合も、実際に送ったリクエスト数としてそのまま数える。
@@ -62,6 +68,7 @@ PRIVACY_STATUS = os.environ.get("YT_PRIVACY_STATUS", DEFAULT_PRIVACY_STATUS)
 QUOTA_COST_PER_CALL = {
     "videos.insert": 100,
     "videos.update": 50,
+    "playlistItems.insert": 50,
 }
 _api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
 
@@ -226,6 +233,25 @@ def upload_video(youtube, video_path, metadata):
     raise last_error
 
 
+def add_to_playlist(youtube, playlist_id, video_id):
+    """動画を再生リスト(playlist_id)に追加する。playlist_idが未設定
+    (Secret未登録)の場合は何もしない。メインのアップロードとは独立した
+    付加情報のため、失敗しても動画自体の公開は妨げない(呼び出し側で
+    警告を出すだけで処理を継続する想定)。"""
+    if not playlist_id:
+        return
+    _api_call_counts["playlistItems.insert"] += 1
+    youtube.playlistItems().insert(
+        part="snippet",
+        body={
+            "snippet": {
+                "playlistId": playlist_id,
+                "resourceId": {"kind": "youtube#video", "videoId": video_id},
+            }
+        },
+    ).execute()
+
+
 def apply_localizations(youtube, video_id, localizations):
     """日本語タイトル/説明(localizations)を設定する。
 
@@ -286,6 +312,13 @@ def main():
             "run_id": os.environ.get("GITHUB_RUN_ID"),
         })
         save_used_words(history)
+
+        try:
+            add_to_playlist(youtube, SHORTS_PLAYLIST_ID, video_id)
+            if SHORTS_PLAYLIST_ID:
+                print("  -> 再生リストに追加完了")
+        except Exception as e:
+            print(f"[Warning] {word} の再生リストへの追加に失敗しました: {e}")
 
         try:
             apply_localizations(youtube, video_id, build_localizations(word, ipa))
