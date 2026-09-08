@@ -46,6 +46,8 @@ upload_videos.py    … 動画をYouTubeにアップロードし、日本語ロ�
 | `GOOGLE_APPLICATION_CREDENTIALS_JSON` | GCPサービスアカウントキー(JSON文字列)。Text-to-Speech APIの呼び出しに使用 |
 | `YT_REFRESH_TOKEN` / `YT_CLIENT_ID` / `YT_CLIENT_SECRET` | YouTube Data API用のOAuth認証情報 |
 | `YT_PRIVACY_STATUS`(任意) | アップロードする動画の公開設定。省略時は `public`。初回運用時は `unlisted` を推奨 |
+| `YOUTUBE_SHORTS_PLAYLIST_ID`(任意) | Shorts用再生リストのID。設定するとアップロード成功時に自動追加される。未設定の場合は追加をスキップ |
+| `YOUTUBE_COMPILATION_PLAYLIST_ID`(任意) | 結合動画(通常動画)用再生リストのID。同上 |
 
 **OAuthスコープについて**: 動画アップロード(`videos.insert`)には `youtube.upload` スコープで足りますが、日本語ローカライズ設定(`videos.update`)には `youtube`(または `youtube.force-ssl`)スコープが必要です。`youtube.upload` のみで発行した `YT_REFRESH_TOKEN` だと、ローカライズ設定だけが403エラーで失敗します(動画本体のアップロードには影響しません)。
 
