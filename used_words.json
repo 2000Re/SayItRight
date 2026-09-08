@@ -664,5 +664,27 @@
     "patterns": [],
     "video_id": "U16APjxRRFg",
     "run_id": "34187982209"
+  },
+  {
+    "word": "HIGHLY",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "Ky-vMGTnqoE",
+    "run_id": "34227663876"
+  },
+  {
+    "word": "PHONE",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "MPjeYbqAgXE",
+    "run_id": "34227663876"
+  },
+  {
+    "word": "ACHIEVED",
+    "patterns": [],
+    "video_id": "J1CqWLeJtfM",
+    "run_id": "34227663876"
   }
 ]

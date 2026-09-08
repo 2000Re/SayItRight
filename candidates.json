@@ -1,23 +1,23 @@
 [
   {
-    "word": "Knows",
-    "arpabet": "N OW1 Z",
+    "word": "Highly",
+    "arpabet": "HH AY1 L IY0",
     "score": 4,
     "patterns": [
-      "kn-"
+      "igh"
     ]
   },
   {
-    "word": "Scenes",
-    "arpabet": "S IY1 N Z",
+    "word": "Phone",
+    "arpabet": "F OW1 N",
     "score": 4,
     "patterns": [
-      "sc[iey]"
+      "ph"
     ]
   },
   {
-    "word": "Achieve",
-    "arpabet": "AH0 CH IY1 V",
+    "word": "Achieved",
+    "arpabet": "AH0 CH IY1 V D",
     "score": 3,
     "patterns": []
   }
