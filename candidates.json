@@ -1,26 +1,24 @@
 [
   {
-    "word": "Flight",
-    "arpabet": "F L AY1 T",
+    "word": "Knows",
+    "arpabet": "N OW1 Z",
     "score": 4,
     "patterns": [
-      "igh"
+      "kn-"
     ]
   },
   {
-    "word": "Roughly",
-    "arpabet": "R AH1 F L IY0",
+    "word": "Scenes",
+    "arpabet": "S IY1 N Z",
     "score": 4,
     "patterns": [
-      "ough"
+      "sc[iey]"
     ]
   },
   {
-    "word": "Write",
-    "arpabet": "R AY1 T",
-    "score": 4,
-    "patterns": [
-      "wr-"
-    ]
+    "word": "Achieve",
+    "arpabet": "AH0 CH IY1 V",
+    "score": 3,
+    "patterns": []
   }
 ]

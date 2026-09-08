@@ -642,5 +642,27 @@
     ],
     "video_id": "3PPLDQm11ao",
     "run_id": "34160468741"
+  },
+  {
+    "word": "KNOWS",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "tQOK0gHZ13A",
+    "run_id": "34187982209"
+  },
+  {
+    "word": "SCENES",
+    "patterns": [
+      "sc[iey]"
+    ],
+    "video_id": "By6PlRlKseY",
+    "run_id": "34187982209"
+  },
+  {
+    "word": "ACHIEVE",
+    "patterns": [],
+    "video_id": "U16APjxRRFg",
+    "run_id": "34187982209"
   }
 ]
