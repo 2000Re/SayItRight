@@ -165,6 +165,10 @@ def build_metadata(word, ipa, lookup: dict | None = None):
         if lookup.get("example"):
             lines.append(f'Example: "{lookup["example"]}"')
     lines.append("")
+    # TTSの音声(config.VOICE_NAME/LANGUAGE_CODE)はアメリカ英語のため、
+    # 他の英語圏の発音と異なる場合があることを明記しておく。
+    lines.append("Note: Pronunciation shown is American English (US).")
+    lines.append("")
     lines.append("#shorts #pronunciation #english #howtopronounce")
     description = "\n".join(lines)
 
@@ -197,6 +201,7 @@ def build_localizations(word, ipa):
             "description": (
                 f'英単語「{word}」はどう発音する?\n'
                 f"発音記号(IPA): /{ipa}/\n\n"
+                f"※この発音はアメリカ英語(米語)です。\n\n"
                 f"#shorts #発音 #英語 #英単語"
             ),
         }
