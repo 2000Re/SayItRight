@@ -710,5 +710,29 @@
     ],
     "video_id": "SVH4M0rH7SI",
     "run_id": "34276442004"
+  },
+  {
+    "word": "HIGHEST",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "VzNhwabEoUc",
+    "run_id": "34312056968"
+  },
+  {
+    "word": "TOUGH",
+    "patterns": [
+      "ough"
+    ],
+    "video_id": "LNStOLgzGik",
+    "run_id": "34312056968"
+  },
+  {
+    "word": "WRITER",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "Qw8hgcQe2VI",
+    "run_id": "34312056968"
   }
 ]

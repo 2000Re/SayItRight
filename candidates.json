@@ -1,26 +1,26 @@
 [
   {
-    "word": "Highland",
-    "arpabet": "HH AY1 L AH0 N D",
+    "word": "Highest",
+    "arpabet": "HH AY1 AH0 S T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Lodging",
-    "arpabet": "L AA1 JH IH0 NG",
+    "word": "Tough",
+    "arpabet": "T AH1 F",
     "score": 4,
     "patterns": [
-      "dg"
+      "ough"
     ]
   },
   {
-    "word": "Whatever",
-    "arpabet": "W AH2 T EH1 V ER0",
+    "word": "Writer",
+    "arpabet": "R AY1 T ER0",
     "score": 4,
     "patterns": [
-      "wh-"
+      "wr-"
     ]
   }
 ]
