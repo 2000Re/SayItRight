@@ -758,5 +758,27 @@
     ],
     "video_id": "zl6lAx0wkTE",
     "run_id": "34352655486"
+  },
+  {
+    "word": "PHONES",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "pr7Jg1Q4Jgk",
+    "run_id": "34402728270"
+  },
+  {
+    "word": "INSIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "uFIB_TJJdOo",
+    "run_id": "34402728270"
+  },
+  {
+    "word": "ALLOWED",
+    "patterns": [],
+    "video_id": "ImT3FfxIQcE",
+    "run_id": "34402728270"
   }
 ]

@@ -1,26 +1,24 @@
 [
   {
-    "word": "Highs",
-    "arpabet": "HH AY1 Z",
+    "word": "Phones",
+    "arpabet": "F OW1 N Z",
+    "score": 4,
+    "patterns": [
+      "ph"
+    ]
+  },
+  {
+    "word": "Insight",
+    "arpabet": "IH1 N S AY2 T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Known",
-    "arpabet": "N OW1 N",
-    "score": 4,
-    "patterns": [
-      "kn-"
-    ]
-  },
-  {
-    "word": "Science",
-    "arpabet": "S AY1 AH0 N S",
-    "score": 4,
-    "patterns": [
-      "sc[iey]"
-    ]
+    "word": "Allowed",
+    "arpabet": "AH0 L AW1 D",
+    "score": 3,
+    "patterns": []
   }
 ]
