@@ -1,26 +1,26 @@
 [
   {
-    "word": "Highest",
-    "arpabet": "HH AY1 AH0 S T",
+    "word": "Highs",
+    "arpabet": "HH AY1 Z",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Tough",
-    "arpabet": "T AH1 F",
+    "word": "Known",
+    "arpabet": "N OW1 N",
     "score": 4,
     "patterns": [
-      "ough"
+      "kn-"
     ]
   },
   {
-    "word": "Writer",
-    "arpabet": "R AY1 T ER0",
+    "word": "Science",
+    "arpabet": "S AY1 AH0 N S",
     "score": 4,
     "patterns": [
-      "wr-"
+      "sc[iey]"
     ]
   }
 ]
