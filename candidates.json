@@ -1,24 +1,26 @@
 [
   {
-    "word": "Phones",
-    "arpabet": "F OW1 N Z",
+    "word": "Pledge",
+    "arpabet": "P L EH1 JH",
     "score": 4,
     "patterns": [
-      "ph"
+      "dg"
     ]
   },
   {
-    "word": "Insight",
-    "arpabet": "IH1 N S AY2 T",
+    "word": "Knock",
+    "arpabet": "N AA1 K",
+    "score": 4,
+    "patterns": [
+      "kn-"
+    ]
+  },
+  {
+    "word": "Insights",
+    "arpabet": "IH1 N S AY2 T S",
     "score": 4,
     "patterns": [
       "igh"
     ]
-  },
-  {
-    "word": "Allowed",
-    "arpabet": "AH0 L AW1 D",
-    "score": 3,
-    "patterns": []
   }
 ]

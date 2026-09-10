@@ -780,5 +780,29 @@
     "patterns": [],
     "video_id": "ImT3FfxIQcE",
     "run_id": "34402728270"
+  },
+  {
+    "word": "PLEDGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "3RQYSWrm0aY",
+    "run_id": "34438263121"
+  },
+  {
+    "word": "KNOCK",
+    "patterns": [
+      "kn-"
+    ],
+    "video_id": "UcME2Qmff5Q",
+    "run_id": "34438263121"
+  },
+  {
+    "word": "INSIGHTS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "FeMykOIWxB8",
+    "run_id": "34438263121"
   }
 ]
