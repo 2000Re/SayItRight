@@ -828,5 +828,25 @@
     ],
     "video_id": "z7-PT-9xzY4",
     "run_id": "34478305449"
+  },
+  {
+    "word": "LIGHTS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "vz7Y_STgKbA",
+    "run_id": "34528043481"
+  },
+  {
+    "word": "ALLOWING",
+    "patterns": [],
+    "video_id": "e99hOzyBN8U",
+    "run_id": "34528043481"
+  },
+  {
+    "word": "ANNOUNCE",
+    "patterns": [],
+    "video_id": "QrJ425kuo_0",
+    "run_id": "34528043481"
   }
 ]
