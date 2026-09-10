@@ -804,5 +804,29 @@
     ],
     "video_id": "FeMykOIWxB8",
     "run_id": "34438263121"
+  },
+  {
+    "word": "MIDNIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "R6Ky_UTYKz0",
+    "run_id": "34478305449"
+  },
+  {
+    "word": "WHEAT",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "U9e6VmA6Kic",
+    "run_id": "34478305449"
+  },
+  {
+    "word": "WRITERS",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "z7-PT-9xzY4",
+    "run_id": "34478305449"
   }
 ]

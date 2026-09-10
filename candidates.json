@@ -1,26 +1,26 @@
 [
   {
-    "word": "Pledge",
-    "arpabet": "P L EH1 JH",
-    "score": 4,
-    "patterns": [
-      "dg"
-    ]
-  },
-  {
-    "word": "Knock",
-    "arpabet": "N AA1 K",
-    "score": 4,
-    "patterns": [
-      "kn-"
-    ]
-  },
-  {
-    "word": "Insights",
-    "arpabet": "IH1 N S AY2 T S",
+    "word": "Midnight",
+    "arpabet": "M IH1 D N AY2 T",
     "score": 4,
     "patterns": [
       "igh"
+    ]
+  },
+  {
+    "word": "Wheat",
+    "arpabet": "W IY1 T",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
+  },
+  {
+    "word": "Writers",
+    "arpabet": "R AY1 T ER0 Z",
+    "score": 4,
+    "patterns": [
+      "wr-"
     ]
   }
 ]
