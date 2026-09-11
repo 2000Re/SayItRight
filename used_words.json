@@ -848,5 +848,27 @@
     "patterns": [],
     "video_id": "QrJ425kuo_0",
     "run_id": "34528043481"
+  },
+  {
+    "word": "PHRASE",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "yVMs-SkwA-E",
+    "run_id": "34563245538"
+  },
+  {
+    "word": "LIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "cacanQdjo1o",
+    "run_id": "34563245538"
+  },
+  {
+    "word": "ANNOYING",
+    "patterns": [],
+    "video_id": "KAdYLA3dcGw",
+    "run_id": "34563245538"
   }
 ]

@@ -1,21 +1,23 @@
 [
   {
-    "word": "Lights",
-    "arpabet": "L AY1 T S",
+    "word": "Phrase",
+    "arpabet": "F R EY1 Z",
+    "score": 4,
+    "patterns": [
+      "ph"
+    ]
+  },
+  {
+    "word": "Light",
+    "arpabet": "L AY1 T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Allowing",
-    "arpabet": "AH0 L AW1 IH0 NG",
-    "score": 3,
-    "patterns": []
-  },
-  {
-    "word": "Announce",
-    "arpabet": "AH0 N AW1 N S",
+    "word": "Annoying",
+    "arpabet": "AH0 N OY1 IH0 NG",
     "score": 3,
     "patterns": []
   }
