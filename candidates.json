@@ -1,24 +1,26 @@
 [
   {
-    "word": "Might",
-    "arpabet": "M AY1 T",
+    "word": "Nights",
+    "arpabet": "N AY1 T S",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Ridge",
-    "arpabet": "R IH1 JH",
+    "word": "Wheel",
+    "arpabet": "W IY1 L",
     "score": 4,
     "patterns": [
-      "dg"
+      "wh-"
     ]
   },
   {
-    "word": "Answered",
-    "arpabet": "AE1 N S ER0 D",
-    "score": 3,
-    "patterns": []
+    "word": "Writes",
+    "arpabet": "R AY1 T S",
+    "score": 4,
+    "patterns": [
+      "wr-"
+    ]
   }
 ]

@@ -892,5 +892,29 @@
     "patterns": [],
     "video_id": "RuUKGhqHFvA",
     "run_id": "34600371155"
+  },
+  {
+    "word": "NIGHTS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "kNrS05YG27k",
+    "run_id": "34645689479"
+  },
+  {
+    "word": "WHEEL",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "_TPT98tqI-E",
+    "run_id": "34645689479"
+  },
+  {
+    "word": "WRITES",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "SkrBI8RjrkE",
+    "run_id": "34645689479"
   }
 ]
