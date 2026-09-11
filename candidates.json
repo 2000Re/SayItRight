@@ -1,23 +1,23 @@
 [
   {
-    "word": "Phrase",
-    "arpabet": "F R EY1 Z",
-    "score": 4,
-    "patterns": [
-      "ph"
-    ]
-  },
-  {
-    "word": "Light",
-    "arpabet": "L AY1 T",
+    "word": "Might",
+    "arpabet": "M AY1 T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Annoying",
-    "arpabet": "AH0 N OY1 IH0 NG",
+    "word": "Ridge",
+    "arpabet": "R IH1 JH",
+    "score": 4,
+    "patterns": [
+      "dg"
+    ]
+  },
+  {
+    "word": "Answered",
+    "arpabet": "AE1 N S ER0 D",
     "score": 3,
     "patterns": []
   }

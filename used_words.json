@@ -870,5 +870,27 @@
     "patterns": [],
     "video_id": "KAdYLA3dcGw",
     "run_id": "34563245538"
+  },
+  {
+    "word": "MIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "QOX02K8-Sn4",
+    "run_id": "34600371155"
+  },
+  {
+    "word": "RIDGE",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "XDH_dC_4mlo",
+    "run_id": "34600371155"
+  },
+  {
+    "word": "ANSWERED",
+    "patterns": [],
+    "video_id": "RuUKGhqHFvA",
+    "run_id": "34600371155"
   }
 ]
