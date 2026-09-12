@@ -1,21 +1,23 @@
 [
   {
-    "word": "Mighty",
-    "arpabet": "M AY1 T IY0",
+    "word": "Sphere",
+    "arpabet": "S F IH1 R",
+    "score": 4,
+    "patterns": [
+      "ph"
+    ]
+  },
+  {
+    "word": "Right",
+    "arpabet": "R AY1 T",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Appeared",
-    "arpabet": "AH0 P IH1 R D",
-    "score": 3,
-    "patterns": []
-  },
-  {
-    "word": "Approach",
-    "arpabet": "AH0 P R OW1 CH",
+    "word": "Arrange",
+    "arpabet": "ER0 EY1 N JH",
     "score": 3,
     "patterns": []
   }
