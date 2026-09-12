@@ -1,23 +1,21 @@
 [
   {
-    "word": "Sphere",
-    "arpabet": "S F IH1 R",
-    "score": 4,
-    "patterns": [
-      "ph"
-    ]
-  },
-  {
-    "word": "Right",
-    "arpabet": "R AY1 T",
+    "word": "Rights",
+    "arpabet": "R AY1 T S",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Arrange",
-    "arpabet": "ER0 EY1 N JH",
+    "word": "Arranged",
+    "arpabet": "ER0 EY1 N JH D",
+    "score": 3,
+    "patterns": []
+  },
+  {
+    "word": "Array",
+    "arpabet": "ER0 EY1",
     "score": 3,
     "patterns": []
   }

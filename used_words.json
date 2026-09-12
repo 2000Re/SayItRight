@@ -958,5 +958,25 @@
     "patterns": [],
     "video_id": "OvH6pNClWIY",
     "run_id": "34694439091"
+  },
+  {
+    "word": "RIGHTS",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "BTNH7S3uZg4",
+    "run_id": "34717908929"
+  },
+  {
+    "word": "ARRANGED",
+    "patterns": [],
+    "video_id": "dquM3FzsnHw",
+    "run_id": "34717908929"
+  },
+  {
+    "word": "ARRAY",
+    "patterns": [],
+    "video_id": "rLd-U7q3tXo",
+    "run_id": "34717908929"
   }
 ]
