@@ -1,26 +1,22 @@
 [
   {
-    "word": "Nights",
-    "arpabet": "N AY1 T S",
+    "word": "Mighty",
+    "arpabet": "M AY1 T IY0",
     "score": 4,
     "patterns": [
       "igh"
     ]
   },
   {
-    "word": "Wheel",
-    "arpabet": "W IY1 L",
-    "score": 4,
-    "patterns": [
-      "wh-"
-    ]
+    "word": "Appeared",
+    "arpabet": "AH0 P IH1 R D",
+    "score": 3,
+    "patterns": []
   },
   {
-    "word": "Writes",
-    "arpabet": "R AY1 T S",
-    "score": 4,
-    "patterns": [
-      "wr-"
-    ]
+    "word": "Approach",
+    "arpabet": "AH0 P R OW1 CH",
+    "score": 3,
+    "patterns": []
   }
 ]

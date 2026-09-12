@@ -916,5 +916,25 @@
     ],
     "video_id": "SkrBI8RjrkE",
     "run_id": "34645689479"
+  },
+  {
+    "word": "MIGHTY",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "HECJ1YlfDfE",
+    "run_id": "34673738431"
+  },
+  {
+    "word": "APPEARED",
+    "patterns": [],
+    "video_id": "Vt_UYj1tPvk",
+    "run_id": "34673738431"
+  },
+  {
+    "word": "APPROACH",
+    "patterns": [],
+    "video_id": "0UawNMHdXRI",
+    "run_id": "34673738431"
   }
 ]
