@@ -1,24 +1,10 @@
 [
   {
-    "word": "Whereas",
-    "arpabet": "W EH0 R AE1 Z",
+    "word": "Night",
+    "arpabet": "N AY1 T",
     "score": 4,
     "patterns": [
-      "wh-"
+      "igh"
     ]
-  },
-  {
-    "word": "Writing",
-    "arpabet": "R AY1 T IH0 NG",
-    "score": 4,
-    "patterns": [
-      "wr-"
-    ]
-  },
-  {
-    "word": "Arrive",
-    "arpabet": "ER0 AY1 V",
-    "score": 3,
-    "patterns": []
   }
 ]

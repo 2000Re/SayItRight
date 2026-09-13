@@ -1000,5 +1000,13 @@
     "patterns": [],
     "video_id": "vTuco7sndf0",
     "run_id": "34738545129"
+  },
+  {
+    "word": "NIGHT",
+    "patterns": [
+      "igh"
+    ],
+    "video_id": "pe_XeL2rFoU",
+    "run_id": "34745923598"
   }
 ]
