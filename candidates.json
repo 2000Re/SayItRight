@@ -1,21 +1,23 @@
 [
   {
-    "word": "Rights",
-    "arpabet": "R AY1 T S",
+    "word": "Whereas",
+    "arpabet": "W EH0 R AE1 Z",
     "score": 4,
     "patterns": [
-      "igh"
+      "wh-"
     ]
   },
   {
-    "word": "Arranged",
-    "arpabet": "ER0 EY1 N JH D",
-    "score": 3,
-    "patterns": []
+    "word": "Writing",
+    "arpabet": "R AY1 T IH0 NG",
+    "score": 4,
+    "patterns": [
+      "wr-"
+    ]
   },
   {
-    "word": "Array",
-    "arpabet": "ER0 EY1",
+    "word": "Arrive",
+    "arpabet": "ER0 AY1 V",
     "score": 3,
     "patterns": []
   }

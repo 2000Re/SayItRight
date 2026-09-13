@@ -978,5 +978,27 @@
     "patterns": [],
     "video_id": "rLd-U7q3tXo",
     "run_id": "34717908929"
+  },
+  {
+    "word": "WHEREAS",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "ciJKk9oWH0M",
+    "run_id": "34738545129"
+  },
+  {
+    "word": "WRITING",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "9E2XeaiMt7o",
+    "run_id": "34738545129"
+  },
+  {
+    "word": "ARRIVE",
+    "patterns": [],
+    "video_id": "vTuco7sndf0",
+    "run_id": "34738545129"
   }
 ]
