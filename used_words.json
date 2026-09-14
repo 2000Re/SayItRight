@@ -1100,5 +1100,13 @@
     "patterns": [],
     "video_id": "eL7Fvd2C9pI",
     "run_id": "34839623350"
+  },
+  {
+    "word": "ASCII",
+    "patterns": [
+      "sc[iey]"
+    ],
+    "video_id": "a4bPY38hcRI",
+    "run_id": "34844961180"
   }
 ]

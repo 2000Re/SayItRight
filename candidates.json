@@ -1,8 +1,10 @@
 [
   {
-    "word": "Arrives",
-    "arpabet": "ER0 AY1 V Z",
+    "word": "Ascii",
+    "arpabet": "AE1 S K IY0",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "sc[iey]"
+    ]
   }
 ]
