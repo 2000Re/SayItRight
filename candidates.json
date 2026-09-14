@@ -1,10 +1,8 @@
 [
   {
-    "word": "Ascii",
-    "arpabet": "AE1 S K IY0",
+    "word": "Assessed",
+    "arpabet": "AH0 S EH1 S T",
     "score": 3,
-    "patterns": [
-      "sc[iey]"
-    ]
+    "patterns": []
   }
 ]
