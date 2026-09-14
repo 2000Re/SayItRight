@@ -1056,5 +1056,13 @@
     ],
     "video_id": "-LjrTkycD2U",
     "run_id": "34796823039"
+  },
+  {
+    "word": "WHENEVER",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "4cgYgfdwZ04",
+    "run_id": "34803547016"
   }
 ]
