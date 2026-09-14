@@ -1064,5 +1064,13 @@
     ],
     "video_id": "4cgYgfdwZ04",
     "run_id": "34803547016"
+  },
+  {
+    "word": "WRITTEN",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "gwLsGp7ytC4",
+    "run_id": "34810641516"
   }
 ]
