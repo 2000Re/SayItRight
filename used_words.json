@@ -1080,5 +1080,13 @@
     ],
     "video_id": "IKtPxK_1Lqs",
     "run_id": "34819153757"
+  },
+  {
+    "word": "ALPHA",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "8yZEWejqm64",
+    "run_id": "34829443601"
   }
 ]
