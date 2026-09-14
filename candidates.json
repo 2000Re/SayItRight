@@ -1,10 +1,10 @@
 [
   {
-    "word": "Tonight",
-    "arpabet": "T AH0 N AY1 T",
+    "word": "Wheels",
+    "arpabet": "W IY1 L Z",
     "score": 4,
     "patterns": [
-      "igh"
+      "wh-"
     ]
   }
 ]
