@@ -1132,5 +1132,13 @@
     "patterns": [],
     "video_id": "Yu7QZgp9occ",
     "run_id": "34933875923"
+  },
+  {
+    "word": "WRITINGS",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "NYqe3m5y6Tw",
+    "run_id": "34943133486"
   }
 ]

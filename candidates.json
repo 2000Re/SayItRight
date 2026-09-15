@@ -1,8 +1,10 @@
 [
   {
-    "word": "Attacked",
-    "arpabet": "AH0 T AE1 K T",
-    "score": 3,
-    "patterns": []
+    "word": "Writings",
+    "arpabet": "R AY1 T IH0 NG Z",
+    "score": 4,
+    "patterns": [
+      "wr-"
+    ]
   }
 ]
