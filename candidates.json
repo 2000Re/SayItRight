@@ -1,8 +1,10 @@
 [
   {
-    "word": "Author",
-    "arpabet": "AO1 TH ER0",
-    "score": 3,
-    "patterns": []
+    "word": "Which",
+    "arpabet": "W IH1 CH",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
