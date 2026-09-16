@@ -1,8 +1,10 @@
 [
   {
-    "word": "Cassette",
-    "arpabet": "K AH0 S EH1 T",
-    "score": 3,
-    "patterns": []
+    "word": "Whole",
+    "arpabet": "HH OW1 L",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]

@@ -1214,5 +1214,13 @@
     "patterns": [],
     "video_id": "FQdC51jnsIA",
     "run_id": "35097464472"
+  },
+  {
+    "word": "WHOLE",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "JgkVdaRcD3M",
+    "run_id": "35110447522"
   }
 ]
