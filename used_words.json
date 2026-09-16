@@ -1172,5 +1172,13 @@
     "patterns": [],
     "video_id": "_j4drB5Y7vI",
     "run_id": "34983531018"
+  },
+  {
+    "word": "BEHALF",
+    "patterns": [
+      "-alf"
+    ],
+    "video_id": "_vIj3a7mi-U",
+    "run_id": "35060637381"
   }
 ]

@@ -1,8 +1,10 @@
 [
   {
-    "word": "Awesome",
-    "arpabet": "AA1 S AH0 M",
+    "word": "Behalf",
+    "arpabet": "B IH0 HH AE1 F",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "-alf"
+    ]
   }
 ]
