@@ -1,8 +1,10 @@
 [
   {
-    "word": "Bouquet",
-    "arpabet": "B UW0 K EY1",
+    "word": "Bridges",
+    "arpabet": "B R IH1 JH AH0 Z",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]
