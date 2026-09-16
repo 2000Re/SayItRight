@@ -45,6 +45,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # requirements.txtは"playwright>=1.45.0"と範囲指定のため、pip install
+      # で実際に解決されるバージョンはrequirements.txtの中身が変わらなくても
+      # 新しいリリースが出るたびに変わりうる。キャッシュキーをrequirements.txt
+      # のハッシュだけにすると、pip側だけ新バージョンが入ってもキャッシュは
+      # 古いバージョンのブラウザ本体のままヒットしてしまい、
+      # 「python -m playwright install」がスキップされて
+      # `BrowserType.launch: Executable doesn't exist`で失敗する
+      # (実際に2026-09-16のGitHub Actions実行で発生・確認済み)。
+      # ブラウザ本体のバージョンはPlaywright本体のバージョンと1:1で対応する
+      # ため、実際にpip installされたバージョンをキャッシュキーに含める。
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "version=$(python -m pip show playwright | grep '^Version:' | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+
       - name: Run scoring script
         run: python fetch_and_score.py
 
@@ -70,7 +84,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright browser (Chromium)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
