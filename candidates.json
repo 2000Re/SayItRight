@@ -1,10 +1,8 @@
 [
   {
-    "word": "Castle",
-    "arpabet": "K AE1 S AH0 L",
+    "word": "Cheaper",
+    "arpabet": "CH IY1 P ER0",
     "score": 3,
-    "patterns": [
-      "stle$"
-    ]
+    "patterns": []
   }
 ]
