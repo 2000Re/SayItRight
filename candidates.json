@@ -1,10 +1,10 @@
 [
   {
-    "word": "Budget",
-    "arpabet": "B AH1 JH IH0 T",
-    "score": 3,
+    "word": "Wrong",
+    "arpabet": "R AO1 NG",
+    "score": 4,
     "patterns": [
-      "dg"
+      "wr-"
     ]
   }
 ]

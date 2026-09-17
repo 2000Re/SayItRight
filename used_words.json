@@ -1268,5 +1268,13 @@
     ],
     "video_id": "l0ZOH_PeCnk",
     "run_id": "35217169440"
+  },
+  {
+    "word": "WRONG",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "gRcIyAV8BK0",
+    "run_id": "35222720134"
   }
 ]
