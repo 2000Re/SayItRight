@@ -1222,5 +1222,13 @@
     ],
     "video_id": "JgkVdaRcD3M",
     "run_id": "35110447522"
+  },
+  {
+    "word": "CASTLE",
+    "patterns": [
+      "stle$"
+    ],
+    "video_id": "F0nmnCHyMpg",
+    "run_id": "35171634639"
   }
 ]

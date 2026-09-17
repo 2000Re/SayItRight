@@ -1,10 +1,10 @@
 [
   {
-    "word": "Whole",
-    "arpabet": "HH OW1 L",
-    "score": 4,
+    "word": "Castle",
+    "arpabet": "K AE1 S AH0 L",
+    "score": 3,
     "patterns": [
-      "wh-"
+      "stle$"
     ]
   }
 ]
