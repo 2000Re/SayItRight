@@ -1260,5 +1260,13 @@
     "patterns": [],
     "video_id": "7QKewnu_4uI",
     "run_id": "35211936622"
+  },
+  {
+    "word": "BUDGET",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "l0ZOH_PeCnk",
+    "run_id": "35217169440"
   }
 ]

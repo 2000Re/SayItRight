@@ -1,8 +1,10 @@
 [
   {
-    "word": "Chassis",
-    "arpabet": "CH AE1 S IY0",
+    "word": "Budget",
+    "arpabet": "B AH1 JH IH0 T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]
