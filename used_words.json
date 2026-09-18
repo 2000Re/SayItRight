@@ -1316,5 +1316,13 @@
     ],
     "video_id": "E8FpSUgK-IE",
     "run_id": "35330993690"
+  },
+  {
+    "word": "CLIMB",
+    "patterns": [
+      "-mb"
+    ],
+    "video_id": "4hVknx6uyL0",
+    "run_id": "35336084735"
   }
 ]

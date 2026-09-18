@@ -1,10 +1,10 @@
 [
   {
-    "word": "Column",
-    "arpabet": "K AA1 L AH0 M",
+    "word": "Climb",
+    "arpabet": "K L AY1 M",
     "score": 3,
     "patterns": [
-      "mn$"
+      "-mb"
     ]
   }
 ]
