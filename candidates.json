@@ -1,8 +1,10 @@
 [
   {
-    "word": "Choosing",
-    "arpabet": "CH UW1 Z IH0 NG",
-    "score": 3,
-    "patterns": []
+    "word": "White",
+    "arpabet": "W AY1 T",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
