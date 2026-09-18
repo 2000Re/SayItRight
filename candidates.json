@@ -1,10 +1,8 @@
 [
   {
-    "word": "White",
-    "arpabet": "W AY1 T",
-    "score": 4,
-    "patterns": [
-      "wh-"
-    ]
+    "word": "Churches",
+    "arpabet": "CH ER1 CH IH0 Z",
+    "score": 3,
+    "patterns": []
   }
 ]
