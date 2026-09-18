@@ -1308,5 +1308,13 @@
     "patterns": [],
     "video_id": "GKO9W-WgN94",
     "run_id": "35320778857"
+  },
+  {
+    "word": "COLUMN",
+    "patterns": [
+      "mn$"
+    ],
+    "video_id": "E8FpSUgK-IE",
+    "run_id": "35330993690"
   }
 ]

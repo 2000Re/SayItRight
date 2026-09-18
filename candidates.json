@@ -1,8 +1,10 @@
 [
   {
-    "word": "Church",
-    "arpabet": "CH ER1 CH",
+    "word": "Column",
+    "arpabet": "K AA1 L AH0 M",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "mn$"
+    ]
   }
 ]
