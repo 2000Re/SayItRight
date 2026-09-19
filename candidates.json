@@ -1,10 +1,8 @@
 [
   {
-    "word": "Scenario",
-    "arpabet": "S IH0 N EH1 R IY0 OW0",
+    "word": "Search",
+    "arpabet": "S ER1 CH",
     "score": 3,
-    "patterns": [
-      "sc[iey]"
-    ]
+    "patterns": []
   }
 ]
