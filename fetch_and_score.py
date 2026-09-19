@@ -16,6 +16,7 @@ sheriff-shorts-bot の movie.py 側から、この candidates.json を
 """
 
 import json
+import random
 
 import cmudict  # pip install cmudict (requirements.txt に追加)
 import requests
@@ -108,6 +109,14 @@ def main():
         if common_words and word not in common_words:
             continue
         scored.append(score_word(word, arpabet))
+    # cmudictの単語リストはほぼアルファベット順に格納されており、
+    # list.sortは安定ソートのため、同点スコアの単語は常に元の順序
+    # (アルファベット順)のまま並んでしまう。PICK_N=1でプール上位から
+    # しか選ばないため、これが「同じ文字から始まる単語ばかり選ばれる」
+    # という偏りとして表面化した(実例: Coaching/Courage/Cheese等の
+    # C始まりの単語が連続した)。ソート前にシャッフルし、同点内の順序を
+    # ランダム化することで解消する。
+    random.shuffle(scored)
     scored.sort(key=lambda s: s.score, reverse=True)
 
     if not scored:
