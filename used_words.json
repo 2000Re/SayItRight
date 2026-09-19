@@ -1380,5 +1380,13 @@
     "patterns": [],
     "video_id": "eIwJ1nR5X8A",
     "run_id": "35438162367"
+  },
+  {
+    "word": "WHOSE",
+    "patterns": [
+      "wh-"
+    ],
+    "video_id": "bNPiO6cbTEI",
+    "run_id": "35440874415"
   }
 ]

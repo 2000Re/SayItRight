@@ -1,8 +1,10 @@
 [
   {
-    "word": "Search",
-    "arpabet": "S ER1 CH",
-    "score": 3,
-    "patterns": []
+    "word": "Whose",
+    "arpabet": "HH UW1 Z",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
