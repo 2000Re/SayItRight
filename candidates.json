@@ -1,8 +1,10 @@
 [
   {
-    "word": "Pleasure",
-    "arpabet": "P L EH1 ZH ER0",
+    "word": "Scenario",
+    "arpabet": "S IH0 N EH1 R IY0 OW0",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "sc[iey]"
+    ]
   }
 ]

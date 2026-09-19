@@ -1366,5 +1366,13 @@
     "patterns": [],
     "video_id": "5BEHKToes_c",
     "run_id": "35430085477"
+  },
+  {
+    "word": "SCENARIO",
+    "patterns": [
+      "sc[iey]"
+    ],
+    "video_id": "OWdJwzm3fJk",
+    "run_id": "35435468672"
   }
 ]
