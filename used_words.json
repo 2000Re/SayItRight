@@ -1424,5 +1424,13 @@
     "patterns": [],
     "video_id": "ZxQNhVsBn_Y",
     "run_id": "35496724518"
+  },
+  {
+    "word": "EMPHASIS",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "2MIyJJEFaqI",
+    "run_id": "35502162452"
   }
 ]

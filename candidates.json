@@ -1,8 +1,10 @@
 [
   {
-    "word": "Features",
-    "arpabet": "F IY1 CH ER0 Z",
+    "word": "Emphasis",
+    "arpabet": "EH1 M F AH0 S AH0 S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]
