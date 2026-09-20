@@ -1,10 +1,8 @@
 [
   {
-    "word": "Emphasis",
-    "arpabet": "EH1 M F AH0 S AH0 S",
+    "word": "Weather",
+    "arpabet": "W EH1 DH ER0",
     "score": 3,
-    "patterns": [
-      "ph"
-    ]
+    "patterns": []
   }
 ]
