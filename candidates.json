@@ -1,8 +1,10 @@
 [
   {
-    "word": "Suffered",
-    "arpabet": "S AH1 F ER0 D",
+    "word": "Whats",
+    "arpabet": "W AH0 T S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
