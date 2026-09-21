@@ -1,8 +1,10 @@
 [
   {
-    "word": "Teaching",
-    "arpabet": "T IY1 CH IH0 NG",
+    "word": "Unique",
+    "arpabet": "Y UW0 N IY1 K",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "-que"
+    ]
   }
 ]
