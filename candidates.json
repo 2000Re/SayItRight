@@ -1,8 +1,10 @@
 [
   {
-    "word": "Pressure",
-    "arpabet": "P R EH1 SH ER0",
+    "word": "Guardian",
+    "arpabet": "G AA1 R D IY0 AH0 N",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "gu[ae]"
+    ]
   }
 ]

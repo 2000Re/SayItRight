@@ -1514,5 +1514,13 @@
     "patterns": [],
     "video_id": "hpZdNkGsc8g",
     "run_id": "35599227867"
+  },
+  {
+    "word": "GUARDIAN",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "YObR35FRhyk",
+    "run_id": "35605273646"
   }
 ]
