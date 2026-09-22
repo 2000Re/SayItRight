@@ -1534,5 +1534,13 @@
     "patterns": [],
     "video_id": "qu__VhYpHk4",
     "run_id": "35675557691"
+  },
+  {
+    "word": "PHOTO",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "7eTK3Z28Big",
+    "run_id": "35682957329"
   }
 ]

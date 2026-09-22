@@ -1,8 +1,10 @@
 [
   {
-    "word": "Shanghai",
-    "arpabet": "SH AE1 NG HH AY1",
+    "word": "Photo",
+    "arpabet": "F OW1 T OW2",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]
