@@ -1,10 +1,10 @@
 [
   {
-    "word": "Photo",
-    "arpabet": "F OW1 T OW2",
-    "score": 3,
+    "word": "Wherever",
+    "arpabet": "W EH0 R EH1 V ER0",
+    "score": 4,
     "patterns": [
-      "ph"
+      "wh-"
     ]
   }
 ]
