@@ -1,8 +1,10 @@
 [
   {
-    "word": "Murray",
-    "arpabet": "M ER1 IY0",
+    "word": "Gadgets",
+    "arpabet": "G AE1 JH AH0 T S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]
