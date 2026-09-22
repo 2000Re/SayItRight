@@ -1556,5 +1556,13 @@
     "patterns": [],
     "video_id": "mS6Ryhr5HaY",
     "run_id": "35699332583"
+  },
+  {
+    "word": "WRIST",
+    "patterns": [
+      "wr-"
+    ],
+    "video_id": "R1uXs9XJEKU",
+    "run_id": "35710072226"
   }
 ]

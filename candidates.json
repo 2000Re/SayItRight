@@ -1,8 +1,10 @@
 [
   {
-    "word": "Should",
-    "arpabet": "SH UH1 D",
+    "word": "Wrist",
+    "arpabet": "R IH1 S T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "wr-"
+    ]
   }
 ]
