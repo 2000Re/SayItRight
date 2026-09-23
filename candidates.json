@@ -1,8 +1,10 @@
 [
   {
-    "word": "Referred",
-    "arpabet": "R AH0 F ER1 D",
+    "word": "Philips",
+    "arpabet": "F IH1 L AH0 P S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]

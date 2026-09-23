@@ -1620,5 +1620,13 @@
     "patterns": [],
     "video_id": "rA7gDxMKh_s",
     "run_id": "35831431972"
+  },
+  {
+    "word": "PHILIPS",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "aE_aWG1ix1w",
+    "run_id": "35842616786"
   }
 ]
