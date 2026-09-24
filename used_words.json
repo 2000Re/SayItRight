@@ -1708,5 +1708,13 @@
     "patterns": [],
     "video_id": "ZKkfEFIkkRg",
     "run_id": "35992703243"
+  },
+  {
+    "word": "PHARMACY",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "8t7LS3IDIqM",
+    "run_id": "35998716194"
   }
 ]
