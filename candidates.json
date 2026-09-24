@@ -1,8 +1,10 @@
 [
   {
-    "word": "Learning",
-    "arpabet": "L ER1 N IH0 NG",
-    "score": 3,
-    "patterns": []
+    "word": "While",
+    "arpabet": "W AY1 L",
+    "score": 4,
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
