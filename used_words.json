@@ -1722,5 +1722,13 @@
     "patterns": [],
     "video_id": "p-vaxo2Hwes",
     "run_id": "36005290232"
+  },
+  {
+    "word": "SCIENCES",
+    "patterns": [
+      "sc[iey]"
+    ],
+    "video_id": "PDu7fEkTJCA",
+    "run_id": "36012413481"
   }
 ]

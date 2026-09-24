@@ -1,8 +1,10 @@
 [
   {
-    "word": "Launched",
-    "arpabet": "L AO1 N CH T",
+    "word": "Sciences",
+    "arpabet": "S AY1 AH0 N S AH0 Z",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "sc[iey]"
+    ]
   }
 ]
