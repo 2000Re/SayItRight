@@ -1,10 +1,10 @@
 [
   {
-    "word": "Realm",
-    "arpabet": "R EH1 L M",
+    "word": "Guests",
+    "arpabet": "G EH1 S T S",
     "score": 3,
     "patterns": [
-      "-alm"
+      "gu[ae]"
     ]
   }
 ]
