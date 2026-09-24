@@ -1686,5 +1686,13 @@
     "patterns": [],
     "video_id": "wjMFe00wHKY",
     "run_id": "35969322533"
+  },
+  {
+    "word": "REALM",
+    "patterns": [
+      "-alm"
+    ],
+    "video_id": "pixGTIMtoSU",
+    "run_id": "35980904669"
   }
 ]

@@ -1,8 +1,10 @@
 [
   {
-    "word": "Matching",
-    "arpabet": "M AE1 CH IH0 NG",
+    "word": "Realm",
+    "arpabet": "R EH1 L M",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "-alm"
+    ]
   }
 ]
