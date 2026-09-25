@@ -1730,5 +1730,13 @@
     ],
     "video_id": "PDu7fEkTJCA",
     "run_id": "36012413481"
+  },
+  {
+    "word": "EDGAR",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "pk10FYjmJc0",
+    "run_id": "36081775399"
   }
 ]

@@ -1,10 +1,10 @@
 [
   {
-    "word": "Sciences",
-    "arpabet": "S AY1 AH0 N S AH0 Z",
+    "word": "Edgar",
+    "arpabet": "EH1 D G ER0",
     "score": 3,
     "patterns": [
-      "sc[iey]"
+      "dg"
     ]
   }
 ]
