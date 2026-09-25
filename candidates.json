@@ -1,8 +1,10 @@
 [
   {
-    "word": "Teacher",
-    "arpabet": "T IY1 CH ER0",
+    "word": "Graphics",
+    "arpabet": "G R AE1 F IH0 K S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]

@@ -1774,5 +1774,13 @@
     "patterns": [],
     "video_id": "x33ERzTR0Fc",
     "run_id": "36129092347"
+  },
+  {
+    "word": "GRAPHICS",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "JSdcRFtI4dI",
+    "run_id": "36134619263"
   }
 ]
