@@ -1,10 +1,8 @@
 [
   {
-    "word": "Language",
-    "arpabet": "L AE1 NG G W AH0 JH",
+    "word": "Earned",
+    "arpabet": "ER1 N D",
     "score": 3,
-    "patterns": [
-      "gu[ae]"
-    ]
+    "patterns": []
   }
 ]
