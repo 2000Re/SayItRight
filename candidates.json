@@ -1,8 +1,10 @@
 [
   {
-    "word": "Featured",
-    "arpabet": "F IY1 CH ER0 D",
+    "word": "Judgment",
+    "arpabet": "JH AH1 JH M AH0 N T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]
