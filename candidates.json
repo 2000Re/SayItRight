@@ -1,8 +1,10 @@
 [
   {
-    "word": "Shopper",
-    "arpabet": "SH AA1 P ER0",
+    "word": "Language",
+    "arpabet": "L AE1 NG G W AH0 JH",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "gu[ae]"
+    ]
   }
 ]

@@ -1800,5 +1800,13 @@
     "patterns": [],
     "video_id": "G5MLKswtV7w",
     "run_id": "36208240570"
+  },
+  {
+    "word": "LANGUAGE",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "F6Jg28JLNAE",
+    "run_id": "36214639382"
   }
 ]
