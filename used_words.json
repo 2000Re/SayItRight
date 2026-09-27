@@ -1908,5 +1908,13 @@
     "patterns": [],
     "video_id": "w_55PvRXY4I",
     "run_id": "36322206999"
+  },
+  {
+    "word": "PHOTOS",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "inTm77qmhDw",
+    "run_id": "36325715930"
   }
 ]

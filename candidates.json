@@ -1,8 +1,10 @@
 [
   {
-    "word": "Touched",
-    "arpabet": "T AH1 CH T",
+    "word": "Photos",
+    "arpabet": "F OW1 T OW2 Z",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]
