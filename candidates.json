@@ -1,10 +1,8 @@
 [
   {
-    "word": "Judges",
-    "arpabet": "JH AH1 JH IH0 Z",
+    "word": "Learners",
+    "arpabet": "L ER1 N ER0 Z",
     "score": 3,
-    "patterns": [
-      "dg"
-    ]
+    "patterns": []
   }
 ]
