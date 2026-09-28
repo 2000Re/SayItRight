@@ -1,8 +1,10 @@
 [
   {
-    "word": "Learners",
-    "arpabet": "L ER1 N ER0 Z",
+    "word": "Guest",
+    "arpabet": "G EH1 S T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "gu[ae]"
+    ]
   }
 ]

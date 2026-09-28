@@ -1938,5 +1938,13 @@
     "patterns": [],
     "video_id": "HKBhNmKzJ2Q",
     "run_id": "36381679790"
+  },
+  {
+    "word": "GUEST",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "SIV-4zm3sQ4",
+    "run_id": "36391361338"
   }
 ]
