@@ -1,8 +1,10 @@
 [
   {
-    "word": "Reaching",
-    "arpabet": "R IY1 CH IH0 NG",
+    "word": "Listen",
+    "arpabet": "L IH1 S AH0 N",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "sten$"
+    ]
   }
 ]

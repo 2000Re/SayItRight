@@ -1952,5 +1952,13 @@
     "patterns": [],
     "video_id": "1OLZkFx64xI",
     "run_id": "36403152841"
+  },
+  {
+    "word": "LISTEN",
+    "patterns": [
+      "sten$"
+    ],
+    "video_id": "Nm5xiT-BYCk",
+    "run_id": "36409388084"
   }
 ]
