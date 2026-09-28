@@ -1,10 +1,8 @@
 [
   {
-    "word": "Listen",
-    "arpabet": "L IH1 S AH0 N",
+    "word": "Shower",
+    "arpabet": "SH AW1 ER0",
     "score": 3,
-    "patterns": [
-      "sten$"
-    ]
+    "patterns": []
   }
 ]
