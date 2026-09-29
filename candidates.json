@@ -1,8 +1,10 @@
 [
   {
-    "word": "Showing",
-    "arpabet": "SH OW1 IH0 NG",
+    "word": "Edges",
+    "arpabet": "EH1 JH AH0 Z",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]

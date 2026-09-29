@@ -2006,5 +2006,13 @@
     "patterns": [],
     "video_id": "6TTxufo59l4",
     "run_id": "36525912451"
+  },
+  {
+    "word": "EDGES",
+    "patterns": [
+      "dg"
+    ],
+    "video_id": "gDs1oBolftk",
+    "run_id": "36536307597"
   }
 ]
