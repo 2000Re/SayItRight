@@ -2026,5 +2026,13 @@
     "patterns": [],
     "video_id": "Dn6s1UsUMJk",
     "run_id": "36555236484"
+  },
+  {
+    "word": "GUARDS",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "yPhRauzvPi4",
+    "run_id": "36561409711"
   }
 ]

@@ -1,8 +1,10 @@
 [
   {
-    "word": "Showers",
-    "arpabet": "SH AW1 ER0 Z",
+    "word": "Guards",
+    "arpabet": "G AA1 R D Z",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "gu[ae]"
+    ]
   }
 ]
