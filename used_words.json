@@ -1984,5 +1984,13 @@
     "patterns": [],
     "video_id": "AYB-UIEv46c",
     "run_id": "36435567894"
+  },
+  {
+    "word": "PROPHET",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "ox155zz_7us",
+    "run_id": "36507642014"
   }
 ]

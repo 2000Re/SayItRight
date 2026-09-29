@@ -1,8 +1,10 @@
 [
   {
-    "word": "Research",
-    "arpabet": "R IY0 S ER1 CH",
+    "word": "Prophet",
+    "arpabet": "P R AA1 F AH0 T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]
