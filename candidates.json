@@ -1,10 +1,8 @@
 [
   {
-    "word": "Scenic",
-    "arpabet": "S IY1 N IH0 K",
+    "word": "Showing",
+    "arpabet": "SH OW1 IH0 NG",
     "score": 3,
-    "patterns": [
-      "sc[iey]"
-    ]
+    "patterns": []
   }
 ]
