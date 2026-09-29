@@ -1,10 +1,10 @@
 [
   {
-    "word": "Prophet",
-    "arpabet": "P R AA1 F AH0 T",
+    "word": "Scenic",
+    "arpabet": "S IY1 N IH0 K",
     "score": 3,
     "patterns": [
-      "ph"
+      "sc[iey]"
     ]
   }
 ]
