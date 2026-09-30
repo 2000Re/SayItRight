@@ -1,8 +1,10 @@
 [
   {
-    "word": "Marriage",
-    "arpabet": "M EH1 R IH0 JH",
+    "word": "Guard",
+    "arpabet": "G AA1 R D",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "gu[ae]"
+    ]
   }
 ]
