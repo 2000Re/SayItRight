@@ -2052,5 +2052,13 @@
     "patterns": [],
     "video_id": "5-w1eY22hqY",
     "run_id": "36582280633"
+  },
+  {
+    "word": "RALPH",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "0kfQKyXmtqc",
+    "run_id": "36654854857"
   }
 ]

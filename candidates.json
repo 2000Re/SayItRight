@@ -1,8 +1,10 @@
 [
   {
-    "word": "Surrey",
-    "arpabet": "S ER1 IY0",
+    "word": "Ralph",
+    "arpabet": "R AE1 L F",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "ph"
+    ]
   }
 ]
