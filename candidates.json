@@ -1,8 +1,10 @@
 [
   {
-    "word": "Moisture",
-    "arpabet": "M OY1 S CH ER0",
+    "word": "Budgets",
+    "arpabet": "B AH1 JH IH0 T S",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "dg"
+    ]
   }
 ]
