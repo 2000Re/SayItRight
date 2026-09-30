@@ -2098,5 +2098,13 @@
     ],
     "video_id": "sQ3UuvYNr8Q",
     "run_id": "36708213930"
+  },
+  {
+    "word": "PHYSICS",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "JHl1N2aAHtU",
+    "run_id": "36714375153"
   }
 ]
