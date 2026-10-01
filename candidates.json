@@ -1,10 +1,10 @@
 [
   {
-    "word": "Whilst",
-    "arpabet": "W AY1 L S T",
+    "word": "Graph",
+    "arpabet": "G R AE1 F",
     "score": 3,
     "patterns": [
-      "wh-"
+      "ph"
     ]
   }
 ]
