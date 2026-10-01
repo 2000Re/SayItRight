@@ -2112,5 +2112,13 @@
     "patterns": [],
     "video_id": "xt-U2-oYvYc",
     "run_id": "36721249577"
+  },
+  {
+    "word": "GUARD",
+    "patterns": [
+      "gu[ae]"
+    ],
+    "video_id": "fIf4bsXk1Ng",
+    "run_id": "36800840397"
   }
 ]
