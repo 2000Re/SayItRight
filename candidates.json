@@ -1,8 +1,10 @@
 [
   {
-    "word": "Worried",
-    "arpabet": "W ER1 IY0 D",
+    "word": "Whilst",
+    "arpabet": "W AY1 L S T",
     "score": 3,
-    "patterns": []
+    "patterns": [
+      "wh-"
+    ]
   }
 ]
