@@ -2222,5 +2222,13 @@
     ],
     "video_id": "aiU1AwdJbbE",
     "run_id": "37054969428"
+  },
+  {
+    "word": "ELEPHANT",
+    "patterns": [
+      "ph"
+    ],
+    "video_id": "hfUXMbWNGAo",
+    "run_id": "37078202005"
   }
 ]
