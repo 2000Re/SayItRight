@@ -2258,6 +2258,12 @@
   {
     "word": "SCANNED",
     "patterns": [],
-    "video_id": "x6KCXRJyvk0"
+    "video_id": "x6KCXRJyvk0",
+    "run_id": null
+  },
+  {
+    "word": "READINGS",
+    "patterns": [],
+    "video_id": "lztcB_CWvlo"
   }
 ]
