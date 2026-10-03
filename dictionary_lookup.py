@@ -7,7 +7,7 @@ Wiktionary(en.wiktionary.org)のREST API `/page/definition/{word}` の
 
 requestsやgoogle-api-python-client等の重い依存を持たないため、
 requirements-dev.txtだけの軽量なテスト環境からもインポートしてテスト
-できる(used_words_store.py/compilation_state.pyと同じ狙い)。
+できる(used_words_store.pyと同じ狙い)。
 
 [Design] 以前はdictionaryapi.dev(無料・認証不要の小規模なコミュニティ
 運営API)を使っていたが、タイムアウトや5xxエラー(522=オリジンサーバー

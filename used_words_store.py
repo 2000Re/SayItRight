@@ -1,8 +1,8 @@
 """
 used_words.json(使用済み単語履歴)の読み書きを共通化する。
 
-fetch_and_score.py・upload_videos.py・compile_shorts.py の複数箇所で
-同じ読み込み/保存ロジックが必要なため、ここに集約する。
+fetch_and_score.py・upload_videos.py の複数箇所で同じ読み込み/保存
+ロジックが必要なため、ここに集約する。
 """
 import json
 import os
@@ -16,10 +16,10 @@ def load_used_words() -> list:
     各要素は
     {"word": str, "patterns": list[str], "video_id": str | None, "run_id": str | None}。
     (patterns は score_words.matched_patterns が返す綴りパターン名、
-     video_id はYouTubeへのアップロード成功時に記録される動画ID、
-     run_id はその動画を生成したGitHub Actionsの実行ID。compile_shorts.pyが
-     video-outputアーティファクトからYouTube経由を介さずに動画本体を
-     取得し直すために使う)
+     video_id はYouTubeへのアップロード成功時に記録される動画ID。
+     run_id は過去の結合動画機能(compile_shorts.py、廃止済み)が使って
+     いた名残で、現在upload_videos.pyは書き込まない。旧エントリに
+     残っている場合もあるため、読み込み時のみ後方互換で受け入れる)
 
     used_words.json 内の「使用済み」の記録は upload_videos.py が
     YouTubeへのアップロードに成功した時点で初めて行う。
@@ -60,7 +60,6 @@ def load_used_words() -> list:
 
 
 def save_used_words(history: list) -> None:
-    """使用済み単語履歴を古い→新しい順のまま保存する
-    (直近パターン判定・結合動画のバッチ管理に使うため)。"""
+    """使用済み単語履歴を古い→新しい順のまま保存する(直近パターン判定に使うため)。"""
     with open(USED_WORDS_PATH, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
