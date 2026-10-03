@@ -2252,6 +2252,12 @@
   {
     "word": "ADVERSE",
     "patterns": [],
-    "video_id": "IIiqOZy3o6w"
+    "video_id": "IIiqOZy3o6w",
+    "run_id": null
+  },
+  {
+    "word": "SCANNED",
+    "patterns": [],
+    "video_id": "x6KCXRJyvk0"
   }
 ]
