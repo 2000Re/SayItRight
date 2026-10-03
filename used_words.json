@@ -2246,6 +2246,12 @@
   {
     "word": "CHEAP",
     "patterns": [],
-    "video_id": "NBtqWiKesJ0"
+    "video_id": "NBtqWiKesJ0",
+    "run_id": null
+  },
+  {
+    "word": "ADVERSE",
+    "patterns": [],
+    "video_id": "IIiqOZy3o6w"
   }
 ]
