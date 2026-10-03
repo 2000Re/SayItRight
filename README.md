@@ -11,13 +11,16 @@ fetch_and_score.py  … cmudict(13万語超)から「発音が難しい単語」
         ↓
 generate_audio.py   … candidates.json の単語をGoogle Cloud TTSで音声化(通常速度/スロー) → audio_output/
         ↓
-create_videos.py    … 音声+IPA発音記号からPlaywright/moviepyで動画を生成 → video_output/
+create_videos.py    … 音声+IPA発音記号からPlaywright/moviepyで動画・サムネイルを生成
+                       → video_output/(Shorts, 9:16), regular_video_output/(通常動画, 16:9), thumbnail_output/
         ↓
-upload_videos.py    … 動画をYouTubeにアップロードし、日本語ローカライズ・意味/例文入り説明欄を設定
+upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにアップロードし、
+                       日本語ローカライズ・意味/例文入り説明欄を設定
 ```
 
 - 単語の選定は `used_words.json`(使用済み単語の履歴)を見て重複を避け、さらに直近の投稿と綴りパターン(黙字系・`-ough`系など)が被らないよう多様性も考慮します。
 - `used_words.json` への登録は **YouTubeへのアップロードが成功した時点で初めて** 行われます。TTS/動画生成/アップロードのいずれかで失敗した単語は「使用済み」にならず、次回また候補に上がります。
+- 1単語につき、Shorts(縦型9:16)と通常動画(横型16:9、Shorts動画をピラーボックスしたもの)を同時に2本アップロードします。通常動画の生成・アップロードが失敗してもShortsの投稿は継続します(通常動画だけがスキップされます)。
 
 ## ディレクトリ構成
 
@@ -28,9 +31,9 @@ upload_videos.py    … 動画をYouTubeにアップロードし、日本語ロ�
 | `fetch_and_score.py` | cmudict + 頻出単語リストから候補単語を選び `candidates.json` を出力 |
 | `arpabet_to_ipa.py` | ARPAbet(CMU辞書の発音表記) → IPA(国際音声記号)変換 |
 | `generate_audio.py` | Google Cloud Text-to-Speechで音声(通常/スロー)を生成 |
-| `video_builder.py` | Playwrightでのスクリーンショット撮影とmoviepyでの動画合成(9:16縦型Shorts) |
-| `create_videos.py` | `video_builder.py` を使って候補単語ごとに動画を生成 |
-| `upload_videos.py` | YouTubeへの動画アップロード、説明欄への意味・例文追加、日本語ローカライズ設定 |
+| `video_builder.py` | Playwrightでのスクリーンショット撮影とmoviepyでの動画合成(Shorts用9:16縦型・通常動画用16:9ピラーボックス・サムネイル) |
+| `create_videos.py` | `video_builder.py` を使って候補単語ごとに動画・サムネイルを生成 |
+| `upload_videos.py` | YouTubeへのShorts/通常動画/サムネイルのアップロード、説明欄への意味・例文追加、日本語ローカライズ設定、再生リストへの追加 |
 | `used_words.json` | 使用済み単語の履歴(`{"word": ..., "patterns": [...]}` の配列、古い→新しい順) |
 | `candidates.json` | 直近の `fetch_and_score.py` 実行で選ばれた候補単語 |
 | `tests/` | `score_words.py` / `arpabet_to_ipa.py` (外部依存のない純粋関数)のユニットテスト |
@@ -47,9 +50,9 @@ upload_videos.py    … 動画をYouTubeにアップロードし、日本語ロ�
 | `YT_REFRESH_TOKEN` / `YT_CLIENT_ID` / `YT_CLIENT_SECRET` | YouTube Data API用のOAuth認証情報 |
 | `YT_PRIVACY_STATUS`(任意) | アップロードする動画の公開設定。省略時は `public`。初回運用時は `unlisted` を推奨 |
 | `YOUTUBE_SHORTS_PLAYLIST_ID`(任意) | Shorts用再生リストのID。設定するとアップロード成功時に自動追加される。未設定の場合は追加をスキップ |
-| `YOUTUBE_COMPILATION_PLAYLIST_ID`(任意) | 結合動画(通常動画)用再生リストのID。同上 |
+| `YOUTUBE_COMPILATION_PLAYLIST_ID`(任意) | 通常動画用再生リストのID。同上(Secret名は旧・結合動画機能の名残だが、現在は単語単位の通常動画用に使っている) |
 
-**OAuthスコープについて**: 動画アップロード(`videos.insert`)には `youtube.upload` スコープで足りますが、日本語ローカライズ設定(`videos.update`)には `youtube`(または `youtube.force-ssl`)スコープが必要です。`youtube.upload` のみで発行した `YT_REFRESH_TOKEN` だと、ローカライズ設定だけが403エラーで失敗します(動画本体のアップロードには影響しません)。
+**OAuthスコープについて**: 動画アップロード(`videos.insert`)・サムネイル設定(`thumbnails.set`)には `youtube.upload` スコープで足りますが、日本語ローカライズ設定(`videos.update`)や再生リストへの追加(`playlistItems.insert`)には `youtube`(または `youtube.force-ssl`)スコープが必要です。`youtube.upload` のみで発行した `YT_REFRESH_TOKEN` だと、それらだけが403エラーで失敗します(動画本体のアップロードには影響しません)。
 
 ## ローカルでの実行
 

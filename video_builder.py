@@ -2,14 +2,15 @@
 video_builder.py
 
 単語 + IPA発音記号 + 音声(スロー/通常) から、YouTube Shorts用の
-縦型動画(1080x1920, 9:16)を生成する。
+縦型動画(1080x1920, 9:16)を生成する。create_videos.pyはこれに加えて、
+同じ内容を横型(16:9)にピラーボックスした「通常動画」も生成し、
+Shortsと合わせてアップロードする(結合動画としてまとめるのではなく、
+単語ごとに2本同時に投稿する方式)。
 
-[Design] 以前は横型(16:9)で作成し、サムネイル(単語をどんと表示)を
-主要な導線にする設計だった(縦型+短尺だとYouTubeがShorts判定し、
-Shortsフィード上ではカスタムサムネイルが表示されなくなるため)。
-横型「通常動画」では十分な再生数が得られなかったため、Shortsの
-フィード経由での露出を優先し、縦型に変更した。サムネイル生成は
-その後、Shorts本編には使われない機能として削除した。
+サムネイル(単語をどんと表示するだけの画像)はShorts・通常動画の
+どちらにも使う。Shorts本編のスワイプ画面にはカスタムサムネイルは
+出ないが、検索結果・埋め込み・通常動画では表示されるため、
+両方の動画にアップロードする。
 
 sheriff-shorts-bot(everysheriff/video_generator.py)の以下の資産を流用:
   - Playwrightでのスクリーンショット撮影パターン(ブラウザは1回だけ起動)
@@ -20,21 +21,43 @@ import os
 import random
 import uuid
 
-from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
+from moviepy import (
+    ImageClip,
+    AudioFileClip,
+    CompositeAudioClip,
+    CompositeVideoClip,
+    ColorClip,
+    VideoFileClip,
+    concatenate_videoclips,
+)
 from PIL import Image
 
 from config import AUDIO_PAD_MS
 
 # ------------------------------------------------------------------
-# 動画キャンバスサイズ(Shorts用 縦型 9:16)
+# 動画キャンバスサイズ(Shorts用 縦型 9:16 / 通常動画用 横型 16:9)
 # ------------------------------------------------------------------
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
+
+REGULAR_VIDEO_WIDTH = 1920
+REGULAR_VIDEO_HEIGHT = 1080
+
+# サムネイルサイズ(YouTube推奨: 1280x720, 16:9)
+THUMBNAIL_WIDTH = 1280
+THUMBNAIL_HEIGHT = 720
 
 # 背景色バリエーション(sheriff-shorts-botと同系統の落ち着いた配色)
 BG_COLORS = [
     "#171310", "#221C18", "#1C211B", "#2B1E18", "#181C24",
 ]
+
+# 通常動画のピラーボックス(左右の無地の帯)の色。BG_COLORSの一色(#171310)と統一。
+REGULAR_VIDEO_BG_COLOR = (23, 19, 16)
+
+# サムネイル配色: 黄色地に黒文字(高視認性の定番配色)
+THUMBNAIL_BG_COLOR = "#FFD400"
+THUMBNAIL_TEXT_COLOR = "#111111"
 
 FONT_STACK = '"DejaVu Sans", "Liberation Sans", "Segoe UI", Roboto, sans-serif'
 
@@ -124,6 +147,114 @@ def _cleanup_temp_files(*paths):
                 os.remove(p)
         except Exception as e:
             print(f"[Warning] Failed to remove temp file {p}: {e}")
+
+
+# ------------------------------------------------------------------
+# サムネイル(黄色地に黒文字。単語のみをどんと表示)
+# ------------------------------------------------------------------
+def _build_thumbnail_html(word):
+    safe_word = _html_escape(word)
+    # 単語の長さに応じてフォントサイズを自動調整(長い単語がはみ出さないように)
+    length = len(word)
+    if length <= 6:
+        font_size = 220
+    elif length <= 10:
+        font_size = 170
+    elif length <= 14:
+        font_size = 130
+    else:
+        font_size = 100
+
+    return (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<style>"
+        f"body {{margin:0; padding:0; width:{THUMBNAIL_WIDTH}px; height:{THUMBNAIL_HEIGHT}px; "
+        f"background-color:{THUMBNAIL_BG_COLOR}; color:{THUMBNAIL_TEXT_COLOR}; "
+        "display:flex; justify-content:center; align-items:center; "
+        f"box-sizing:border-box; font-family:{FONT_STACK};}}"
+        f".word {{font-size:{font_size}px; font-weight:900; text-align:center; "
+        "word-break:break-word; padding:0 60px; letter-spacing:-0.01em;}}"
+        "</style></head><body>"
+        f"<div class='word'>{safe_word}</div>"
+        "</body></html>"
+    )
+
+
+def generate_thumbnail(word, output_path, browser=None):
+    """
+    単語をどんと表示するだけのサムネイル(1280x720、黄色地に黒文字)を生成する。
+    Shorts・通常動画の両方のアップロードでこの同じ画像を使い回す。
+
+    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
+    (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
+    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
+    このタブ専用のブラウザセッションを起動して完結させる。
+    """
+    html_content = _build_thumbnail_html(word)
+
+    if browser is not None:
+        _screenshot_html(browser, html_content, output_path,
+                          width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
+    else:
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            owned_browser = p.chromium.launch(headless=True)
+            try:
+                _screenshot_html(owned_browser, html_content, output_path,
+                                  width=THUMBNAIL_WIDTH, height=THUMBNAIL_HEIGHT)
+            finally:
+                owned_browser.close()
+
+    print(f"[Thumbnail] 生成しました: {output_path}")
+    return output_path
+
+
+def pillarbox_scale(clip_width: int, clip_height: int, canvas_width: int, canvas_height: int) -> float:
+    """縦長クリップを横型キャンバスに収めるための拡大率を返す。
+
+    まず高さをキャンバスの高さに合わせる。それでも幅がキャンバス幅を
+    超える場合(極端に横長のクリップが来た場合の安全策)は、幅基準にする。"""
+    scale = canvas_height / clip_height
+    if clip_width * scale > canvas_width:
+        scale = canvas_width / clip_width
+    return scale
+
+
+def build_regular_video(shorts_video_path: str, output_filename: str) -> str:
+    """
+    build_word_video()が生成した縦型Shorts動画(shorts_video_path)を、
+    横型(16:9)キャンバスにピラーボックス(左右に無地の帯)で配置し直し、
+    「通常動画」としてアップロードできる形にする。
+
+    単純に縦型のままアップロードすると、尺が短いままYouTubeにShorts判定
+    されてしまう(判定は投稿者の意図ではなく、アスペクト比+尺のみで決まる
+    仕様のため)。ピラーボックスして横型の見た目にすることで、確実に
+    「通常動画」として扱われるようにする。"""
+    clip = VideoFileClip(shorts_video_path)
+    composed = None
+    try:
+        scale = pillarbox_scale(clip.w, clip.h, REGULAR_VIDEO_WIDTH, REGULAR_VIDEO_HEIGHT)
+        resized = clip.resized(scale)
+        bg = ColorClip(
+            size=(REGULAR_VIDEO_WIDTH, REGULAR_VIDEO_HEIGHT),
+            color=REGULAR_VIDEO_BG_COLOR,
+            duration=clip.duration,
+        )
+        composed = CompositeVideoClip([bg, resized.with_position("center")]).with_duration(clip.duration)
+        composed.write_videofile(
+            output_filename, fps=30, codec="libx264", audio_codec="aac", logger=None
+        )
+    finally:
+        if composed:
+            try:
+                composed.close()
+            except Exception:
+                pass
+        clip.close()
+
+    print(f"[Video Gen] 通常動画(横型)を生成しました: {output_filename}")
+    return output_filename
 
 
 # ------------------------------------------------------------------

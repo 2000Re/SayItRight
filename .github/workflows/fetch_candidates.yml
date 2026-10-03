@@ -11,9 +11,6 @@ on:
 
 permissions:
   contents: write
-  # compile_shorts.pyがGitHub Actions APIで過去のvideo-outputアーティファクト
-  # を取得するために必要(YouTubeへのyt-dlp再ダウンロードをやめたため)。
-  actions: read
 
 # 手動実行と cron-job.org からの自動実行が重なった場合に、同じ単語が
 # 二重にアップロードされたり、used_words.json/candidates.json への
@@ -97,16 +94,6 @@ jobs:
       - name: Generate videos
         run: python create_videos.py
 
-      # compile_shorts.pyが後で(この回も含めて)GitHub Actions API経由で
-      # 動画本体を取得し直せるよう、YouTubeへのアップロードより前に
-      # アーティファクトとして保存しておく必要がある(video_output/の中身は
-      # この時点以降変化しないため、ここでアップロードして問題ない)。
-      - name: Upload video files as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: video-output
-          path: video_output/
-
       - name: Upload to YouTube
         run: python upload_videos.py
         env:
@@ -114,29 +101,13 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YOUTUBE_SHORTS_PLAYLIST_ID: ${{ secrets.YOUTUBE_SHORTS_PLAYLIST_ID }}
-
-      # used_words.jsonにvideo_id/run_idが10件たまるごとに、各動画が生成
-      # された回のvideo-outputアーティファクト(GitHub Actions API経由)から
-      # 動画本体を取得し直し、横型(16:9)の結合動画としてアップロードする。
-      # (以前はYouTubeからyt-dlpで再ダウンロードしていたが、GitHub Actionsの
-      # IPがボット判定される問題が解決できなかったため、YouTube/yt-dlpに
-      # 依存しないこの方式に変更した)
-      # 本編パイプラインとは独立した追加機能なので、失敗しても後続の
-      # コミット処理はブロックしない(compile_shorts.py側で例外を吸収する)。
-      - name: Compile Shorts into a regular video (every 10 videos)
-        run: python compile_shorts.py
-        env:
-          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
-          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
-          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YOUTUBE_COMPILATION_PLAYLIST_ID: ${{ secrets.YOUTUBE_COMPILATION_PLAYLIST_ID }}
 
       - name: Commit updated candidates and used-words list
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add candidates.json used_words.json compilation_state.json
+          git add candidates.json used_words.json
           git diff --cached --quiet || git commit -m "chore: update pronunciation candidates"
 
           # git push はGitHub側の一時的な障害(Internal Server Error等)で
@@ -169,11 +140,20 @@ jobs:
           name: audio-output
           path: audio_output/
 
-      # compilation_output/ は10件たまった回にしか作られないため、
-      # それ以外の日は対象ファイルなしの警告が出るだけで正常。
-      - name: Upload compilation video as artifact
+      - name: Upload video files as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: compilation-output
-          path: compilation_output/
-          if-no-files-found: ignore
+          name: video-output
+          path: video_output/
+
+      - name: Upload regular video files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: regular-video-output
+          path: regular_video_output/
+
+      - name: Upload thumbnail files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thumbnail-output
+          path: thumbnail_output/

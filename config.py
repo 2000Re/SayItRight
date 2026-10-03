@@ -10,7 +10,9 @@
 CANDIDATES_PATH = "candidates.json"
 USED_WORDS_PATH = "used_words.json"
 AUDIO_DIR = "audio_output"
-VIDEO_DIR = "video_output"
+VIDEO_DIR = "video_output"            # Shorts用(縦型9:16)
+REGULAR_VIDEO_DIR = "regular_video_output"  # 通常動画用(横型16:9、ピラーボックス)
+THUMBNAIL_DIR = "thumbnail_output"    # Shorts・通常動画で共用
 
 # --- fetch_and_score.py: 単語選定 ---
 COMMON_WORDS_URL = (
@@ -67,32 +69,3 @@ DICTIONARY_API_RETRY_BACKOFF_SECONDS = 3
 DICTIONARY_API_HEADERS = {
     "User-Agent": "SayItRight/1.0 (https://github.com/2000Re/SayItRight)"
 }
-
-# --- compile_shorts.py: Shorts結合動画 ---
-# Shorts(縦型9:16、3分以内)は本数を連結しても合計尺が短いままだと
-# 縦型ゆえにYouTubeにShorts判定されてしまうため、結合時は横型(16:9)
-# キャンバスにピラーボックス(左右に無地の帯)で配置し直す。
-COMPILATION_STATE_PATH = "compilation_state.json"
-COMPILATION_BATCH_SIZE = 10  # この件数たまるごとに結合動画を1本作る
-COMPILATION_DOWNLOAD_DIR = "compilation_downloads"
-COMPILATION_OUTPUT_DIR = "compilation_output"
-COMPILATION_VIDEO_WIDTH = 1920
-COMPILATION_VIDEO_HEIGHT = 1080
-COMPILATION_BG_COLOR = (23, 19, 16)  # video_builder.BG_COLORSの一色(#171310)と統一
-# GitHub ActionsのIPがYouTube側にボット判定される問題(player_client変更・
-# cookie認証のいずれでも解決しなかった)を根本的に回避するため、動画本体は
-# YouTubeからyt-dlpで再ダウンロードせず、create_videos.pyが生成した時点で
-# GitHub Actionsアーティファクト(video-output)として保存済みのものを
-# GitHub Actions APIから取得する方式にした。
-#
-# アーティファクトの取得先(該当runのID)が見つからない/保持期限切れ等の
-# 「恒久的に取得不可能」なケースと、一時的なネットワーク不調を区別するための
-# リトライ回数。前者はcompilation_state.jsonのskipped_video_idsに記録し、
-# 結合対象から永久に除外する(次回以降取得を再試行しない)。
-COMPILATION_DOWNLOAD_MAX_RETRIES = 2
-COMPILATION_DOWNLOAD_RETRY_BACKOFF_SECONDS = 5
-COMPILATION_GITHUB_API_TIMEOUT_SECONDS = 20
-# GitHub Actionsアーティファクトのデフォルト保持期間は90日(組織/リポジトリの
-# 設定で変更されていなければ)。COMPILATION_BATCH_SIZE(10件)たまるまでの
-# 実運用上の日数は十分この範囲に収まる想定。
-COMPILATION_ARTIFACT_NAME = "video-output"
