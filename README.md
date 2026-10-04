@@ -20,7 +20,7 @@ upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにア�
 
 - 単語の選定は `used_words.json`(使用済み単語の履歴)を見て重複を避け、さらに直近の投稿と綴りパターン(黙字系・`-ough`系など)が被らないよう多様性も考慮します。
 - `used_words.json` への登録は **YouTubeへのアップロードが成功した時点で初めて** 行われます。TTS/動画生成/アップロードのいずれかで失敗した単語は「使用済み」にならず、次回また候補に上がります。
-- 1単語につき、Shorts(縦型9:16)と通常動画(横型16:9、Shorts動画をピラーボックスしたもの)を同時に2本アップロードします。通常動画の生成・アップロードが失敗してもShortsの投稿は継続します(通常動画だけがスキップされます)。
+- 1単語につき、Shorts(縦型9:16)と通常動画(横型16:9、単語をキャンバスいっぱいに大きく表示するレイアウト)を同時に2本アップロードします。通常動画の生成・アップロードが失敗してもShortsの投稿は継続します(通常動画だけがスキップされます)。
 
 ## ディレクトリ構成
 
@@ -31,7 +31,7 @@ upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにア�
 | `fetch_and_score.py` | cmudict + 頻出単語リストから候補単語を選び `candidates.json` を出力 |
 | `arpabet_to_ipa.py` | ARPAbet(CMU辞書の発音表記) → IPA(国際音声記号)変換 |
 | `generate_audio.py` | Google Cloud Text-to-Speechで音声(通常/スロー)を生成 |
-| `video_builder.py` | Playwrightでのスクリーンショット撮影とmoviepyでの動画合成(Shorts用9:16縦型・通常動画用16:9ピラーボックス・サムネイル) |
+| `video_builder.py` | Playwrightでのスクリーンショット撮影とmoviepyでの動画合成(Shorts用9:16縦型・通常動画用16:9横型・サムネイル) |
 | `create_videos.py` | `video_builder.py` を使って候補単語ごとに動画・サムネイルを生成 |
 | `upload_videos.py` | YouTubeへのShorts/通常動画/サムネイルのアップロード、説明欄への意味・例文追加、日本語ローカライズ設定、再生リストへの追加 |
 | `used_words.json` | 使用済み単語の履歴(`{"word": ..., "patterns": [...]}` の配列、古い→新しい順) |

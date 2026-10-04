@@ -2,10 +2,11 @@
 video_builder.py
 
 単語 + IPA発音記号 + 音声(スロー/通常) から、YouTube Shorts用の
-縦型動画(1080x1920, 9:16)を生成する。create_videos.pyはこれに加えて、
-同じ内容を横型(16:9)にピラーボックスした「通常動画」も生成し、
-Shortsと合わせてアップロードする(結合動画としてまとめるのではなく、
-単語ごとに2本同時に投稿する方式)。
+縦型動画(1080x1920, 9:16)と、通常動画用の横型動画(1920x1080, 16:9)の
+両方を生成する。構成(導入→スロー発音→通常発音→まとめ、の4セクション+
+Ken Burns風ズーム+音声)は共通だが、通常動画は単語をキャンバスいっぱいに
+大きく表示するレイアウトを使う(縦型動画をピラーボックスで変形するの
+ではなく、ネイティブに16:9で作り直す方式)。
 
 サムネイル(単語をどんと表示するだけの画像)はShorts・通常動画の
 どちらにも使う。Shorts本編のスワイプ画面にはカスタムサムネイルは
@@ -21,15 +22,7 @@ import os
 import random
 import uuid
 
-from moviepy import (
-    ImageClip,
-    AudioFileClip,
-    CompositeAudioClip,
-    CompositeVideoClip,
-    ColorClip,
-    VideoFileClip,
-    concatenate_videoclips,
-)
+from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
 from PIL import Image
 
 from config import AUDIO_PAD_MS
@@ -43,6 +36,11 @@ VIDEO_HEIGHT = 1920
 REGULAR_VIDEO_WIDTH = 1920
 REGULAR_VIDEO_HEIGHT = 1080
 
+# 通常動画はShorts用よりキャンバス幅が広いため、Shorts用のフォント
+# サイズ(120px等)をそのまま使うと相対的に小さく見えてしまう。
+# 幅の比率でスケールし、横型キャンバスいっぱいに単語を表示する。
+REGULAR_FONT_SCALE = REGULAR_VIDEO_WIDTH / VIDEO_WIDTH
+
 # サムネイルサイズ(YouTube推奨: 1280x720, 16:9)
 THUMBNAIL_WIDTH = 1280
 THUMBNAIL_HEIGHT = 720
@@ -51,9 +49,6 @@ THUMBNAIL_HEIGHT = 720
 BG_COLORS = [
     "#171310", "#221C18", "#1C211B", "#2B1E18", "#181C24",
 ]
-
-# 通常動画のピラーボックス(左右の無地の帯)の色。BG_COLORSの一色(#171310)と統一。
-REGULAR_VIDEO_BG_COLOR = (23, 19, 16)
 
 # サムネイル配色: 黄色地に黒文字(高視認性の定番配色)
 THUMBNAIL_BG_COLOR = "#FFD400"
@@ -81,7 +76,20 @@ def _html_escape(text):
     )
 
 
-def _screenshot_html(browser, html_content, output_path, width=VIDEO_WIDTH, height=VIDEO_HEIGHT):
+def _word_font_size(word, sizes):
+    """単語の長さに応じてフォントサイズを選ぶ(長い単語がはみ出さないように)。
+    sizes は (6文字以下, 10文字以下, 14文字以下, それ以外) の4段階。"""
+    length = len(word)
+    if length <= 6:
+        return sizes[0]
+    elif length <= 10:
+        return sizes[1]
+    elif length <= 14:
+        return sizes[2]
+    return sizes[3]
+
+
+def _screenshot_html(browser, html_content, output_path, width, height):
     """起動済みのPlaywright browserでHTMLをスクリーンショットする。"""
     page = browser.new_page(viewport={"width": width, "height": height})
     try:
@@ -154,16 +162,7 @@ def _cleanup_temp_files(*paths):
 # ------------------------------------------------------------------
 def _build_thumbnail_html(word):
     safe_word = _html_escape(word)
-    # 単語の長さに応じてフォントサイズを自動調整(長い単語がはみ出さないように)
-    length = len(word)
-    if length <= 6:
-        font_size = 220
-    elif length <= 10:
-        font_size = 170
-    elif length <= 14:
-        font_size = 130
-    else:
-        font_size = 100
+    font_size = _word_font_size(word, (220, 170, 130, 100))
 
     return (
         "<!DOCTYPE html><html><head><meta charset='utf-8'>"
@@ -208,53 +207,6 @@ def generate_thumbnail(word, output_path, browser=None):
 
     print(f"[Thumbnail] 生成しました: {output_path}")
     return output_path
-
-
-def pillarbox_scale(clip_width: int, clip_height: int, canvas_width: int, canvas_height: int) -> float:
-    """縦長クリップを横型キャンバスに収めるための拡大率を返す。
-
-    まず高さをキャンバスの高さに合わせる。それでも幅がキャンバス幅を
-    超える場合(極端に横長のクリップが来た場合の安全策)は、幅基準にする。"""
-    scale = canvas_height / clip_height
-    if clip_width * scale > canvas_width:
-        scale = canvas_width / clip_width
-    return scale
-
-
-def build_regular_video(shorts_video_path: str, output_filename: str) -> str:
-    """
-    build_word_video()が生成した縦型Shorts動画(shorts_video_path)を、
-    横型(16:9)キャンバスにピラーボックス(左右に無地の帯)で配置し直し、
-    「通常動画」としてアップロードできる形にする。
-
-    単純に縦型のままアップロードすると、尺が短いままYouTubeにShorts判定
-    されてしまう(判定は投稿者の意図ではなく、アスペクト比+尺のみで決まる
-    仕様のため)。ピラーボックスして横型の見た目にすることで、確実に
-    「通常動画」として扱われるようにする。"""
-    clip = VideoFileClip(shorts_video_path)
-    composed = None
-    try:
-        scale = pillarbox_scale(clip.w, clip.h, REGULAR_VIDEO_WIDTH, REGULAR_VIDEO_HEIGHT)
-        resized = clip.resized(scale)
-        bg = ColorClip(
-            size=(REGULAR_VIDEO_WIDTH, REGULAR_VIDEO_HEIGHT),
-            color=REGULAR_VIDEO_BG_COLOR,
-            duration=clip.duration,
-        )
-        composed = CompositeVideoClip([bg, resized.with_position("center")]).with_duration(clip.duration)
-        composed.write_videofile(
-            output_filename, fps=30, codec="libx264", audio_codec="aac", logger=None
-        )
-    finally:
-        if composed:
-            try:
-                composed.close()
-            except Exception:
-                pass
-        clip.close()
-
-    print(f"[Video Gen] 通常動画(横型)を生成しました: {output_filename}")
-    return output_filename
 
 
 # ------------------------------------------------------------------
@@ -321,21 +273,92 @@ def _build_ending_html(word, ipa, bg_hex):
     )
 
 
-def _take_word_screenshots(browser, word, ipa, bg_hex):
+# ------------------------------------------------------------------
+# HTML組み立て(動画本編。通常動画用 16:9キャンバス。単語をキャンバス
+# いっぱいに大きく表示するレイアウト)
+# ------------------------------------------------------------------
+def _build_regular_intro_html(bg_hex):
+    s = REGULAR_FONT_SCALE
+    return (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<style>"
+        f"body {{margin:0; padding:0; width:{REGULAR_VIDEO_WIDTH}px; height:{REGULAR_VIDEO_HEIGHT}px; background-color:{bg_hex}; "
+        "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
+        f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
+        f".prompt {{font-size:{round(64*s)}px; font-weight:800; text-align:center; width:{round(820*s)}px; line-height:1.3;}}"
+        f".sub {{font-size:{round(36*s)}px; margin-top:32px; opacity:0.75;}}"
+        "</style></head><body>"
+        "<div class='prompt'>Can you pronounce this word?</div>"
+        "<div class='sub'>🔊 listen carefully</div>"
+        "</body></html>"
+    )
+
+
+def _build_regular_main_html(word, ipa, bg_hex, label):
+    safe_word = _html_escape(word)
+    safe_ipa = _html_escape(ipa) if ipa else ""
+    ipa_html = f"<div class='ipa'>/{safe_ipa}/</div>" if safe_ipa else ""
+    s = REGULAR_FONT_SCALE
+    # 単語自体はキャンバス幅いっぱいに表示したいため、Shorts版の固定120pxでは
+    # なく、単語の長さに応じて自動調整する(サムネイルと同じ考え方)。
+    word_font_size = _word_font_size(word, (300, 220, 160, 120))
+    return (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<style>"
+        f"body {{margin:0; padding:0; width:{REGULAR_VIDEO_WIDTH}px; height:{REGULAR_VIDEO_HEIGHT}px; background-color:{bg_hex}; "
+        "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
+        f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
+        f".word {{font-size:{word_font_size}px; font-weight:800; text-align:center; word-break:break-word; padding:0 80px;}}"
+        f".ipa {{font-size:{round(52*s)}px; margin-top:36px; opacity:0.8; letter-spacing:0.02em;}}"
+        f".label {{font-size:{round(34*s)}px; margin-top:48px; padding:14px 32px; border-radius:100px; "
+        "background-color:rgba(242,237,228,0.12); font-weight:600;}}"
+        "</style></head><body>"
+        f"<div class='word'>{safe_word}</div>"
+        f"{ipa_html}"
+        f"<div class='label'>{_html_escape(label)}</div>"
+        "</body></html>"
+    )
+
+
+def _build_regular_ending_html(word, ipa, bg_hex):
+    safe_word = _html_escape(word)
+    safe_ipa = _html_escape(ipa) if ipa else ""
+    cta = random.choice(ENDING_CTAS)
+    s = REGULAR_FONT_SCALE
+    return (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<style>"
+        f"body {{margin:0; padding:0; width:{REGULAR_VIDEO_WIDTH}px; height:{REGULAR_VIDEO_HEIGHT}px; background-color:{bg_hex}; "
+        "color:#F2EDE4; display:flex; flex-direction:column; justify-content:center; "
+        f"align-items:center; box-sizing:border-box; font-family:{FONT_STACK};}}"
+        f".check {{font-size:{round(64*s)}px;}}"
+        f".word {{font-size:{round(90*s)}px; font-weight:800; text-align:center; margin-top:16px; padding:0 80px; word-break:break-word;}}"
+        f".ipa {{font-size:{round(42*s)}px; margin-top:20px; opacity:0.8;}}"
+        f".cta {{font-size:{round(36*s)}px; margin-top:56px; font-weight:700; text-align:center; padding:0 100px;}}"
+        "</style></head><body>"
+        "<div class='check'>✅</div>"
+        f"<div class='word'>{safe_word}</div>"
+        f"<div class='ipa'>/{safe_ipa}/</div>"
+        f"<div class='cta'>{_html_escape(cta)}</div>"
+        "</body></html>"
+    )
+
+
+def _take_word_screenshots(browser, word, ipa, bg_hex, width, height, build_intro, build_main, build_ending):
     unique_id = uuid.uuid4().hex
     intro_img = f"temp_intro_{unique_id}.png"
     main_slow_img = f"temp_main_slow_{unique_id}.png"
     main_normal_img = f"temp_main_normal_{unique_id}.png"
     ending_img = f"temp_ending_{unique_id}.png"
 
-    # 4枚のうち途中で撮影に失敗した場合、build_word_video側のtry/finally
-    # クリーンアップはこの関数の呼び出し後にしか効かないため、それより前に
-    # 撮影済みの一時PNGが残ってしまう。ここで自前で後始末してから再送出する。
+    # 4枚のうち途中で撮影に失敗した場合、呼び出し側のtry/finallyクリーン
+    # アップはこの関数の呼び出し後にしか効かないため、それより前に撮影済みの
+    # 一時PNGが残ってしまう。ここで自前で後始末してから再送出する。
     try:
-        _screenshot_html(browser, _build_intro_html(bg_hex), intro_img)
-        _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐢 slow"), main_slow_img)
-        _screenshot_html(browser, _build_main_html(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img)
-        _screenshot_html(browser, _build_ending_html(word, ipa, bg_hex), ending_img)
+        _screenshot_html(browser, build_intro(bg_hex), intro_img, width=width, height=height)
+        _screenshot_html(browser, build_main(word, ipa, bg_hex, "🐢 slow"), main_slow_img, width=width, height=height)
+        _screenshot_html(browser, build_main(word, ipa, bg_hex, "🐇 normal speed"), main_normal_img, width=width, height=height)
+        _screenshot_html(browser, build_ending(word, ipa, bg_hex), ending_img, width=width, height=height)
     except Exception:
         _cleanup_temp_files(intro_img, main_slow_img, main_normal_img, ending_img)
         raise
@@ -343,37 +366,30 @@ def _take_word_screenshots(browser, word, ipa, bg_hex):
     return intro_img, main_slow_img, main_normal_img, ending_img
 
 
-def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename, browser=None):
-    """
-    単語1つ分の動画(mp4, 9:16縦型、Shorts用)を生成する。
-
-    audio_slow_path / audio_normal_path は generate_audio.py が出力した
-    (前後 AUDIO_PAD_SECONDS 秒の無音つき)mp3を想定。ここで無音部分は
-    subclippedで取り除いてから動画に配置する。
-
-    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
+def _get_word_screenshots(browser, word, ipa, bg_hex, width, height, build_intro, build_main, build_ending):
+    """browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
     (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
-    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
-    この関数専用のブラウザセッションを起動する。
-    """
-    bg_hex = random.choice(BG_COLORS)
-
+    ブラウザを起動し直すコストを避けるため)。渡さなければ専用の
+    ブラウザセッションを起動して完結させる。"""
     if browser is not None:
-        intro_img, main_slow_img, main_normal_img, ending_img = _take_word_screenshots(
-            browser, word, ipa, bg_hex
-        )
-    else:
-        from playwright.sync_api import sync_playwright
+        return _take_word_screenshots(browser, word, ipa, bg_hex, width, height, build_intro, build_main, build_ending)
 
-        with sync_playwright() as p:
-            owned_browser = p.chromium.launch(headless=True)
-            try:
-                intro_img, main_slow_img, main_normal_img, ending_img = _take_word_screenshots(
-                    owned_browser, word, ipa, bg_hex
-                )
-            finally:
-                owned_browser.close()
+    from playwright.sync_api import sync_playwright
 
+    with sync_playwright() as p:
+        owned_browser = p.chromium.launch(headless=True)
+        try:
+            return _take_word_screenshots(owned_browser, word, ipa, bg_hex, width, height, build_intro, build_main, build_ending)
+        finally:
+            owned_browser.close()
+
+
+def _assemble_video(intro_img, main_slow_img, main_normal_img, ending_img,
+                     audio_slow_path, audio_normal_path, output_filename):
+    """4枚の静止画(導入/スロー/通常/まとめ)にKen Burns風ズームと音声を
+    合成して書き出す。Shorts用・通常動画用で共通のロジック
+    (画像自体のサイズが縦型/横型のどちらであっても、ここでは画像ファイルの
+    実寸をそのまま使うだけなので同じコードで組み立てられる)。"""
     all_clips_to_close = []
     zoom_temp_paths = []
     slow_audio = normal_audio = mixed_audio = video_clip = None
@@ -458,3 +474,47 @@ def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filen
 
     print(f"[Video Gen] 動画を生成しました: {output_filename}")
     return output_filename
+
+
+def build_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename, browser=None):
+    """
+    単語1つ分の動画(mp4, 9:16縦型、Shorts用)を生成する。
+
+    audio_slow_path / audio_normal_path は generate_audio.py が出力した
+    (前後 AUDIO_PAD_SECONDS 秒の無音つき)mp3を想定。ここで無音部分は
+    subclippedで取り除いてから動画に配置する。
+
+    browser を渡した場合はそのPlaywrightブラウザセッションを使い回す
+    (create_videos.py のようにバッチで複数単語を処理する際、単語ごとに
+    ブラウザを起動し直すコストを避けるため)。渡さなければ従来通り、
+    この関数専用のブラウザセッションを起動する。
+    """
+    bg_hex = random.choice(BG_COLORS)
+    screenshots = _get_word_screenshots(
+        browser, word, ipa, bg_hex, VIDEO_WIDTH, VIDEO_HEIGHT,
+        _build_intro_html, _build_main_html, _build_ending_html,
+    )
+    return _assemble_video(*screenshots, audio_slow_path, audio_normal_path, output_filename)
+
+
+def build_regular_word_video(word, ipa, audio_slow_path, audio_normal_path, output_filename, browser=None):
+    """
+    単語1つ分の動画(mp4, 16:9横型、通常動画用)を生成する。
+
+    build_word_video()と同じ4セクション構成(導入/スロー発音/通常発音/
+    まとめ)・Ken Burns風ズーム・音声合成を使うが、単語を横型キャンバス
+    いっぱいに大きく表示するレイアウト(_build_regular_*_html)を使う。
+    以前はbuild_word_video()が生成した縦型動画を横型キャンバスに
+    ピラーボックス(左右に無地の帯)で変形していたが、見た目が単語を
+    大きく表示するスタイルにならないため、ネイティブに16:9で作り直す
+    方式に変更した。
+
+    audio_slow_path / audio_normal_path / browser の扱いはbuild_word_video()
+    と同じ。
+    """
+    bg_hex = random.choice(BG_COLORS)
+    screenshots = _get_word_screenshots(
+        browser, word, ipa, bg_hex, REGULAR_VIDEO_WIDTH, REGULAR_VIDEO_HEIGHT,
+        _build_regular_intro_html, _build_regular_main_html, _build_regular_ending_html,
+    )
+    return _assemble_video(*screenshots, audio_slow_path, audio_normal_path, output_filename)
