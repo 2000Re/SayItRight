@@ -48,6 +48,8 @@ from config import (
     YOUTUBE_CATEGORY_ID as CATEGORY_ID,
     UPLOAD_MAX_RETRIES as MAX_RETRIES,
     UPLOAD_RETRY_BACKOFF_SECONDS as RETRY_BACKOFF_SECONDS,
+    THUMBNAIL_MAX_RETRIES,
+    THUMBNAIL_RETRY_BACKOFF_SECONDS,
     DICTIONARY_API_URL,
     DICTIONARY_API_TIMEOUT_SECONDS,
     DICTIONARY_API_MAX_RETRIES,
@@ -248,12 +250,30 @@ def upload_video(youtube, video_path, metadata):
 
 
 def upload_thumbnail(youtube, video_id, thumbnail_path):
+    """サムネイルを設定する。429 uploadRateLimitExceeded(YouTube側の非公開の
+    サムネイル専用レート制限)は一時的に解消することがあるため、他のAPI
+    呼び出しより長めの間隔でリトライする。それ以外のHttpErrorはリトライ
+    せず即座に送出する(呼び出し側で警告ログのみ出して処理を継続する)。"""
     if not os.path.exists(thumbnail_path):
         print(f"    [Warning] サムネイルが見つかりません: {thumbnail_path}")
         return
-    media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
-    _api_call_counts["thumbnails.set"] += 1
-    youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
+
+    last_error = None
+    for attempt in range(1, THUMBNAIL_MAX_RETRIES + 1):
+        media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
+        try:
+            _api_call_counts["thumbnails.set"] += 1
+            youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
+            return
+        except HttpError as e:
+            is_rate_limit = e.resp.status == 429 or "uploadRateLimitExceeded" in str(e)
+            if not is_rate_limit or attempt == THUMBNAIL_MAX_RETRIES:
+                raise
+            last_error = e
+            print(f"    [Info] サムネイル設定{attempt}回目がレート制限で失敗しました。"
+                  f"{THUMBNAIL_RETRY_BACKOFF_SECONDS}秒待ってリトライします: {e}")
+            time.sleep(THUMBNAIL_RETRY_BACKOFF_SECONDS)
+    raise last_error
 
 
 def add_to_playlist(youtube, playlist_id, video_id):
