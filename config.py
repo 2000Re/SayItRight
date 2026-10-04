@@ -54,6 +54,13 @@ DEFAULT_PRIVACY_STATUS = "public"  # 環境変数 YT_PRIVACY_STATUS で上書き
 YOUTUBE_CATEGORY_ID = "27"  # Education
 UPLOAD_MAX_RETRIES = 3
 UPLOAD_RETRY_BACKOFF_SECONDS = 5
+# サムネイル設定(thumbnails.set)専用のリトライ設定。YouTube側に非公開の
+# サムネイル専用レート制限があり、短時間に何度もアップロードすると
+# 429 uploadRateLimitExceeded で失敗することがある(1日9回実行・1回あたり
+# Shorts+通常動画の2回thumbnails.setを呼ぶため、1日最大18回のアップロードに
+# なり実際に発生した)。他のAPI呼び出しより長めの間隔でリトライする。
+THUMBNAIL_MAX_RETRIES = 3
+THUMBNAIL_RETRY_BACKOFF_SECONDS = 30
 # 以前はdictionaryapi.dev(無料・認証不要の小規模なコミュニティ運営API)を
 # 使っていたが、タイムアウトや5xxエラー(522=オリジンサーバーとの接続失敗、
 # 等)が頻発したため、Wikimediaのインフラ上で動くWiktionaryのREST APIに
