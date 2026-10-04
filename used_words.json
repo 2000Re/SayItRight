@@ -2288,6 +2288,12 @@
   {
     "word": "DECREASE",
     "patterns": [],
-    "video_id": "YgwbHYc8GcU"
+    "video_id": "YgwbHYc8GcU",
+    "run_id": null
+  },
+  {
+    "word": "FIRMWARE",
+    "patterns": [],
+    "video_id": "4NUVidUtp1o"
   }
 ]
