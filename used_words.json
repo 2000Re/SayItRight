@@ -2264,6 +2264,12 @@
   {
     "word": "READINGS",
     "patterns": [],
-    "video_id": "lztcB_CWvlo"
+    "video_id": "lztcB_CWvlo",
+    "run_id": null
+  },
+  {
+    "word": "ATTACKS",
+    "patterns": [],
+    "video_id": "ChdS4tc8Mbs"
   }
 ]
