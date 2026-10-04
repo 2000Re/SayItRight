@@ -2282,6 +2282,12 @@
   {
     "word": "BUYING",
     "patterns": [],
-    "video_id": "pyF6MOqwjVg"
+    "video_id": "pyF6MOqwjVg",
+    "run_id": null
+  },
+  {
+    "word": "DECREASE",
+    "patterns": [],
+    "video_id": "YgwbHYc8GcU"
   }
 ]
