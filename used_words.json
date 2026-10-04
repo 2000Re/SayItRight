@@ -2276,6 +2276,12 @@
   {
     "word": "MAILING",
     "patterns": [],
-    "video_id": "Ug9LZlY9LY8"
+    "video_id": "Ug9LZlY9LY8",
+    "run_id": null
+  },
+  {
+    "word": "BUYING",
+    "patterns": [],
+    "video_id": "pyF6MOqwjVg"
   }
 ]
