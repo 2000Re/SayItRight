@@ -3,7 +3,7 @@ upload_videos.py
 
 candidates.json の各単語について、
   video_output/{word}.mp4           (Shorts用、縦型9:16)
-  regular_video_output/{word}.mp4   (通常動画用、横型16:9ピラーボックス)
+  regular_video_output/{word}.mp4   (通常動画用、横型16:9)
   thumbnail_output/{word}.jpg       (サムネイル、両方で共用)
 をYouTubeにアップロードする。1単語につきShorts・通常動画の2本を
 同時に投稿する(以前はcompile_shorts.pyで10本たまってから結合動画に

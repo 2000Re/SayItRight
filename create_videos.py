@@ -5,7 +5,7 @@ candidates.json の各単語について、
   audio_output/{word}_slow.mp3 / {word}_normal.mp3
 を使って動画を生成する。1単語につき以下の3つを出力する:
   - Shorts用動画(mp4, 9:16縦型) -> video_output/
-  - 通常動画(mp4, 16:9横型、Shorts用動画をピラーボックスしたもの)
+  - 通常動画(mp4, 16:9横型、単語をキャンバスいっぱいに大きく表示)
     -> regular_video_output/
   - サムネイル(jpg, 単語をどんと表示。Shorts・通常動画で共用)
     -> thumbnail_output/
@@ -21,7 +21,7 @@ import os
 from playwright.sync_api import sync_playwright
 
 from arpabet_to_ipa import arpabet_to_ipa
-from video_builder import build_word_video, build_regular_video, generate_thumbnail
+from video_builder import build_word_video, build_regular_word_video, generate_thumbnail
 from config import (
     CANDIDATES_PATH,
     AUDIO_DIR,
@@ -90,7 +90,14 @@ def main():
                 regular_video_path = os.path.join(REGULAR_VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
                 print(f"通常動画生成中: {word}")
                 try:
-                    build_regular_video(video_path, regular_video_path)
+                    build_regular_word_video(
+                        word=word,
+                        ipa=ipa,
+                        audio_slow_path=slow_path,
+                        audio_normal_path=normal_path,
+                        output_filename=regular_video_path,
+                        browser=browser,
+                    )
                 except Exception as e:
                     print(f"::error::{word} の通常動画生成に失敗しました: {e}")
                     if os.path.exists(regular_video_path):
