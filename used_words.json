@@ -2294,6 +2294,12 @@
   {
     "word": "FIRMWARE",
     "patterns": [],
-    "video_id": "4NUVidUtp1o"
+    "video_id": "4NUVidUtp1o",
+    "run_id": null
+  },
+  {
+    "word": "DEADLINE",
+    "patterns": [],
+    "video_id": "yFcm82G_DVI"
   }
 ]
