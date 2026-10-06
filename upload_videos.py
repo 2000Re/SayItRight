@@ -19,8 +19,9 @@ candidates.json の各単語について、
 必要なOAuthスコープについて:
   動画のアップロード(videos.insert)・サムネイル設定(thumbnails.set)だけなら
   https://www.googleapis.com/auth/youtube.upload で足りるが、
-  日本語ローカライズ設定(videos.update, apply_localizations)や
-  再生リストへの追加(playlistItems.insert, add_to_playlist)には
+  日本語ローカライズ設定(videos.update, apply_localizations)、
+  再生リストへの追加(playlistItems.insert, add_to_playlist)、
+  コメント投稿(commentThreads.insert, add_comment)には
   https://www.googleapis.com/auth/youtube (または youtube.force-ssl)
   スコープが必要。youtube.upload のみで発行したrefresh tokenだと
   これらが403 insufficientPermissionsで失敗する
@@ -82,6 +83,7 @@ QUOTA_COST_PER_CALL = {
     "videos.update": 50,
     "playlistItems.insert": 50,
     "thumbnails.set": 50,
+    "commentThreads.insert": 50,
 }
 _api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
 
@@ -172,8 +174,11 @@ def build_tags(word, lookup: dict | None = None, is_short: bool = True):
     return tags
 
 
-def build_metadata(word, ipa, lookup: dict | None = None, is_short: bool = True):
-    title = f"How to Pronounce {word}"
+def _build_description_body_lines(word, ipa, lookup: dict | None = None):
+    """概要欄本文(ハッシュタグを除いた部分)の行リストを返す。
+
+    build_metadata()(ハッシュタグ付き)と build_comment_text()
+    (コメント欄用、ハッシュタグ無し)で共有する。"""
     lines = [
         f'How do you pronounce "{word}"?',
         f"Phonetic: /{ipa}/",
@@ -189,6 +194,18 @@ def build_metadata(word, ipa, lookup: dict | None = None, is_short: bool = True)
     # TTSの音声(config.VOICE_NAME/LANGUAGE_CODE)はアメリカ英語のため、
     # 他の英語圏の発音と異なる場合があることを明記しておく。
     lines.append("Note: Pronunciation shown is American English (US).")
+    return lines
+
+
+def build_comment_text(word, ipa, lookup: dict | None = None):
+    """コメント欄に自動投稿する本文。概要欄と同じ内容だが、ハッシュタグは
+    コメント欄では意味が薄く冗長なため含めない。"""
+    return "\n".join(_build_description_body_lines(word, ipa, lookup))
+
+
+def build_metadata(word, ipa, lookup: dict | None = None, is_short: bool = True):
+    title = f"How to Pronounce {word}"
+    lines = _build_description_body_lines(word, ipa, lookup)
     lines.append("")
     hashtags = "#pronunciation #english #howtopronounce"
     lines.append(f"#shorts {hashtags}" if is_short else hashtags)
@@ -307,12 +324,32 @@ def apply_localizations(youtube, video_id, localizations):
     ).execute()
 
 
-def upload_one(youtube, video_path, thumbnail_path, metadata, localizations, playlist_id, label):
+def add_comment(youtube, video_id, comment_text):
+    """概要欄と同内容(ハッシュタグ除く)をトップレベルコメントとして投稿する。
+
+    メインのメタデータとは独立した付加情報のため、失敗しても動画自体の
+    公開は妨げない(警告を出すだけで処理を継続する)。"""
+    _api_call_counts["commentThreads.insert"] += 1
+    youtube.commentThreads().insert(
+        part="snippet",
+        body={
+            "snippet": {
+                "videoId": video_id,
+                "topLevelComment": {
+                    "snippet": {"textOriginal": comment_text}
+                },
+            }
+        },
+    ).execute()
+
+
+def upload_one(youtube, video_path, thumbnail_path, metadata, localizations, comment_text, playlist_id, label):
     """1本の動画(Shorts または 通常動画)をアップロードし、サムネイル設定・
-    再生リスト追加・日本語ローカライズ設定まで行う。動画アップロード自体が
-    失敗した場合はNoneを返し、呼び出し側で後続処理(used_words.jsonへの
-    登録等)をスキップできるようにする。それ以外の付加情報(サムネイル・
-    再生リスト・ローカライズ)の失敗は警告のみで、動画の公開自体は妨げない。"""
+    再生リスト追加・日本語ローカライズ設定・コメント投稿まで行う。動画
+    アップロード自体が失敗した場合はNoneを返し、呼び出し側で後続処理
+    (used_words.jsonへの登録等)をスキップできるようにする。それ以外の
+    付加情報(サムネイル・再生リスト・ローカライズ・コメント)の失敗は
+    警告のみで、動画の公開自体は妨げない。"""
     try:
         video_id = upload_video(youtube, video_path, metadata)
         print(f"  -> [{label}] https://youtu.be/{video_id}")
@@ -348,6 +385,12 @@ def upload_one(youtube, video_path, thumbnail_path, metadata, localizations, pla
     except Exception as e:
         print(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました: {e}")
 
+    try:
+        add_comment(youtube, video_id, comment_text)
+        print(f"  -> [{label}] コメント投稿完了")
+    except Exception as e:
+        print(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
+
     return video_id
 
 
@@ -376,11 +419,13 @@ def main():
         print(f"アップロード中: {word}")
         lookup = fetch_definition(word)
         thumbnail_path = os.path.join(THUMBNAIL_DIR, f"{word.lower()}.jpg")
+        comment_text = build_comment_text(word, ipa, lookup)
 
         shorts_video_id = upload_one(
             youtube, video_path, thumbnail_path,
             build_metadata(word, ipa, lookup, is_short=True),
             build_localizations(word, ipa, is_short=True),
+            comment_text,
             SHORTS_PLAYLIST_ID, "Shorts",
         )
         if shorts_video_id is None:
@@ -404,6 +449,7 @@ def main():
                 youtube, regular_video_path, thumbnail_path,
                 build_metadata(word, ipa, lookup, is_short=False),
                 build_localizations(word, ipa, is_short=False),
+                comment_text,
                 REGULAR_VIDEO_PLAYLIST_ID, "通常動画",
             )
         else:

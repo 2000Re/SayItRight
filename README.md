@@ -16,6 +16,7 @@ create_videos.py    … 音声+IPA発音記号からPlaywright/moviepyで動画�
         ↓
 upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにアップロードし、
                        日本語ローカライズ・意味/例文入り説明欄を設定
+                       さらに概要欄と同内容(ハッシュタグ除く)をコメントにも投稿
 ```
 
 - 単語の選定は `used_words.json`(使用済み単語の履歴)を見て重複を避け、さらに直近の投稿と綴りパターン(黙字系・`-ough`系など)が被らないよう多様性も考慮します。
@@ -52,7 +53,7 @@ upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにア�
 | `YOUTUBE_SHORTS_PLAYLIST_ID`(任意) | Shorts用再生リストのID。設定するとアップロード成功時に自動追加される。未設定の場合は追加をスキップ |
 | `YOUTUBE_COMPILATION_PLAYLIST_ID`(任意) | 通常動画用再生リストのID。同上(Secret名は旧・結合動画機能の名残だが、現在は単語単位の通常動画用に使っている) |
 
-**OAuthスコープについて**: 動画アップロード(`videos.insert`)・サムネイル設定(`thumbnails.set`)には `youtube.upload` スコープで足りますが、日本語ローカライズ設定(`videos.update`)や再生リストへの追加(`playlistItems.insert`)には `youtube`(または `youtube.force-ssl`)スコープが必要です。`youtube.upload` のみで発行した `YT_REFRESH_TOKEN` だと、それらだけが403エラーで失敗します(動画本体のアップロードには影響しません)。
+**OAuthスコープについて**: 動画アップロード(`videos.insert`)・サムネイル設定(`thumbnails.set`)には `youtube.upload` スコープで足りますが、日本語ローカライズ設定(`videos.update`)・再生リストへの追加(`playlistItems.insert`)・コメント投稿(`commentThreads.insert`)には `youtube`(または `youtube.force-ssl`)スコープが必要です。`youtube.upload` のみで発行した `YT_REFRESH_TOKEN` だと、それらだけが403エラーで失敗します(動画本体のアップロードには影響しません)。
 
 ## ローカルでの実行
 
