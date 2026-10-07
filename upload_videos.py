@@ -19,13 +19,16 @@ candidates.json の各単語について、
 必要なOAuthスコープについて:
   動画のアップロード(videos.insert)・サムネイル設定(thumbnails.set)だけなら
   https://www.googleapis.com/auth/youtube.upload で足りるが、
-  日本語ローカライズ設定(videos.update, apply_localizations)、
-  再生リストへの追加(playlistItems.insert, add_to_playlist)、
-  コメント投稿(commentThreads.insert, add_comment)には
+  日本語ローカライズ設定(videos.update, apply_localizations)や
+  再生リストへの追加(playlistItems.insert, add_to_playlist)には
   https://www.googleapis.com/auth/youtube (または youtube.force-ssl)
-  スコープが必要。youtube.upload のみで発行したrefresh tokenだと
-  これらが403 insufficientPermissionsで失敗する
-  (アップロード自体は成功するので、失敗しても警告のみで処理は継続する)。
+  スコープが必要。コメント投稿(commentThreads.insert, add_comment)は
+  youtube.force-ssl スコープのみ対応で、youtube スコープだけでは
+  403 insufficientPermissionsで失敗する(videos.update/playlistItems.insert
+  とは必要スコープが異なる点に注意)。
+  いずれのスコープも不足している場合は403 insufficientPermissionsで失敗する
+  (動画アップロード自体は成功するので、これらが失敗しても警告のみで
+  処理は継続する)。
 """
 import json
 import os
@@ -388,6 +391,15 @@ def upload_one(youtube, video_path, thumbnail_path, metadata, localizations, com
     try:
         add_comment(youtube, video_id, comment_text)
         print(f"  -> [{label}] コメント投稿完了")
+    except HttpError as e:
+        if e.resp.status == 403:
+            print(f"[Warning] [{label}] コメント投稿に失敗しました(権限不足): {e}\n"
+                  f"    -> commentThreads.insert には youtube (または youtube.readonly) "
+                  f"だけでは不足で、youtube.force-ssl スコープが必須です。"
+                  f"OAuth同意画面に youtube.force-ssl を追加のうえ、"
+                  f"refresh tokenを再発行してください。")
+        else:
+            print(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
     except Exception as e:
         print(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
 
