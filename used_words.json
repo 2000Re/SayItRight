@@ -2342,6 +2342,12 @@
   {
     "word": "THURSDAY",
     "patterns": [],
-    "video_id": "rmbXrOsvAMI"
+    "video_id": "rmbXrOsvAMI",
+    "run_id": null
+  },
+  {
+    "word": "PLANNED",
+    "patterns": [],
+    "video_id": "PIOkLrKT0EE"
   }
 ]
