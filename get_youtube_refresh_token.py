@@ -15,7 +15,9 @@ GitHub Secretsに登録しておく運用にしている(取得したトーク�
        その場合は自分のGoogleアカウントを「テストユーザー」に追加すること)。
        「データアクセス」→「スコープを追加または削除」で、下記SCOPESに
        書いてあるものと同じスコープを追加しておくこと(登録していないスコー
-       プはリクエストしても正しく付与されないことがある)
+       プはリクエストしても正しく付与されないことがある)。
+       既存のOAuthクライアントで再発行する場合も、SCOPESに
+       youtube.force-ssl を追加した際はこの画面にも追加登録が必要
     3. 「認証情報」→「OAuthクライアントIDを作成」で、種類は
        「デスクトップアプリ」を選んで作成する
        (このスクリプトはループバックアドレス http://localhost でリダイレクト
@@ -56,9 +58,14 @@ from googleapiclient.discovery import build
 # 側にそのスコープが登録されていない場合に正しく付与されないことがあるため、
 # 同意画面の「機密性の高いスコープ」に登録した youtube / youtube.readonly と
 # 一致させている。
+# youtube.force-ssl はコメント投稿(commentThreads.insert, upload_videos.py
+# の add_comment)専用で、youtube / youtube.readonly だけでは403
+# insufficientPermissionsになる(videos.update・playlistItems.insertは
+# youtube スコープだけで動くが、commentThreads.insertはforce-sslが必須)。
 SCOPES = [
     "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 
 
