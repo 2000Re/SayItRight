@@ -1,9 +1,9 @@
 """
 content_safety.py
 
-自動生成パイプラインが卑語・差別的スラーを単語候補として選んでしまう
-ことが無いよう、常時(常用語リストの取得成否に関わらず)適用する専用の
-ブロックリスト。
+自動生成パイプラインが卑語・差別的スラー・下ネタ(排泄・嘔吐等)を
+単語候補として選んでしまうことが無いよう、常時(常用語リストの取得
+成否に関わらず)適用する専用のブロックリスト。
 
 [Design] 通常はcmudictの候補を常用語リスト(config.COMMON_WORDS_URL、
 "no-swears"版)と突き合わせて絞り込むことで卑語を除外しているが、この
@@ -21,6 +21,11 @@ content_safety.py
 差別的スラー(SLURS)は一般的な卑語(PROFANITY)よりもはるかに深刻な
 問題(YouTubeのヘイトスピーチポリシー違反によるチャンネル停止リスク等)
 を引き起こしうるため、区別してコメントしているが、除外の扱いは同じ。
+
+下ネタ(TOILET_HUMOR)は卑語そのものではないため常用語リスト("no-swears"
+版)では除外されず、実際に"peeing"が候補として選ばれコメント欄で
+茶化される事態が発生したため追加した。発音教育チャンネルとして
+ふさわしくない下ネタ的な語(排泄・嘔吐関連)を対象にしている。
 """
 
 SLURS = frozenset({
@@ -86,7 +91,59 @@ PROFANITY = frozenset({
     "PISSED",
 })
 
-BLOCKED_WORDS = SLURS | PROFANITY
+TOILET_HUMOR = frozenset({
+    # 排泄関連
+    "PEE",
+    "PEES",
+    "PEEING",
+    "PEED",
+    "POOP",
+    "POOPS",
+    "POOPING",
+    "POOPED",
+    "POOPY",
+    "POO",
+    "POOS",
+    "CRAP",
+    "CRAPS",
+    "CRAPPING",
+    "CRAPPED",
+    "FART",
+    "FARTS",
+    "FARTING",
+    "FARTED",
+    "URINATE",
+    "URINATES",
+    "URINATING",
+    "URINATED",
+    "URINE",
+    "DEFECATE",
+    "DEFECATES",
+    "DEFECATING",
+    "DEFECATED",
+    "FECES",
+    "EXCREMENT",
+    "DIARRHEA",
+    # 嘔吐関連
+    "VOMIT",
+    "VOMITS",
+    "VOMITING",
+    "VOMITED",
+    "PUKE",
+    "PUKES",
+    "PUKING",
+    "PUKED",
+    "BARF",
+    "BARFS",
+    "BARFING",
+    "BARFED",
+    # 鼻水等
+    "SNOT",
+    "BOOGER",
+    "BOOGERS",
+})
+
+BLOCKED_WORDS = SLURS | PROFANITY | TOILET_HUMOR
 
 
 def is_blocked(word: str) -> bool:
