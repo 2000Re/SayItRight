@@ -2414,6 +2414,12 @@
   {
     "word": "PICTURE",
     "patterns": [],
-    "video_id": "UC0sGAsnBS8"
+    "video_id": "UC0sGAsnBS8",
+    "run_id": null
+  },
+  {
+    "word": "BIZARRE",
+    "patterns": [],
+    "video_id": "fd50j6OfyGM"
   }
 ]
