@@ -115,6 +115,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add candidates.json used_words.json
+          # quota_state.json はupload_videos.pyが実行された場合のみ生成される
+          # (candidates.jsonが空でアップロード自体がスキップされた回は無い)。
+          # 無条件にgit addすると、ファイルが存在しない回にpathspecエラーで
+          # このステップ自体が失敗してしまう(-e)ため、存在確認してから追加する。
+          if [ -f quota_state.json ]; then
+            git add quota_state.json
+          fi
           git diff --cached --quiet || git commit -m "chore: update pronunciation candidates"
 
           # git push はGitHub側の一時的な障害(Internal Server Error等)で

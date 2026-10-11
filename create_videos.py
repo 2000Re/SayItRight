@@ -22,6 +22,7 @@ from playwright.sync_api import sync_playwright
 
 from arpabet_to_ipa import arpabet_to_ipa
 from video_builder import build_word_video, build_regular_word_video, generate_thumbnail
+from log_utils import log, timestamp
 from config import (
     CANDIDATES_PATH,
     AUDIO_DIR,
@@ -40,7 +41,7 @@ def main():
         candidates = json.load(f)
 
     if not candidates:
-        print("candidates.json が空です。動画生成をスキップします。")
+        log("candidates.json が空です。動画生成をスキップします。")
         return
 
     # 単語ごとにPlaywrightブラウザを起動し直すと無駄が大きいため、
@@ -57,13 +58,13 @@ def main():
                 normal_path = os.path.join(AUDIO_DIR, f"{word.lower()}_normal.mp3")
 
                 if not (os.path.exists(slow_path) and os.path.exists(normal_path)):
-                    print(f"[Skip] {word}: 音声ファイルが見つかりません "
-                          f"({slow_path} / {normal_path})。generate_audio.pyを先に実行してください。")
+                    log(f"[Skip] {word}: 音声ファイルが見つかりません "
+                        f"({slow_path} / {normal_path})。generate_audio.pyを先に実行してください。")
                     continue
 
                 video_path = os.path.join(VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
 
-                print(f"動画生成中: {word} (IPA: {ipa})")
+                log(f"動画生成中: {word} (IPA: {ipa})")
                 try:
                     build_word_video(
                         word=word,
@@ -74,7 +75,7 @@ def main():
                         browser=browser,
                     )
                 except Exception as e:
-                    print(f"::error::{word} の動画生成に失敗しました: {e}")
+                    print(f"::error::{timestamp()} {word} の動画生成に失敗しました: {e}")
                     # write_videofileはffmpegへ直接書き込むため、エンコード
                     # 途中(ディスク容量不足・ワークフローのタイムアウト等)で
                     # 失敗すると不完全なmp4がそのまま残ることがある。
@@ -84,11 +85,11 @@ def main():
                         try:
                             os.remove(video_path)
                         except OSError as remove_error:
-                            print(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
+                            log(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
                     continue
 
                 regular_video_path = os.path.join(REGULAR_VIDEO_OUTPUT_DIR, f"{word.lower()}.mp4")
-                print(f"通常動画生成中: {word}")
+                log(f"通常動画生成中: {word}")
                 try:
                     build_regular_word_video(
                         word=word,
@@ -99,26 +100,26 @@ def main():
                         browser=browser,
                     )
                 except Exception as e:
-                    print(f"::error::{word} の通常動画生成に失敗しました: {e}")
+                    print(f"::error::{timestamp()} {word} の通常動画生成に失敗しました: {e}")
                     if os.path.exists(regular_video_path):
                         try:
                             os.remove(regular_video_path)
                         except OSError as remove_error:
-                            print(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
+                            log(f"[Warning] 不完全な動画ファイルの削除に失敗しました: {remove_error}")
                     # 通常動画の生成に失敗しても、Shorts用動画は生成済みなので
                     # アップロード自体は継続させる(upload_videos.py側で
                     # 通常動画ファイルが無ければそちらのアップロードだけスキップする)。
 
                 thumbnail_path = os.path.join(THUMBNAIL_OUTPUT_DIR, f"{word.lower()}.jpg")
-                print(f"サムネイル生成中: {word}")
+                log(f"サムネイル生成中: {word}")
                 try:
                     generate_thumbnail(word, thumbnail_path, browser=browser)
                 except Exception as e:
-                    print(f"::error::{word} のサムネイル生成に失敗しました: {e}")
+                    print(f"::error::{timestamp()} {word} のサムネイル生成に失敗しました: {e}")
         finally:
             browser.close()
 
-    print("全単語の動画生成処理が完了しました。")
+    log("全単語の動画生成処理が完了しました。")
 
 
 if __name__ == "__main__":

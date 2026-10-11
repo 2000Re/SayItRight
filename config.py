@@ -13,6 +13,10 @@ AUDIO_DIR = "audio_output"
 VIDEO_DIR = "video_output"            # Shorts用(縦型9:16)
 REGULAR_VIDEO_DIR = "regular_video_output"  # 通常動画用(横型16:9、ピラーボックス)
 THUMBNAIL_DIR = "thumbnail_output"    # Shorts・通常動画で共用
+# YouTube Data APIの日次クォータ使用量を実行(1日9回)をまたいで積み上げる
+# ための永続化ファイル(upload_videos.py)。used_words.json/candidates.json
+# と同じく、ワークフロー側で各実行後にgit commitして永続化する。
+QUOTA_STATE_PATH = "quota_state.json"
 
 # --- fetch_and_score.py: 単語選定 ---
 COMMON_WORDS_URL = (

@@ -37,6 +37,8 @@ upload_videos.py    … Shorts・通常動画・サムネイルをYouTubeにア�
 | `upload_videos.py` | YouTubeへのShorts/通常動画/サムネイルのアップロード、説明欄への意味・例文追加、日本語ローカライズ設定、再生リストへの追加 |
 | `used_words.json` | 使用済み単語の履歴(`{"word": ..., "patterns": [...]}` の配列、古い→新しい順) |
 | `candidates.json` | 直近の `fetch_and_score.py` 実行で選ばれた候補単語 |
+| `quota_state.json` | その日(太平洋時間、YouTube Data APIの日次クォータのリセット基準)のクォータ消費量の累計(`upload_videos.py`が1日9回の実行をまたいで積み上げる) |
+| `log_utils.py` | `create_videos.py` / `upload_videos.py` の実行ログに日本時間のタイムスタンプを付ける共通ヘルパー |
 | `tests/` | `score_words.py` / `arpabet_to_ipa.py` (外部依存のない純粋関数)のユニットテスト |
 | `.github/workflows/fetch_candidates.yml` | 本番パイプライン一式を実行するワークフロー |
 | `.github/workflows/tests.yml` | lint(ruff) + pytest を実行するCIワークフロー |
@@ -78,4 +80,5 @@ ruff check .
 ## 運用上の注意
 
 - **同時実行**: `fetch_candidates.yml` は `concurrency` で同時実行を1本に制限しています。手動実行と定期実行が重なった場合、後続はキャンセルされずキューで待機します。
-- **API使用量**: `generate_audio.py` / `upload_videos.py` は実行完了時に、TTS呼び出し回数・YouTube Data APIの概算クォータ消費量をログに出力します。GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで使用量の目安を確認できます。
+- **API使用量**: `generate_audio.py` / `upload_videos.py` は実行完了時に、TTS呼び出し回数・YouTube Data APIの概算クォータ消費量をログに出力します。GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで使用量の目安を確認できます。`upload_videos.py`は今回の実行分に加えて、その日(太平洋時間基準)の累計クォータ消費量も表示します(`quota_state.json`に実行をまたいで積み上げて保存)。
+- **ログのタイムスタンプ**: `create_videos.py` / `upload_videos.py` の各ログ行には日本時間・24時間表記(`YYYY-MM-DD HH:MM:SS`)のタイムスタンプが付きます(`log_utils.py`)。
