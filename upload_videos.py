@@ -29,10 +29,27 @@ candidates.json の各単語について、
   いずれのスコープも不足している場合は403 insufficientPermissionsで失敗する
   (動画アップロード自体は成功するので、これらが失敗しても警告のみで
   処理は継続する)。
+
+実行ログについて:
+  各行の先頭に日本時間・24時間表記(YYYY-MM-DD HH:MM:SS)のタイムスタンプを
+  付ける(log_utils.log)。ただしGitHub Actionsのワークフローエラー注釈
+  (::error::)は行頭にその文字列が無いと認識されないため、該当行だけは
+  素のprint()を使い、タイムスタンプは::error::より後ろに埋め込んでいる。
+
+クォータ使用量の累計表示について:
+  1日9回(PICK_N=1)実行されるため、1回分の消費量だけでは日次上限
+  (10,000 units)にどれだけ近づいているか分かりにくい。quota_state.json
+  (太平洋時間の日付をキーに実行をまたいで積み上げる)に実行ごとの消費量を
+  加算して保存し、その日の累計も合わせてログに出す。YouTube Data APIの
+  日次クォータは太平洋時間(America/Los_Angeles)の深夜0時にリセットされる
+  ため(サマータイムの影響で日本時間では16時台/17時台と季節で変わる)、
+  JSTの固定時刻ではなく太平洋時間の日付が変わったかどうかで判定している。
 """
 import json
 import os
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import google.oauth2.credentials
 import requests
@@ -42,12 +59,14 @@ from googleapiclient.errors import HttpError
 
 from arpabet_to_ipa import arpabet_to_ipa
 from dictionary_lookup import parse_definition_response
+from log_utils import log, timestamp
 from used_words_store import load_used_words, save_used_words
 from config import (
     CANDIDATES_PATH,
     VIDEO_DIR,
     REGULAR_VIDEO_DIR,
     THUMBNAIL_DIR,
+    QUOTA_STATE_PATH,
     DEFAULT_PRIVACY_STATUS,
     YOUTUBE_CATEGORY_ID as CATEGORY_ID,
     UPLOAD_MAX_RETRIES as MAX_RETRIES,
@@ -60,6 +79,12 @@ from config import (
     DICTIONARY_API_RETRY_BACKOFF_SECONDS,
     DICTIONARY_API_HEADERS,
 )
+
+# YouTube Data APIの日次クォータは太平洋時間(America/Los_Angeles)の
+# 深夜0時にリセットされる(サマータイムの影響で日本時間では16時台/17時台と
+# 季節によってずれる)。JSTで固定時刻を決め打ちするより、太平洋時間の日付が
+# 変わったかどうかで判定した方が年間を通じて正確なため、この基準を使う。
+_QUOTA_RESET_TZ = ZoneInfo("America/Los_Angeles")
 
 # 初回運用時は "unlisted" にして、実際の見え方を確認してから
 # "public" に変更するのがおすすめ。
@@ -91,18 +116,64 @@ QUOTA_COST_PER_CALL = {
 _api_call_counts = {name: 0 for name in QUOTA_COST_PER_CALL}
 
 
-def _log_api_usage_summary():
-    """このスクリプト実行で消費したYouTube Data APIのクォータ概算をログに出す。
+def _quota_reset_date_today() -> str:
+    """太平洋時間での「今日」の日付(YYYY-MM-DD)。クォータのリセット基準。"""
+    return datetime.now(_QUOTA_RESET_TZ).date().isoformat()
 
-    GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで
+
+def _load_quota_state() -> dict:
+    """その日(太平洋時間)の累計クォータ消費状態を読み込む。
+
+    1日9回の実行をまたいで積み上げるため、quota_state.json(ワークフロー側で
+    used_words.json等と同様にgit commitされる)に保存している。保存されて
+    いる日付が今日と異なる場合は、クォータがリセットされた後なので0から
+    やり直す。ファイルが無い・壊れている場合も同様に0から開始する(無くても
+    動画投稿自体には影響しない補助情報のため)。"""
+    today = _quota_reset_date_today()
+    try:
+        with open(QUOTA_STATE_PATH, encoding="utf-8") as f:
+            state = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        state = {}
+
+    if state.get("date") != today:
+        return {"date": today, "counts": {name: 0 for name in QUOTA_COST_PER_CALL}}
+
+    counts = state.get("counts", {})
+    return {"date": today, "counts": {name: counts.get(name, 0) for name in QUOTA_COST_PER_CALL}}
+
+
+def _save_quota_state(state: dict) -> None:
+    with open(QUOTA_STATE_PATH, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
+def _log_api_usage_summary():
+    """このスクリプト実行で消費したYouTube Data APIのクォータ概算に加え、
+    その日(太平洋時間、日次クォータのリセット基準)の累計クォータ消費も
+    ログに出す。GCP Consoleのクォータ画面を都度開かなくても、実行ログだけで
     (videos.insert=100 units等の)おおよその消費量を把握できるようにする。"""
     total_units = sum(count * QUOTA_COST_PER_CALL[name] for name, count in _api_call_counts.items())
-    print("=== API使用量(YouTube Data API v3、概算) ===")
+    log("=== API使用量(YouTube Data API v3、概算、今回の実行分) ===")
     for name, count in _api_call_counts.items():
-        print(f"  {name}: {count}回 (1回あたり{QUOTA_COST_PER_CALL[name]} units)")
-    print(f"  概算クォータ消費: {total_units} units (日次上限 10,000 units の目安)")
-    print(f"  動画アップロード回数: {_api_call_counts['videos.insert']}回"
-          f" (日次上限100本の目安)")
+        log(f"  {name}: {count}回 (1回あたり{QUOTA_COST_PER_CALL[name]} units)")
+    log(f"  今回の概算クォータ消費: {total_units} units (日次上限 10,000 units の目安)")
+    log(f"  今回の動画アップロード回数: {_api_call_counts['videos.insert']}回"
+        f" (日次上限100本の目安)")
+
+    state = _load_quota_state()
+    for name, count in _api_call_counts.items():
+        state["counts"][name] = state["counts"].get(name, 0) + count
+    _save_quota_state(state)
+
+    cumulative_units = sum(count * QUOTA_COST_PER_CALL[name] for name, count in state["counts"].items())
+    log(f"=== 本日(太平洋時間 {state['date']}、日次クォータ基準)の累計 ===")
+    for name, count in state["counts"].items():
+        log(f"  {name}: {count}回")
+    log(f"  本日の累計クォータ消費: {cumulative_units} units (日次上限 10,000 units の目安)")
+    log(f"  本日の累計動画アップロード回数: {state['counts'].get('videos.insert', 0)}回"
+        f" (日次上限100本の目安)")
 
 
 def build_youtube_client():
@@ -136,12 +207,12 @@ def fetch_definition(word: str) -> dict | None:
             resp = requests.get(url, timeout=DICTIONARY_API_TIMEOUT_SECONDS, headers=DICTIONARY_API_HEADERS)
         except requests.RequestException as e:
             last_error = e
-            print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
+            log(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
             time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
             continue
 
         if resp.status_code == 404:
-            print(f"    [Info] {word} の意味は辞書に見つかりませんでした。")
+            log(f"    [Info] {word} の意味は辞書に見つかりませんでした。")
             return None
 
         try:
@@ -149,19 +220,19 @@ def fetch_definition(word: str) -> dict | None:
             data = resp.json()
         except (requests.RequestException, ValueError) as e:
             last_error = e
-            print(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
+            log(f"    [Info] {word} の意味の取得{attempt}回目に失敗しました({e})。リトライします。")
             time.sleep(DICTIONARY_API_RETRY_BACKOFF_SECONDS)
             continue
 
         lookup = parse_definition_response(data)
         if lookup:
-            print(f"    [Info] {word} の意味を取得しました: {lookup['definition']}")
+            log(f"    [Info] {word} の意味を取得しました: {lookup['definition']}")
         else:
-            print(f"    [Info] {word} の英語の定義が見つかりませんでした。")
+            log(f"    [Info] {word} の英語の定義が見つかりませんでした。")
         return lookup
 
-    print(f"    [Info] {word} の意味の取得を{DICTIONARY_API_MAX_RETRIES}回試しても"
-          f"取得できませんでした({last_error})。スキップします。")
+    log(f"    [Info] {word} の意味の取得を{DICTIONARY_API_MAX_RETRIES}回試しても"
+        f"取得できませんでした({last_error})。スキップします。")
     return None
 
 
@@ -264,7 +335,7 @@ def upload_video(youtube, video_path, metadata):
             return response["id"]
         except HttpError as e:
             last_error = e
-            print(f"    アップロード{attempt}回目失敗: {e}")
+            log(f"    アップロード{attempt}回目失敗: {e}")
             time.sleep(RETRY_BACKOFF_SECONDS)
     raise last_error
 
@@ -275,7 +346,7 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
     呼び出しより長めの間隔でリトライする。それ以外のHttpErrorはリトライ
     せず即座に送出する(呼び出し側で警告ログのみ出して処理を継続する)。"""
     if not os.path.exists(thumbnail_path):
-        print(f"    [Warning] サムネイルが見つかりません: {thumbnail_path}")
+        log(f"    [Warning] サムネイルが見つかりません: {thumbnail_path}")
         return
 
     last_error = None
@@ -290,8 +361,8 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
             if not is_rate_limit or attempt == THUMBNAIL_MAX_RETRIES:
                 raise
             last_error = e
-            print(f"    [Info] サムネイル設定{attempt}回目がレート制限で失敗しました。"
-                  f"{THUMBNAIL_RETRY_BACKOFF_SECONDS}秒待ってリトライします: {e}")
+            log(f"    [Info] サムネイル設定{attempt}回目がレート制限で失敗しました。"
+                f"{THUMBNAIL_RETRY_BACKOFF_SECONDS}秒待ってリトライします: {e}")
             time.sleep(THUMBNAIL_RETRY_BACKOFF_SECONDS)
     raise last_error
 
@@ -355,53 +426,53 @@ def upload_one(youtube, video_path, thumbnail_path, metadata, localizations, com
     警告のみで、動画の公開自体は妨げない。"""
     try:
         video_id = upload_video(youtube, video_path, metadata)
-        print(f"  -> [{label}] https://youtu.be/{video_id}")
+        log(f"  -> [{label}] https://youtu.be/{video_id}")
     except Exception as e:
-        print(f"::error::{label}のアップロードに失敗しました: {e}")
+        print(f"::error::{timestamp()} {label}のアップロードに失敗しました: {e}")
         return None
 
     try:
         upload_thumbnail(youtube, video_id, thumbnail_path)
-        print(f"  -> [{label}] サムネイル設定完了")
+        log(f"  -> [{label}] サムネイル設定完了")
     except Exception as e:
-        print(f"[Warning] [{label}] サムネイル設定に失敗しました: {e}")
+        log(f"[Warning] [{label}] サムネイル設定に失敗しました: {e}")
 
     try:
         add_to_playlist(youtube, playlist_id, video_id)
         if playlist_id:
-            print(f"  -> [{label}] 再生リストに追加完了")
+            log(f"  -> [{label}] 再生リストに追加完了")
     except Exception as e:
-        print(f"[Warning] [{label}] 再生リストへの追加に失敗しました: {e}")
+        log(f"[Warning] [{label}] 再生リストへの追加に失敗しました: {e}")
 
     try:
         apply_localizations(youtube, video_id, localizations)
-        print(f"  -> [{label}] 日本語ローカライズ設定完了")
+        log(f"  -> [{label}] 日本語ローカライズ設定完了")
     except HttpError as e:
         if e.resp.status == 403:
-            print(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました(権限不足): {e}\n"
-                  f"    -> YT_REFRESH_TOKEN が youtube.upload スコープのみで発行されている"
-                  f"可能性があります。videos.update には youtube (または youtube.force-ssl) "
-                  f"スコープが必要です。OAuth同意画面で該当スコープを追加のうえ、"
-                  f"refresh tokenを再発行してください。")
+            log(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました(権限不足): {e}\n"
+                f"    -> YT_REFRESH_TOKEN が youtube.upload スコープのみで発行されている"
+                f"可能性があります。videos.update には youtube (または youtube.force-ssl) "
+                f"スコープが必要です。OAuth同意画面で該当スコープを追加のうえ、"
+                f"refresh tokenを再発行してください。")
         else:
-            print(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました: {e}")
+            log(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました: {e}")
     except Exception as e:
-        print(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました: {e}")
+        log(f"[Warning] [{label}] 日本語ローカライズ設定に失敗しました: {e}")
 
     try:
         add_comment(youtube, video_id, comment_text)
-        print(f"  -> [{label}] コメント投稿完了")
+        log(f"  -> [{label}] コメント投稿完了")
     except HttpError as e:
         if e.resp.status == 403:
-            print(f"[Warning] [{label}] コメント投稿に失敗しました(権限不足): {e}\n"
-                  f"    -> commentThreads.insert には youtube (または youtube.readonly) "
-                  f"だけでは不足で、youtube.force-ssl スコープが必須です。"
-                  f"OAuth同意画面に youtube.force-ssl を追加のうえ、"
-                  f"refresh tokenを再発行してください。")
+            log(f"[Warning] [{label}] コメント投稿に失敗しました(権限不足): {e}\n"
+                f"    -> commentThreads.insert には youtube (または youtube.readonly) "
+                f"だけでは不足で、youtube.force-ssl スコープが必須です。"
+                f"OAuth同意画面に youtube.force-ssl を追加のうえ、"
+                f"refresh tokenを再発行してください。")
         else:
-            print(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
+            log(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
     except Exception as e:
-        print(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
+        log(f"[Warning] [{label}] コメント投稿に失敗しました: {e}")
 
     return video_id
 
@@ -411,7 +482,7 @@ def main():
         candidates = json.load(f)
 
     if not candidates:
-        print("candidates.json が空です。アップロードをスキップします。")
+        log("candidates.json が空です。アップロードをスキップします。")
         return
 
     youtube = build_youtube_client()
@@ -425,10 +496,10 @@ def main():
         video_path = os.path.join(VIDEO_DIR, f"{word.lower()}.mp4")
 
         if not os.path.exists(video_path):
-            print(f"[Skip] {word}: 動画ファイルが見つかりません({video_path})")
+            log(f"[Skip] {word}: 動画ファイルが見つかりません({video_path})")
             continue
 
-        print(f"アップロード中: {word}")
+        log(f"アップロード中: {word}")
         lookup = fetch_definition(word)
         thumbnail_path = os.path.join(THUMBNAIL_DIR, f"{word.lower()}.jpg")
         comment_text = build_comment_text(word, ipa, lookup)
@@ -465,10 +536,10 @@ def main():
                 REGULAR_VIDEO_PLAYLIST_ID, "通常動画",
             )
         else:
-            print(f"[Skip] {word}: 通常動画ファイルが見つかりません({regular_video_path})。"
-                  f"Shortsのみ投稿します。")
+            log(f"[Skip] {word}: 通常動画ファイルが見つかりません({regular_video_path})。"
+                f"Shortsのみ投稿します。")
 
-    print("全単語のアップロード処理が完了しました。")
+    log("全単語のアップロード処理が完了しました。")
     _log_api_usage_summary()
 
 
