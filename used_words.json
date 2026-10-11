@@ -2420,6 +2420,12 @@
   {
     "word": "BIZARRE",
     "patterns": [],
-    "video_id": "fd50j6OfyGM"
+    "video_id": "fd50j6OfyGM",
+    "run_id": null
+  },
+  {
+    "word": "SPEAKERS",
+    "patterns": [],
+    "video_id": "37kRSRhC0rI"
   }
 ]
