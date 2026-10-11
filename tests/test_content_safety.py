@@ -24,3 +24,11 @@ def test_is_blocked_detects_general_profanity():
     assert is_blocked("fuck")
     assert is_blocked("Shit")
     assert is_blocked("BITCH")
+
+
+def test_is_blocked_detects_toilet_humor():
+    assert is_blocked("PEEING")
+    assert is_blocked("peeing")
+    assert is_blocked("POOPING")
+    assert is_blocked("Vomiting")
+    assert is_blocked("FART")
