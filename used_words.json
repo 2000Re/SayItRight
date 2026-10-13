@@ -2444,6 +2444,12 @@
   {
     "word": "BATCH",
     "patterns": [],
-    "video_id": "5iX2MCxI6UQ"
+    "video_id": "5iX2MCxI6UQ",
+    "run_id": null
+  },
+  {
+    "word": "POWERFUL",
+    "patterns": [],
+    "video_id": "_MDQAmMKefE"
   }
 ]
