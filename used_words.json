@@ -2498,6 +2498,12 @@
   {
     "word": "EQUIPPED",
     "patterns": [],
-    "video_id": "F-XinfxHx_8"
+    "video_id": "F-XinfxHx_8",
+    "run_id": null
+  },
+  {
+    "word": "MISSING",
+    "patterns": [],
+    "video_id": "pJP3-qRBob0"
   }
 ]
