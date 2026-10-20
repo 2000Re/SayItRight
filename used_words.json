@@ -2570,6 +2570,12 @@
   {
     "word": "SURVEYS",
     "patterns": [],
-    "video_id": "RJYjydrC9aA"
+    "video_id": "RJYjydrC9aA",
+    "run_id": null
+  },
+  {
+    "word": "EFFORT",
+    "patterns": [],
+    "video_id": "e-Am3bndYgM"
   }
 ]
