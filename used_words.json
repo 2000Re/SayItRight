@@ -2600,6 +2600,12 @@
   {
     "word": "TELLING",
     "patterns": [],
-    "video_id": "PVCgNLEn-0U"
+    "video_id": "PVCgNLEn-0U",
+    "run_id": null
+  },
+  {
+    "word": "BECAUSE",
+    "patterns": [],
+    "video_id": "jrsLQD4-xO0"
   }
 ]
