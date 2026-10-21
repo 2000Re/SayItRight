@@ -277,8 +277,19 @@ def build_comment_text(word, ipa, lookup: dict | None = None):
     return "\n".join(_build_description_body_lines(word, ipa, lookup))
 
 
+def build_title(word, lookup: dict | None = None) -> str:
+    """動画タイトルを返す。検索語句の実データ(「X meaning」「Xの意味」系の
+    検索が「X pronunciation」系と並んで多い)を踏まえ、意味の取得に成功した
+    場合はタイトルにも "Meaning" を含めて検索にヒットしやすくする。
+    取得に失敗した場合(lookupがNoneまたは定義なし)は、説明欄に意味が
+    載らないのにタイトルだけ "Meaning" と謳うと誤解を招くため含めない。"""
+    if lookup and lookup.get("definition"):
+        return f"How to Pronounce {word} (Meaning & Pronunciation)"
+    return f"How to Pronounce {word}"
+
+
 def build_metadata(word, ipa, lookup: dict | None = None, is_short: bool = True):
-    title = f"How to Pronounce {word}"
+    title = build_title(word, lookup)
     lines = _build_description_body_lines(word, ipa, lookup)
     lines.append("")
     hashtags = "#pronunciation #english #howtopronounce"
