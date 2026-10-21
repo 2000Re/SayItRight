@@ -65,6 +65,10 @@ ENDING_CTAS = [
     "Could you say it right?",
     "Comment your score!",
     "Tap follow for daily challenges!",
+    # 視聴者に「発音を知りたい単語」をコメントで教えてもらう系。エンゲージ
+    # メント(コメント)を稼ぐだけでなく、今後の単語選定のヒントにもなる。
+    "Comment a word you want pronounced next!",
+    "Got a tricky word? Drop it in the comments!",
 ]
 
 
