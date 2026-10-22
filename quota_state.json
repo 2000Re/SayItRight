@@ -1,10 +1,10 @@
 {
   "date": "2026-10-22",
   "counts": {
-    "videos.insert": 4,
-    "videos.update": 4,
-    "playlistItems.insert": 4,
-    "thumbnails.set": 4,
-    "commentThreads.insert": 4
+    "videos.insert": 6,
+    "videos.update": 6,
+    "playlistItems.insert": 6,
+    "thumbnails.set": 6,
+    "commentThreads.insert": 6
   }
 }
